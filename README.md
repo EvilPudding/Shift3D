@@ -11,5 +11,9 @@ Game based on ArmorGames' Shift game series.
 It's a revamp of a project I did some years ago with working but ugly code that only ran on windows. This is what the gameplay looked like:
 https://www.youtube.com/watch?v=AiLzEhxt8-8
 
+The original windows only game can be downloaded here: https://mega.nz/#!mlgQRQKa!fftbyLQpDa45gwHw1S-9z2ogNx4kB8qeSqT3fWJoT8E
+
+Install and run, the login was an unfinished feature for sharing levels, cancel out of that. Pause with 'P'.
+
 ## Why
-The objective of this project is to keep implementing modern lighting techniques, and recreate the mechanics I had made in the original project but are now broken.
+The goal of this project is to keep implementing modern lighting techniques, and recreate the mechanics I had made in the original project but are now broken.
