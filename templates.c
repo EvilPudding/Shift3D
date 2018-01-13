@@ -149,10 +149,10 @@ static entity_t template_bridge(entity_t root, FILE *fd, candle_t *candle)
 	p->x1 = p->ix1 - 0.5; p->y1 = p->iy1 - 0.5; p->z1 = p->iz1 - 0.5;
 	p->x2 = p->ix2 + 0.5; p->y2 = p->iy2 + 0.5; p->z2 = p->iz2 + 0.5;
 
-    p->cx=cx;
-    p->cy=cy;
-    p->cz=cz;
-    p->key=key;
+	p->cx=cx;
+	p->cy=cy;
+	p->cz=cz;
+	p->key=key;
 
 	/* mesh_t *mesh = mesh_cuboid(0.5, */
 			/* p->x1 - 0.01, p->y1 - 0.01, p->z1 - 0.01, */
