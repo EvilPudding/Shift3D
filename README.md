@@ -3,7 +3,7 @@ Game based on ArmorGames' Shift game series.
 
 I've never used any other game engine, so some aspects should be changed. If you have used other game engines and have suggestions, they would be welcome.
 
-Any constructive or destructive critics on the code in general would also be appreciated.
+Any constructive or destructive criticisms on the code in general would also be appreciated.
 
 ## Screenshots
 ![Screenshot](https://i.imgur.com/jF5aFB7.png)
