@@ -1,0 +1,3 @@
+[submodule "candle"]
+	path = candle
+	url = ../candle.git
