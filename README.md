@@ -1,6 +1,8 @@
 # Shift3D
 Game based on ArmorGames' Shift game series.
 
+I've never used any other game engine, so some aspects should be changed. If you have used other game engines and have suggestions, they would be welcome.
+
 ## Screenshots
 ![Screenshot](https://i.imgur.com/jF5aFB7.png)
 ![Screenshot](https://i.imgur.com/OEQ3a6q.png)
