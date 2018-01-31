@@ -65,8 +65,7 @@ int c_character_update(c_character_t *self, float *dt)
 	vec3_t up_line = vec3_mul(up_dir, up_dir);
 	vec3_t tang = vec3_norm(vec3_sub(vec3(1.0, 1.0, 1.0), up_line));
 
-	mat4 ori_rot;
-	mat4_mul(ori_rot, sc->rotation_matrix, ori->rotation_matrix);
+	mat4_t ori_rot = mat4_mul(sc->rotation_matrix, ori->rotation_matrix);
 	front = vec3_norm(
 		vec3_mul(
 			mat4_mul_vec4( ori_rot, vec4(0.0, 0.0, 1.0, 1.0)).xyz,
