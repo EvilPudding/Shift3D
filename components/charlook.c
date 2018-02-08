@@ -48,11 +48,27 @@ static int c_charlook_window_resize(c_charlook_t *self,
 	return 1;
 }
 
+/* TODO remove this extern reference */
+extern SDL_Window *mainWindow;
+extern int control;
+
 void c_charlook_update(c_charlook_t *self)
 {
 	const float max_up = M_PI / 2.0 - 0.01;
 	const float max_down = -M_PI / 2.0 + 0.01;
 
+	if(control)
+	{
+		SDL_SetWindowGrab(mainWindow, SDL_TRUE);
+		SDL_SetRelativeMouseMode(SDL_TRUE);
+
+	}
+	else
+	{
+		SDL_SetWindowGrab(mainWindow, SDL_FALSE);
+		SDL_SetRelativeMouseMode(SDL_FALSE);
+		return;
+	}
 	if(entity_is_null(self->x_control) || entity_is_null(self->y_control))
 	{
 		return;

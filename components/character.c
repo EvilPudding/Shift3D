@@ -13,6 +13,7 @@
 
 unsigned long ct_character;
 extern int window_width, window_height;
+int control = 1;
 
 #define friction 0.1
 
@@ -202,6 +203,7 @@ int c_character_key_up(c_character_t *self, char *key)
 		case 'D': case 'd': self->right = 0; break;
 		case 'S': case 's': self->backward = 0; break;
 		case 'Q': case 'q': self->swap = 0; break;
+		case '`': control = !control; break;
 		case 32: self->jump = 0; break;
 	}
 	return 1;

@@ -8,6 +8,7 @@ typedef struct
 	c_t super; /* extends c_t */
 
 	int forward, backward, left, right, jump, swap;
+	int control;
 	float targR;
 	float max_jump_vel;
 
