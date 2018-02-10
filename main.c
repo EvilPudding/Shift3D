@@ -48,7 +48,7 @@ int main(int argc, char **argv)
 			c_bridge_register,		c_door_register,	c_moving_register,
 			c_side_follow_register);
 
-	entity_add_component(candle->systems, (c_t*)c_renderer_new(1.0f, 1, 1, 1.0f));
+	entity_add_component(candle->systems, (c_t*)c_renderer_new(1.0f, 1, 1, 1.0f, 0));
 
 	common = candle->ecm->common;
 
