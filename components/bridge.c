@@ -2,6 +2,7 @@
 #include <components/rigid_body.h>
 #include <components/spacial.h>
 #include <stdlib.h>
+#include <candle.h>
 
 unsigned long ct_bridge;
 
@@ -9,7 +10,6 @@ void c_bridge_init(c_bridge_t *self)
 {
 	self->super = component_new(ct_bridge);
 
-    self->pivot = vec3(0.0);
     self->rotate_to = vec3(0.0);
 }
 
@@ -21,16 +21,50 @@ c_bridge_t *c_bridge_new()
 	return self;
 }
 
+static int c_bridge_spacial_changed(c_bridge_t *self)
+{
+	c_spacial_t *spacial = c_spacial(c_entity(self));
+	self->inverse_model = mat4_invert(spacial->model_matrix);
+
+	return 1;
+}
+
 static float c_rigid_body_bridge_collider(c_rigid_body_t *self, vec3_t pos)
 {
 	c_bridge_t *b = c_bridge(c_entity(self));
 	/* c_spacial_t *b = c_spacial(c_entity(self)); */
 
-	float inc = 0;//-0.01;
-	int val = pos.x > b->x1 + inc && pos.x < b->x2 - inc
-		&& pos.y > b->y1 + inc && pos.y < b->y2 - inc
-		&& pos.z > b->z1 + inc && pos.z < b->z2 - inc;
+	pos = mat4_mul_vec4(b->inverse_model, vec4(_vec3(pos), 1.0f)).xyz;
+
+	/* float inc = 0;//-0.01; */
+	int val = pos.x > b->min.x && pos.x < b->max.x
+		&& pos.y > b->min.y && pos.y < b->max.y
+		&& pos.z > b->min.z && pos.z < b->max.z;
 	return val ? 4 : -1;
+}
+
+static int c_bridge_update(c_bridge_t *self, float *dt)
+{
+	if(!vec3_null(self->rotate_to))
+	{
+		c_spacial_t *s = c_spacial(c_entity(self));
+		vec3_t inc;
+		if(fabs(self->rotate_to.x) < 0.01 &&
+				fabs(self->rotate_to.y) < 0.01 &&
+				fabs(self->rotate_to.z) < 0.01)
+		{
+			inc = self->rotate_to;
+		}
+		else
+		{
+			inc = vec3_scale(self->rotate_to, (*dt) * 3.0f);
+		}
+		c_spacial_rotate_X(s, inc.x);
+		c_spacial_rotate_Y(s, inc.y);
+		c_spacial_rotate_Z(s, inc.z);
+		self->rotate_to = vec3_sub(self->rotate_to, inc);
+	}
+	return 1;
 }
 
 static int c_bridge_created(c_bridge_t *self)
@@ -48,7 +82,13 @@ void c_bridge_register(ecm_t *ecm)
 			(signal_cb)c_bridge_created);
 	/* ct_register_listener(ct, WORLD, collider_callback, */
 			/* (signal_cb)c_bridge_collider); */
+	ct_register_listener(ct, SAME_ENTITY, spacial_changed,
+			(signal_cb)c_bridge_spacial_changed);
+
+	ct_register_listener(ct, WORLD, world_update,
+			(signal_cb)c_bridge_update);
 }
+
 
 /* void updateBridges(state_t *self) */
 /* { */

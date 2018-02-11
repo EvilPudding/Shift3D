@@ -1,4 +1,5 @@
 #include "key.h"
+#include "bridge.h"
 #include <components/spacial.h>
 #include <components/model.h>
 #include <components/rigid_body.h>
@@ -18,10 +19,24 @@ static float c_rigid_body_key_collider(c_rigid_body_t *self, vec3_t pos)
 
 	const vec3_t kpos = c_spacial(ent)->pos;
 
-	if(vec3_len(vec3_sub(pos, kpos)) < 0.4)
+	c_model_t *model = c_model(ent);
+	if(model->visible && vec3_len(vec3_sub(pos, kpos)) < 0.4)
 	{
-		c_model(ent)->visible = 0;
+		model->visible = 0;
 		entity_signal(ent, spacial_changed, &ent);
+
+		c_key_t *key = c_key(ent);
+		ct_t *bridges = ecm_get(c_ecm(self), ct_bridge);
+
+		int i;
+		for(i = 0; i < bridges->components_size; i++)
+		{
+			c_bridge_t *b = (c_bridge_t*)ct_get_at(bridges, i);
+			if(b->key == key->key)
+			{
+				b->rotate_to = key->rot;
+			}
+		}
 	}
 
 	return -1;
@@ -39,9 +54,9 @@ c_key_t *c_key_new(int rotX, int rotY, int rotZ, int key)
 	c_key_t *self = malloc(sizeof *self);
 	c_key_init(self);
 
-    self->angRotx = rotX;
-    self->angRoty = rotY;
-    self->angRotz = rotZ;
+    self->rot.x = ((float)rotX) * (M_PI / 180);
+    self->rot.y = ((float)rotY) * (M_PI / 180);
+    self->rot.z = ((float)rotZ) * (M_PI / 180);
 	self->key = key;
 
 	return self;

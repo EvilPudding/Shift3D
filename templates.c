@@ -119,7 +119,7 @@ static entity_t template_spawn(entity_t root, FILE *fd, candle_t *candle)
 
 	if(fc)
 	{
-		c_spacial_set_pos(c_spacial(fc->super.entity), vec3(x, y, z));
+		c_spacial_set_pos(c_spacial(fc->super.entity), vec3(x, y + 2.5, z));
 		/* c_spacial_set_pos(c_spacial(cc->super.entity), 0, 0.7, 0); */
 	}
 	c_spacial_set_pos(c_spacial(spawn), vec3(x, y, z));
@@ -146,26 +146,35 @@ static entity_t template_bridge(entity_t root, FILE *fd, candle_t *candle)
 	order(p->iy1, p->iy2, y1, y2);
 	order(p->iz1, p->iz2, z1, z2);
 
-	p->x1 = p->ix1 - 0.5; p->y1 = p->iy1 - 0.5; p->z1 = p->iz1 - 0.5;
-	p->x2 = p->ix2 + 0.5; p->y2 = p->iy2 + 0.5; p->z2 = p->iz2 + 0.5;
+	p->ix1 -= cx; p->ix2 -= cx;
+	p->iy1 -= cy; p->iy2 -= cy;
+	p->iz1 -= cz; p->iz2 -= cz;
+
+	p->min.x = p->ix1; p->min.y = p->iy1; p->min.z = p->iz1;
+	p->max.x = p->ix2; p->max.y = p->iy2; p->max.z = p->iz2;
+
+	p->min = vec3_sub(p->min, vec3(0.5));
+	p->max = vec3_add(p->max, vec3(0.5));
 
 	p->cx=cx;
 	p->cy=cy;
 	p->cz=cz;
+
 	p->key=key;
 
 	/* mesh_t *mesh = mesh_cuboid(0.5, */
 			/* p->x1 - 0.01, p->y1 - 0.01, p->z1 - 0.01, */
 			/* p->x2 + 0.01, p->y2 + 0.01, p->z2 + 0.01); */
 	mesh_t *mesh = mesh_cuboid(0.5,
-			vec3(p->x1 - 0.01f, p->y1 - 0.01f, p->z1 - 0.01f),
-			vec3(p->x2 + 0.01f, p->y2 + 0.01f, p->z2 + 0.01f));
+			vec3(p->min.x - 0.005f, p->min.y - 0.005f, p->min.z - 0.005f),
+			vec3(p->max.x + 0.005f, p->max.y + 0.005f, p->max.z + 0.005f));
 
 	entity_t bridge = entity_new(root.ecm, 4,
 			c_side_new(2),
 			c_node_new(),
 			c_model_paint(c_model_new(mesh, 1), 0,
 				candle_material_get(candle, "bridge")), p);
+	c_spacial_set_pos(c_spacial(bridge), vec3(p->cx, p->cy, p->cz));
 
 	c_model(bridge)->before_draw = (before_draw_cb)template_model_before_draw;
 

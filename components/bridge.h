@@ -15,18 +15,12 @@ typedef struct
     int cx;
     int cy;
     int cz;
-	/* TODO make vec3 */
-	float x1,
-		  y1,
-		  z1;
-	/* TODO make vec3 */
-	float x2,
-		  y2,
-		  z2;
+
+	vec3_t min;
+	vec3_t max;
     int key;
 
-	/* TODO make vec3 */
-	vec3_t pivot;
+	mat4_t inverse_model;
 	vec3_t rotate_to;
 
 } c_bridge_t;

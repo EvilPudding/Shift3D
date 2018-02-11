@@ -46,7 +46,7 @@ float c_rigid_body_grid_collider(c_rigid_body_t *self, vec3_t pos)
 	c_grid_t *g = c_grid(c_entity(self));
 	int val = c_grid_get(g, round(pos.x), round(pos.y), round(pos.z));
 
-	return (val&1) != side ? 0 : -1;
+	return ((val&1) != side || val == -1) ? 0 : -1;
 }
 
 c_grid_t *c_grid_new(ecm_t *ecm, int mx, int my, int mz)

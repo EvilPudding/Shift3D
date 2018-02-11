@@ -12,9 +12,7 @@ typedef struct
 {
 	c_t super; /* extends c_t */
 
-    int angRotx;
-    int angRoty;
-    int angRotz;
+	vec3_t rot;
     int key;
 } c_key_t;
 
