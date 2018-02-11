@@ -24,6 +24,7 @@ c_bridge_t *c_bridge_new()
 static float c_rigid_body_bridge_collider(c_rigid_body_t *self, vec3_t pos)
 {
 	c_bridge_t *b = c_bridge(c_entity(self));
+	/* c_spacial_t *b = c_spacial(c_entity(self)); */
 
 	float inc = 0;//-0.01;
 	int val = pos.x > b->x1 + inc && pos.x < b->x2 - inc

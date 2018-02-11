@@ -16,7 +16,7 @@ static float c_rigid_body_key_collider(c_rigid_body_t *self, vec3_t pos)
 {
 	entity_t ent = c_entity(self);
 
-	const vec3_t kpos = c_spacial(ent)->position;
+	const vec3_t kpos = c_spacial(ent)->pos;
 
 	if(vec3_len(vec3_sub(pos, kpos)) < 0.4)
 	{

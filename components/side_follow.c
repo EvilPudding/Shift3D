@@ -26,7 +26,7 @@ static int c_side_follow_update(c_side_follow_t *self, float *dt)
 	entity_t entity = c_entity(self);
 	int side = c_side(c_ecm(self)->common)->side;
 	c_spacial_t *sc = c_spacial(entity);
-	vec3_t pos = sc->position;
+	vec3_t pos = sc->pos;
 
 	vec3_t dest = vec3(pos.x, 2.0 + 6.0 * !side, pos.z);
 	vec3_t inc = vec3_sub(pos, dest);

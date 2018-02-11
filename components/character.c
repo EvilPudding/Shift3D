@@ -66,7 +66,7 @@ int c_character_update(c_character_t *self, float *dt)
 	vec3_t up_line = vec3_mul(up_dir, up_dir);
 	vec3_t tang = vec3_norm(vec3_sub(vec3(1.0, 1.0, 1.0), up_line));
 
-	mat4_t ori_rot = mat4_mul(sc->rotation_matrix, ori->rotation_matrix);
+	mat4_t ori_rot = mat4_mul(sc->rot_matrix, ori->rot_matrix);
 	front = vec3_norm(
 		vec3_mul(
 			mat4_mul_vec4( ori_rot, vec4(0.0, 0.0, 1.0, 1.0)).xyz,
@@ -81,14 +81,14 @@ int c_character_update(c_character_t *self, float *dt)
 	);
 
 	/* front = vec3( */
-	/* 		sin(ori->rotation.y), */
+	/* 		sin(ori->rot.y), */
 	/* 		0, */
-	/* 		cos(ori->rotation.y)); */
+	/* 		cos(ori->rot.y)); */
 
 	/* sideways = vec3( */
-	/* 		cos(-ori->rotation.y), */
+	/* 		cos(-ori->rot.y), */
 	/* 		0, */
-	/* 		sin(-ori->rotation.y)); */
+	/* 		sin(-ori->rot.y)); */
 
 
 	int floored = vec3_dot(up, vc->normal) > 0;
@@ -152,7 +152,7 @@ int c_character_update(c_character_t *self, float *dt)
 		}
 
 		/* entity_t grid = level->grid; */
-		/* if(c_grid_collider(c_grid(grid), vec3_add(sc->position, up_dir)) < 0) */
+		/* if(c_grid_collider(c_grid(grid), vec3_add(sc->pos, up_dir)) < 0) */
 		/* { */
 		/*	 return 0; */
 		/* } */
@@ -164,8 +164,8 @@ int c_character_update(c_character_t *self, float *dt)
 
 			c_side(c_ecm(self)->common)->side =
 				!c_side(c_ecm(self)->common)->side;
-			sc->position = vec3_round(sc->position);
-			sc->position = vec3_sub(sc->position, vec3_scale(up_dir, 0.55));
+			sc->pos = vec3_round(sc->pos);
+			sc->pos = vec3_sub(sc->pos, vec3_scale(up_dir, 0.55));
 
 			/* c_spacial_set_rot(sc, up_dir.x, up_dir.y, up_dir.z, c_charlook(self->orientation)->yrot); */
 			if(self->targR == 0)
@@ -183,9 +183,9 @@ int c_character_update(c_character_t *self, float *dt)
 	}
 end:
 
-	if(fabs(dif = self->targR - sc->rotation.z) > 0.01)
+	if(fabs(dif = self->targR - sc->rot.z) > 0.01)
 	{
-		c_spacial_set_rot(sc, 0, 0, 1, sc->rotation.z + dif * 5 * (*dt));
+		c_spacial_set_rot(sc, 0, 0, 1, sc->rot.z + dif * 5 * (*dt));
 	}
 
 	entity_signal(self->super.entity, spacial_changed, &self->super.entity);

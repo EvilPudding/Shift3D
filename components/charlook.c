@@ -81,15 +81,15 @@ void c_charlook_update(c_charlook_t *self)
 	if(self->xrot < max_down) self->xrot = max_down;
 
 	c_spacial_t *sc_z = c_spacial(c_node(self->y_control)->parent);
-	float r = mat4_mul_vec4(sc_z->rotation_matrix, vec4(0, self->xrot, 0, 1.0)).y;
+	float r = mat4_mul_vec4(sc_z->rot_matrix, vec4(0, self->xrot, 0, 1.0)).y;
 
-	sc_y->rotation_matrix = mat4();
-	sc_x->rotation_matrix = mat4();
+	sc_y->rot_matrix = mat4();
+	sc_x->rot_matrix = mat4();
 
-	sc_y->rotation_matrix = mat4_rotate(sc_y->rotation_matrix, 0, 1, 0,
+	sc_y->rot_matrix = mat4_rotate(sc_y->rot_matrix, 0, 1, 0,
 			self->yrot);
 
-	sc_x->rotation_matrix = mat4_rotate(sc_x->rotation_matrix, 1, 0, 0,
+	sc_x->rot_matrix = mat4_rotate(sc_x->rot_matrix, 1, 0, 0,
 		r);
 
 	c_spacial_update_model_matrix(sc_x);
@@ -101,7 +101,7 @@ int c_charlook_mouse_move(c_charlook_t *self, mouse_move_data *event)
 	float frac = self->sensitivity / self->win_min_side;
 
 	c_spacial_t *sc_z = c_spacial(c_node(self->y_control)->parent);
-	float r = mat4_mul_vec4(sc_z->rotation_matrix, vec4(0, 1, 0, 1.0)).y;
+	float r = mat4_mul_vec4(sc_z->rot_matrix, vec4(0, 1, 0, 1.0)).y;
 
 	self->yrot = self->yrot - event->sx * frac;
 	self->xrot = self->xrot - event->sy * frac * r;
