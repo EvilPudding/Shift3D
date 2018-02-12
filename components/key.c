@@ -64,8 +64,8 @@ c_key_t *c_key_new(int rotX, int rotY, int rotZ, int key)
 
 void c_key_register(ecm_t *ecm)
 {
-	ct_t *ct = ecm_register(ecm, &ct_key, sizeof(c_key_t), (init_cb)c_key_init,
-			1, ct_spacial);
+	ct_t *ct = ecm_register(ecm, "Key", &ct_key, sizeof(c_key_t),
+			(init_cb)c_key_init, 1, ct_spacial);
 	ecm_register_signal(ecm, &key_activated, sizeof(key_activated_data));
 	ct_register_listener(ct, SAME_ENTITY, entity_created,
 			(signal_cb)c_key_created);

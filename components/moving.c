@@ -26,7 +26,8 @@ c_moving_t *c_moving_new(float x, float y, float z, float mx, float mz)
 
 void c_moving_register(ecm_t *ecm)
 {
-	ecm_register(ecm, &ct_moving, sizeof(c_moving_t), (init_cb)c_moving_init, 0);
+	ecm_register(ecm, "Moving", &ct_moving, sizeof(c_moving_t),
+			(init_cb)c_moving_init, 0);
 }
 
 

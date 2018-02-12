@@ -113,8 +113,9 @@ int c_charlook_mouse_move(c_charlook_t *self, mouse_move_data *event)
 
 void c_charlook_register(ecm_t *ecm)
 {
-	ct_t *ct = ecm_register(ecm, &ct_charlook, sizeof(c_charlook_t),
-			(init_cb)c_charlook_init, 2, ct_spacial, ct_node);
+	ct_t *ct = ecm_register(ecm, "Charlook", &ct_charlook,
+			sizeof(c_charlook_t), (init_cb)c_charlook_init,
+			2, ct_spacial, ct_node);
 
 	ct_register_listener(ct, WORLD, mouse_move,
 			(signal_cb)c_charlook_mouse_move);

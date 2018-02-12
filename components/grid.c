@@ -292,7 +292,7 @@ int c_grid_get(c_grid_t *self, int x, int y, int z)
 
 void c_grid_register(ecm_t *ecm)
 {
-	ct_t *ct = ecm_register(ecm, &ct_grid, sizeof(c_grid_t),
+	ct_t *ct = ecm_register(ecm, "Grid", &ct_grid, sizeof(c_grid_t),
 			(init_cb)c_grid_init, 0);
 
 	ecm_register_signal(ecm, &grid_update, 0);

@@ -226,9 +226,9 @@ int c_character_key_down(c_character_t *self, char *key)
 
 void c_character_register(ecm_t *ecm)
 {
-	ct_t *ct = ecm_register(ecm, &ct_character, sizeof(c_character_t),
-			(init_cb)c_character_init, 4, ct_spacial, ct_velocity, ct_node,
-			ct_rigid_body);
+	ct_t *ct = ecm_register(ecm, "Character",
+			&ct_character, sizeof(c_character_t), (init_cb)c_character_init,
+			4, ct_spacial, ct_velocity, ct_node, ct_rigid_body);
 
 	ct_register_listener(ct, WORLD, key_up, (signal_cb)c_character_key_up);
 

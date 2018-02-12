@@ -48,9 +48,9 @@ static int c_side_follow_update(c_side_follow_t *self, float *dt)
 
 void c_side_follow_register(ecm_t *ecm)
 {
-	ct_t *ct = ecm_register(ecm, &ct_side_follow,
-			sizeof(c_side_follow_t),
-			(init_cb)c_side_follow_init, 1, ct_spacial);
+	ct_t *ct = ecm_register(ecm, "Side Follow", &ct_side_follow,
+			sizeof(c_side_follow_t), (init_cb)c_side_follow_init,
+			1, ct_spacial);
 
 	ct_register_listener(ct, WORLD, world_update, (signal_cb)c_side_follow_update);
 }
