@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <candle.h>
 
-unsigned long ct_bridge;
+DEC_CT(ct_bridge);
 
 void c_bridge_init(c_bridge_t *self)
 {

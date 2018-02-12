@@ -16,8 +16,6 @@ typedef struct
     int key;
 } c_key_t;
 
-extern unsigned long ct_key;
-
 DEF_CASTER(ct_key, c_key, c_key_t);
 
 c_key_t *c_key_new(int rotX, int rotY, int rotZ, int id);

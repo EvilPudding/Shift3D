@@ -11,7 +11,7 @@
 #include <math.h>
 #include <stdlib.h>
 
-unsigned long ct_character;
+DEC_CT(ct_character);
 extern int window_width, window_height;
 int control = 1;
 

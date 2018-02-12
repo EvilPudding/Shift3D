@@ -49,6 +49,9 @@ int main(int argc, char **argv)
 			c_side_follow_register);
 
 	entity_add_component(candle->systems, (c_t*)c_renderer_new(1.0f, 1, 1, 1.0f, 0));
+	entity_add_component(candle->systems, (c_t*)c_editmode_new());
+	c_editmode(candle->systems)->visible = 0;
+	c_editmode(candle->systems)->control = 0;
 
 	common = candle->ecm->common;
 

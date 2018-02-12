@@ -13,8 +13,6 @@ typedef struct
 	entity_t x_control, y_control, force_down;
 } c_charlook_t;
 
-extern unsigned long ct_charlook;
-
 DEF_CASTER(ct_charlook, c_charlook, c_charlook_t);
 
 c_charlook_t *c_charlook_new(entity_t force_down, float sensitivity);

@@ -1,7 +1,7 @@
 #include "moving.h"
 #include <stdlib.h>
 
-unsigned long ct_moving;
+DEC_CT(ct_moving);
 
 void c_moving_init(c_moving_t *self)
 {

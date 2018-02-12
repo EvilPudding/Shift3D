@@ -21,8 +21,6 @@ typedef struct
 	entity_t force_down;
 } c_character_t;
 
-extern unsigned long ct_character;
-
 DEF_CASTER(ct_character, c_character, c_character_t);
 
 c_character_t *c_character_new(entity_t orientation, int plane_movement, entity_t force_down);

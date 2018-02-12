@@ -5,8 +5,8 @@
 #include <components/rigid_body.h>
 #include <stdlib.h>
 
-unsigned long ct_key;
-unsigned long key_activated;
+DEC_CT(ct_key);
+DEC_SIG(key_activated);
 
 void c_key_init(c_key_t *self)
 {
@@ -66,7 +66,7 @@ void c_key_register(ecm_t *ecm)
 {
 	ct_t *ct = ecm_register(ecm, &ct_key, sizeof(c_key_t), (init_cb)c_key_init,
 			1, ct_spacial);
-	key_activated = ecm_register_signal(ecm, sizeof(key_activated_data));
+	ecm_register_signal(ecm, &key_activated, sizeof(key_activated_data));
 	ct_register_listener(ct, SAME_ENTITY, entity_created,
 			(signal_cb)c_key_created);
 }

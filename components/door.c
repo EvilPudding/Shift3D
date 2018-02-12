@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-unsigned long ct_door;
+DEC_CT(ct_door);
 
 void c_door_init(c_door_t *self)
 {

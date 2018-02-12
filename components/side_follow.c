@@ -7,7 +7,7 @@
 #include "side_follow.h"
 #include <stdlib.h>
 
-unsigned long ct_side_follow;
+DEC_CT(ct_side_follow);
 
 void c_side_follow_init(c_side_follow_t *self)
 {

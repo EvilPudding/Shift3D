@@ -25,8 +25,6 @@ typedef struct
 
 } c_bridge_t;
 
-extern unsigned long ct_bridge;
-
 DEF_CASTER(ct_bridge, c_bridge, c_bridge_t);
 
 c_bridge_t *c_bridge_new();

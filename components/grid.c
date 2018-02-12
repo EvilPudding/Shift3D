@@ -17,8 +17,8 @@ void mesh_add_plane(mesh_t *self, float s, vec3_t v, vec3_t dir, int inverted_no
 		/* int px, int py, int pz, int inverted_normals); */
 
 
-unsigned long ct_grid;
-unsigned long grid_update;
+DEC_CT(ct_grid);
+DEC_SIG(grid_update);
 
 typedef void(*create_cb)(mesh_t *self, float s, vec3_t v, vec3_t dir,
 		int inverted_normals);
@@ -295,7 +295,7 @@ void c_grid_register(ecm_t *ecm)
 	ct_t *ct = ecm_register(ecm, &ct_grid, sizeof(c_grid_t),
 			(init_cb)c_grid_init, 0);
 
-	grid_update = ecm_register_signal(ecm, 0);
+	ecm_register_signal(ecm, &grid_update, 0);
 
 	ct_register_listener(ct, WORLD, grid_update, (signal_cb)c_grid_update);
 	/* ct_register_listener(ct, WORLD, collider_callback, */

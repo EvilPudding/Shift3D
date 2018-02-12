@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-unsigned long ct_level;
+DEC_CT(ct_level);
 
 void c_level_init(c_level_t *self)
 {

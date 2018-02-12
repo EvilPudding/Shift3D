@@ -9,8 +9,6 @@ typedef struct
 	int side;
 } c_side_t;
 
-extern unsigned long ct_side;
-
 DEF_CASTER(ct_side, c_side, c_side_t)
 
 c_side_t *c_side_new(int side);

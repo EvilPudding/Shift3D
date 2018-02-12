@@ -11,8 +11,6 @@ typedef struct
 	char next[256];
 } c_door_t;
 
-extern unsigned long ct_door;
-
 DEF_CASTER(ct_door, c_door, c_door_t);
 
 c_door_t *c_door_new(const char *next);

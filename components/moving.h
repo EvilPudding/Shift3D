@@ -12,8 +12,6 @@ typedef struct
     int side, active, pushed, XorZ;
 } c_moving_t;
 
-extern unsigned long ct_moving;
-
 DEF_CASTER(ct_moving, c_moving, c_moving_t);
 
 c_moving_t *c_moving_new(float x, float y, float z, float mx, float mz);

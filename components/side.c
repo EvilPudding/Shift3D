@@ -1,7 +1,7 @@
 #include "side.h"
 #include <stdlib.h>
 
-unsigned long ct_side;
+DEC_CT(ct_side);
 
 void c_side_init(c_side_t *self)
 {

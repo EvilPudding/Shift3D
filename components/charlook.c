@@ -8,7 +8,7 @@
 #include <math.h>
 #include <stdlib.h>
 
-unsigned long ct_charlook;
+DEC_CT(ct_charlook);
 
 void c_charlook_init(c_charlook_t *self)
 {

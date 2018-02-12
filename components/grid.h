@@ -14,8 +14,7 @@ typedef struct
 			 blocks_inv, cage_inv, boxes_inv;
 } c_grid_t;
 
-extern unsigned long ct_grid;
-extern unsigned long grid_update;
+DEF_SIG(grid_update);
 
 DEF_CASTER(ct_grid, c_grid, c_grid_t);
 
