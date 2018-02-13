@@ -41,9 +41,9 @@ void c_grid_init(c_grid_t *self)
 float c_rigid_body_grid_collider(c_rigid_body_t *self, vec3_t pos)
 {
 	
-	int side = c_side(c_ecm(self)->common)->side;
+	int side = c_side(&c_ecm(self)->common)->side;
 
-	c_grid_t *g = c_grid(c_entity(self));
+	c_grid_t *g = c_grid(self);
 	int val = c_grid_get(g, round(pos.x), round(pos.y), round(pos.z));
 
 	return ((val&1) != side || val == -1) ? 0 : -1;
@@ -88,14 +88,14 @@ c_grid_t *c_grid_new(ecm_t *ecm, int mx, int my, int mz)
 			c_model_paint(c_model_new(NULL, 1), 0,
 				candle_material_get(candle, "movable")));
 
-	c_model(self->blocks_inv)->before_draw =
-		c_model(self->cage_inv)->before_draw =
-		c_model(self->boxes_inv)->before_draw =
+	c_model(&self->blocks_inv)->before_draw =
+		c_model(&self->cage_inv)->before_draw =
+		c_model(&self->boxes_inv)->before_draw =
 		(before_draw_cb)template_model_before_draw;
 
-	c_model(self->blocks)->before_draw =
-		c_model(self->cage)->before_draw =
-		c_model(self->boxes)->before_draw =
+	c_model(&self->blocks)->before_draw =
+		c_model(&self->cage)->before_draw =
+		c_model(&self->boxes)->before_draw =
 		(before_draw_cb)template_model_before_draw;
 
 
@@ -262,11 +262,10 @@ static int c_grid_created(c_grid_t *self)
 {
 	c_grid_update(self);
 
-	entity_t e = c_entity(self);
-	c_node_add(c_node(e), 6, self->boxes_inv, self->cage_inv,
+	c_node_add(c_node(self), 6, self->boxes_inv, self->cage_inv,
 			self->blocks_inv, self->boxes, self->cage, self->blocks);
 
-	entity_add_component(e,
+	entity_add_component(c_entity(self),
 			(c_t*)c_rigid_body_new((collider_cb)c_rigid_body_grid_collider));
 
 	return 1;
@@ -323,15 +322,15 @@ static int c_grid_update(c_grid_t *self)
 	/* mesh_cull_face(new_terrainB, 1); */
 	/* mesh_cull_face(new_boxesB, 1); */
 
-	c_model_set_mesh(c_model(self->blocks), new_terrainA);
-	c_model_set_mesh(c_model(self->cage), new_cageA);
-	c_model_set_mesh(c_model(self->boxes), new_boxesA);
+	c_model_set_mesh(c_model(&self->blocks), new_terrainA);
+	c_model_set_mesh(c_model(&self->cage), new_cageA);
+	c_model_set_mesh(c_model(&self->boxes), new_boxesA);
 
-	c_model_set_mesh(c_model(self->blocks_inv), new_terrainB);
-	c_model_set_mesh(c_model(self->cage_inv), new_cageB);
-	c_model_set_mesh(c_model(self->boxes_inv), new_boxesB);
+	c_model_set_mesh(c_model(&self->blocks_inv), new_terrainB);
+	c_model_set_mesh(c_model(&self->cage_inv), new_cageB);
+	c_model_set_mesh(c_model(&self->boxes_inv), new_boxesB);
 
-	entity_signal(self->super.entity, spacial_changed, &self->blocks);
+	entity_signal(c_entity(self), spacial_changed, &self->blocks);
 
 	/* c_grid_print(self); */
 

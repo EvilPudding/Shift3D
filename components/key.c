@@ -17,15 +17,15 @@ static float c_rigid_body_key_collider(c_rigid_body_t *self, vec3_t pos)
 {
 	entity_t ent = c_entity(self);
 
-	const vec3_t kpos = c_spacial(ent)->pos;
+	const vec3_t kpos = c_spacial(self)->pos;
 
-	c_model_t *model = c_model(ent);
+	c_model_t *model = c_model(self);
 	if(model->visible && vec3_len(vec3_sub(pos, kpos)) < 0.4)
 	{
 		model->visible = 0;
 		entity_signal(ent, spacial_changed, &ent);
 
-		c_key_t *key = c_key(ent);
+		c_key_t *key = c_key(self);
 		ct_t *bridges = ecm_get(c_ecm(self), ct_bridge);
 
 		int i;

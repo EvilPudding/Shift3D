@@ -23,7 +23,7 @@ c_bridge_t *c_bridge_new()
 
 static int c_bridge_spacial_changed(c_bridge_t *self)
 {
-	c_spacial_t *spacial = c_spacial(c_entity(self));
+	c_spacial_t *spacial = c_spacial(self);
 	self->inverse_model = mat4_invert(spacial->model_matrix);
 
 	return 1;
@@ -31,7 +31,7 @@ static int c_bridge_spacial_changed(c_bridge_t *self)
 
 static float c_rigid_body_bridge_collider(c_rigid_body_t *self, vec3_t pos)
 {
-	c_bridge_t *b = c_bridge(c_entity(self));
+	c_bridge_t *b = c_bridge(self);
 	/* c_spacial_t *b = c_spacial(c_entity(self)); */
 
 	pos = mat4_mul_vec4(b->inverse_model, vec4(_vec3(pos), 1.0f)).xyz;
@@ -47,7 +47,7 @@ static int c_bridge_update(c_bridge_t *self, float *dt)
 {
 	if(!vec3_null(self->rotate_to))
 	{
-		c_spacial_t *s = c_spacial(c_entity(self));
+		c_spacial_t *s = c_spacial(self);
 		vec3_t inc;
 		if(fabs(self->rotate_to.x) < 0.01 &&
 				fabs(self->rotate_to.y) < 0.01 &&

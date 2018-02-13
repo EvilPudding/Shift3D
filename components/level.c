@@ -26,7 +26,7 @@ c_level_t *c_level_new(candle_t *engine, const char *filename)
 
 	candle_import(engine, self->scene, filename);
 
-	self->grid = c_node_get_by_name(c_node(self->scene), "grid");
+	self->grid = c_node_get_by_name(c_node(&self->scene), "grid");
 
 	return self;
 }

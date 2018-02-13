@@ -49,19 +49,19 @@ c_character_t *c_character_new(entity_t orientation, int plane_movement, entity_
 int c_character_update(c_character_t *self, float *dt)
 {
 	const float corner = 1.0 / sqrt(2.0);
-	c_spacial_t *ori = c_spacial(self->orientation);
+	c_spacial_t *ori = c_spacial(&self->orientation);
 	float dif;
 
-	c_velocity_t *vc = c_velocity(c_entity(self));
+	c_velocity_t *vc = c_velocity(self);
 	vec3_t *vel = &vc->velocity;
 	float accel = 72 * (*dt);
 
-	c_spacial_t *sc = c_spacial(self->super.entity);
+	c_spacial_t *sc = c_spacial(self);
 
 	vec3_t front;
 	vec3_t sideways;
 
-	const vec3_t up = vec3_inv(c_force(self->force_down)->force);
+	const vec3_t up = vec3_inv(c_force(&self->force_down)->force);
 	vec3_t up_dir = vec3_norm(up);
 	vec3_t up_line = vec3_mul(up_dir, up_dir);
 	vec3_t tang = vec3_norm(vec3_sub(vec3(1.0, 1.0, 1.0), up_line));
@@ -122,7 +122,7 @@ int c_character_update(c_character_t *self, float *dt)
 	}
 	vec3_t tang_speed = vec3_mul(tang, *vel);
 
-	c_level_t *level = c_level(c_ecm(self)->common);
+	c_level_t *level = c_level(&c_ecm(self)->common);
 	if(!level)
 	{
 		floored = 1;
@@ -159,11 +159,11 @@ int c_character_update(c_character_t *self, float *dt)
 		if(self->swap == 1)
 		{
 			self->swap = 2;
-			c_force(self->force_down)->force = up;
+			c_force(&self->force_down)->force = up;
 			/* c_force(self->force_down)->force = vec3(0.0, 0.0, 30.0); */
 
-			c_side(c_ecm(self)->common)->side =
-				!c_side(c_ecm(self)->common)->side;
+			c_side(&c_ecm(self)->common)->side =
+				!c_side(&c_ecm(self)->common)->side;
 			sc->pos = vec3_round(sc->pos);
 			sc->pos = vec3_sub(sc->pos, vec3_scale(up_dir, 0.55));
 
@@ -189,7 +189,7 @@ end:
 	}
 
 	entity_signal(self->super.entity, spacial_changed, &self->super.entity);
-	c_charlook_update(c_charlook(self->orientation));
+	c_charlook_update(c_charlook(&self->orientation));
 
 	return 1;
 }

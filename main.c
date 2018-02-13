@@ -61,10 +61,11 @@ int main(int argc, char **argv)
 	g = entity_new(candle->ecm, 2, c_name_new("gravity"),
 			c_force_new(0.0, -55, 0.0, 1));
 
-	camera = entity_new(candle->ecm, 3,
+	c_renderer(&candle->systems)->camera = camera = entity_new(candle->ecm, 4,
 			c_name_new("camera"),
-			c_camera_new(1, 70, 0.1, 50.0, window_width, window_height),
-			c_charlook_new(g, 1.9)
+			c_camera_new(70, 0.1, 50.0),
+			c_charlook_new(g, 1.9),
+			c_node_new()
 	);
 
 	character = entity_new(candle->ecm, 2,
@@ -73,10 +74,10 @@ int main(int argc, char **argv)
 	);
 
 	/* c_charlook_set_controls(c_charlook(camera), character, camera); */
-	c_charlook_set_controls(c_charlook(camera), camera, camera);
+	c_charlook_set_controls(c_charlook(&camera), camera, camera);
 
-	c_spacial_set_pos(c_spacial(camera), vec3(0.0, 0.7, 0.0));
-	c_node_add(c_node(character), 1, camera);
+	c_spacial_set_pos(c_spacial(&camera), vec3(0.0, 0.7, 0.0));
+	c_node_add(c_node(&character), 1, camera);
 
 
 	/* TORUS */
@@ -96,7 +97,7 @@ int main(int argc, char **argv)
 	entity_add_component(common, (c_t*)c_level_new(candle, open_map_name));
 
 	entity_t ambient = entity_new(candle->ecm, 1, c_ambient_new(64));
-	c_spacial_set_pos(c_spacial(ambient), vec3(6.5, 6, 6.5));
+	c_spacial_set_pos(c_spacial(&ambient), vec3(6.5, 6, 6.5));
 
 	entity_signal(candle->ecm->none, window_resize,
 			&(window_resize_data){window_width, window_height});
