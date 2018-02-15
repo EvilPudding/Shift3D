@@ -5,6 +5,7 @@
 #include <components/force.h>
 #include <components/node.h>
 #include <mouse.h>
+#include <candle.h>
 #include <math.h>
 #include <stdlib.h>
 
@@ -36,6 +37,7 @@ c_charlook_t *c_charlook_new(entity_t force_down, float sensitivity)
 void c_charlook_set_controls(c_charlook_t *self,
 		entity_t x_control, entity_t y_control)
 {
+	candle_grab_mouse(candle, c_entity(self), 0);
 	self->x_control = x_control;
 	self->y_control = y_control;
 }
@@ -49,7 +51,6 @@ static int c_charlook_window_resize(c_charlook_t *self,
 }
 
 /* TODO remove this extern reference */
-extern SDL_Window *mainWindow;
 extern int control;
 
 void c_charlook_update(c_charlook_t *self)
@@ -57,16 +58,8 @@ void c_charlook_update(c_charlook_t *self)
 	const float max_up = M_PI / 2.0 - 0.01;
 	const float max_down = -M_PI / 2.0 + 0.01;
 
-	if(control)
+	if(!control)
 	{
-		SDL_SetWindowGrab(mainWindow, SDL_TRUE);
-		SDL_SetRelativeMouseMode(SDL_TRUE);
-
-	}
-	else
-	{
-		SDL_SetWindowGrab(mainWindow, SDL_FALSE);
-		SDL_SetRelativeMouseMode(SDL_FALSE);
 		return;
 	}
 	if(entity_is_null(self->x_control) || entity_is_null(self->y_control))

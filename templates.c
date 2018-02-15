@@ -81,8 +81,8 @@ static entity_t template_key(entity_t root, FILE *fd, candle_t *candle)
 	entity_t key = entity_new(root.ecm, 5,
 			c_name_new("key"),
 			c_node_new(),
-			c_model_paint(c_model_new(candle_mesh_get(candle, "key.obj"), 1), 0,
-				candle_material_get(candle, "key")),
+			c_model_paint(c_model_new(sauces_mesh("key.obj"), 1), 0,
+				sauces_mat("key")),
 			c_side_new(side),
 			c_key_new(rotX, rotY, rotZ, id));
 	c_model(&key)->before_draw = (before_draw_cb)template_model_before_draw;
@@ -173,7 +173,7 @@ static entity_t template_bridge(entity_t root, FILE *fd, candle_t *candle)
 			c_side_new(2),
 			c_node_new(),
 			c_model_paint(c_model_new(mesh, 1), 0,
-				candle_material_get(candle, "bridge")), p);
+				sauces_mat("bridge")), p);
 	c_spacial_set_pos(c_spacial(&bridge), vec3(p->cx, p->cy, p->cz));
 
 	c_model(&bridge)->before_draw = (before_draw_cb)template_model_before_draw;
@@ -198,8 +198,8 @@ static entity_t template_door(entity_t root, FILE *fd, candle_t *candle)
 
 	entity_t door = entity_new(root.ecm, 5,
 			c_name_new("door"),
-			c_model_paint(c_model_new(candle_mesh_get(candle, "door.obj"), 1),
-				0, candle_material_get(candle, "door")),
+			c_model_paint(c_model_new(sauces_mesh( "door.obj"), 1),
+				0, sauces_mat( "door")),
 			c_side_new(side),
 			c_node_new(),
 			c_door_new(next));

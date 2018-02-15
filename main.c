@@ -20,20 +20,21 @@ void load_resources(candle_t *engine)
 	/* TODO: make dir loading dynamic built in candle */
 	/* loader_wait(engine->loader); */
 
-	candle_material_get(engine, "blocks");
-	candle_material_get(engine, "inverted");
-	/* candle_material_get(engine, "movable")->diffuse.texture_blend =
+	sauces_mat("blocks");
+	sauces_mat("inverted");
+	/* sauces_mat("movable")->diffuse.texture_blend =
 	 * 0.5; */
 
-	candle_material_get(engine, "key");
-	candle_material_get(engine, "door");
-	material_t *bridge_mat = candle_material_get(engine, "bridge");
+	sauces_mat("key");
+	sauces_mat("door");
+	material_t *bridge_mat = sauces_mat("bridge");
 	bridge_mat->diffuse.color = vec4(0.2f, 0.2f, 0.6f, 1.0f);
 	bridge_mat->diffuse.texture_blend = 0.5;
 
-	candle_mesh_get(engine, "key.obj");
-	candle_mesh_get(engine, "door.obj");
-	candle_mesh_reg(engine, "movable", mesh_cube(0.5f, 2.0f, 1));
+	sauces_mesh("key.obj");
+	sauces_mesh("door.obj");
+	c_sauces_mesh_reg(c_sauces(&engine->systems),
+			"movable", mesh_cube(0.5f, 2.0f, 1));
 
 	/* loader_wait(state->engine->loader); */
 }
@@ -55,7 +56,7 @@ int main(int argc, char **argv)
 
 	register_custom_templates(candle);
 
-	candle_get_materials_at(candle, "");
+	sauces_mat_at("");
 	load_resources(candle);
 
 	g = entity_new(candle->ecm, 2, c_name_new("gravity"),
@@ -84,7 +85,7 @@ int main(int argc, char **argv)
 	/* entity_t torus = entity_new(candle->ecm, 2, */
 			/* c_name_new("torus"), */
 			/* c_model_new(mesh_torus(0.5, 0.2, 32, 16), */
-				/* candle_material_get(candle, "stone5"), 1) */
+				/* sauces_mat("stone5"), 1) */
 	/* ); */
 	/* c_spacial_set_pos(c_spacial(torus), vec3(11.0, 6.1, 7.0)); */
 	/* c_spacial_set_rot(c_spacial(torus), 1, 0, 0, M_PI / 5.5); */

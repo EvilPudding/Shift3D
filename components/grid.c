@@ -61,14 +61,13 @@ c_grid_t *c_grid_new(ecm_t *ecm, int mx, int my, int mz)
 
 	self->blocks = entity_new(ecm, 3, c_name_new("blocks"), c_side_new(0),
 			/* c_model_new(NULL, candle_material_get(candle, "pack1/white"), 1)); */
-			c_model_paint(c_model_new(NULL, 1), 0, candle_material_get(candle,
-						"pack1/white")));
+			c_model_paint(c_model_new(NULL, 1), 0, sauces_mat("pack1/white")));
 
 	self->cage = entity_new(ecm, 3, c_name_new("cage"), c_side_new(0),
 			c_model_paint(c_model_new(NULL, 1), 0,
-				candle_material_get(candle, "pack1/piramids")));
+				sauces_mat("pack1/piramids")));
 
-	material_t *stone3 = candle_material_get(candle, "pack1/stone3");
+	material_t *stone3 = sauces_mat("pack1/stone3");
 	stone3->diffuse.color = vec4(0.6f, 0.1f, 0.14f, 1.0f);
 	stone3->diffuse.texture_blend = 0.5;
 	stone3->normal.texture_blend = 0.3;
@@ -78,15 +77,15 @@ c_grid_t *c_grid_new(ecm_t *ecm, int mx, int my, int mz)
 
 	self->blocks_inv = entity_new(ecm, 3, c_name_new("bloc_i"), c_side_new(1),
 			c_model_paint(c_model_new(NULL, 1), 0,
-				candle_material_get(candle, "pack1/piramids")));
+				sauces_mat("pack1/piramids")));
 
 	self->cage_inv = entity_new(ecm, 3, c_name_new("cage_i"), c_side_new(1),
 			c_model_paint(c_model_new(NULL, 1), 0,
-				candle_material_get(candle, "pack1/white")));
+				sauces_mat("pack1/white")));
 
 	self->boxes_inv = entity_new(ecm, 3, c_name_new("movab_i"), c_side_new(1),
 			c_model_paint(c_model_new(NULL, 1), 0,
-				candle_material_get(candle, "movable")));
+				sauces_mat("movable")));
 
 	c_model(&self->blocks_inv)->before_draw =
 		c_model(&self->cage_inv)->before_draw =
