@@ -15,6 +15,6 @@ typedef struct
 DEF_CASTER(ct_moving, c_moving, c_moving_t);
 
 c_moving_t *c_moving_new(float x, float y, float z, float mx, float mz);
-void c_moving_register(ecm_t *ecm);
+void c_moving_register(void);
 
 #endif /* !MOVING_H */

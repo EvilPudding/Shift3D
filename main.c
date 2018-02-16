@@ -42,7 +42,7 @@ void load_resources(candle_t *engine)
 int main(int argc, char **argv)
 {
 	char open_map_name[256];
-	entity_t camera, g, character, common;
+	entity_t camera, g, character;
 	candle_new(10,
 			c_side_register,		c_grid_register,	c_charlook_register,
 			c_character_register,	c_key_register,		c_level_register,
@@ -52,24 +52,21 @@ int main(int argc, char **argv)
 	entity_add_component(candle->systems, (c_t*)c_renderer_new(1.0f, 1, 1, 1.0f, 0));
 	entity_add_component(candle->systems, (c_t*)c_editmode_new());
 
-	common = candle->ecm->common;
-
 	register_custom_templates(candle);
 
 	sauces_mat_at("");
 	load_resources(candle);
 
-	g = entity_new(candle->ecm, 2, c_name_new("gravity"),
-			c_force_new(0.0, -55, 0.0, 1));
+	g = entity_new(c_name_new("gravity"), c_force_new(0.0, -55, 0.0, 1));
 
-	c_renderer(&candle->systems)->camera = camera = entity_new(candle->ecm, 4,
+	c_renderer(&candle->systems)->camera = camera = entity_new(
 			c_name_new("camera"),
 			c_camera_new(70, 0.1, 50.0),
 			c_charlook_new(g, 1.9),
 			c_node_new()
 	);
 
-	character = entity_new(candle->ecm, 2,
+	character = entity_new(
 			c_name_new("character"),
 			c_character_new(camera, 1, g)
 	);
@@ -82,7 +79,7 @@ int main(int argc, char **argv)
 
 
 	/* TORUS */
-	/* entity_t torus = entity_new(candle->ecm, 2, */
+	/* entity_t torus = entity_new( */
 			/* c_name_new("torus"), */
 			/* c_model_new(mesh_torus(0.5, 0.2, 32, 16), */
 				/* sauces_mat("stone5"), 1) */
@@ -93,14 +90,14 @@ int main(int argc, char **argv)
 
 	sprintf(open_map_name, "resauces/maps/%s.xmap", argc > 1 ? argv[1] : "0");
 
-	entity_add_component(common, (c_t*)c_side_new(0));
+	entity_add_component(candle->systems, (c_t*)c_side_new(0));
 
-	entity_add_component(common, (c_t*)c_level_new(candle, open_map_name));
+	entity_add_component(candle->systems, (c_t*)c_level_new(candle, open_map_name));
 
-	entity_t ambient = entity_new(candle->ecm, 1, c_ambient_new(64));
+	entity_t ambient = entity_new(c_ambient_new(64));
 	c_spacial_set_pos(c_spacial(&ambient), vec3(6.5, 6, 6.5));
 
-	entity_signal(candle->ecm->none, window_resize,
+	entity_signal(entity_null, window_resize,
 			&(window_resize_data){window_width, window_height});
 
 	candle_init(candle);

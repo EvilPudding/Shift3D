@@ -74,9 +74,9 @@ static int c_bridge_created(c_bridge_t *self)
 	return 1;
 }
 
-void c_bridge_register(ecm_t *ecm)
+void c_bridge_register()
 {
-	ct_t *ct = ecm_register(ecm, "Bridge", &ct_bridge,
+	ct_t *ct = ecm_register("Bridge", &ct_bridge,
 			sizeof(c_bridge_t), (init_cb)c_bridge_init, 1, ct_spacial);
 	ct_register_listener(ct, SAME_ENTITY, entity_created,
 			(signal_cb)c_bridge_created);

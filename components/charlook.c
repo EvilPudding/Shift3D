@@ -18,9 +18,9 @@ void c_charlook_init(c_charlook_t *self)
 
 	self->xrot = 0;
 	self->yrot = 0;
-	self->x_control = entity_null();
-	self->y_control = entity_null();
-	self->force_down = entity_null();
+	self->x_control = entity_null;
+	self->y_control = entity_null;
+	self->force_down = entity_null;
 }
 
 c_charlook_t *c_charlook_new(entity_t force_down, float sensitivity)
@@ -62,7 +62,7 @@ void c_charlook_update(c_charlook_t *self)
 	{
 		return;
 	}
-	if(entity_is_null(self->x_control) || entity_is_null(self->y_control))
+	if(self->x_control == entity_null || self->y_control == entity_null)
 	{
 		return;
 	}
@@ -104,9 +104,9 @@ int c_charlook_mouse_move(c_charlook_t *self, mouse_move_data *event)
 	return 1;
 }
 
-void c_charlook_register(ecm_t *ecm)
+void c_charlook_register()
 {
-	ct_t *ct = ecm_register(ecm, "Charlook", &ct_charlook,
+	ct_t *ct = ecm_register("Charlook", &ct_charlook,
 			sizeof(c_charlook_t), (init_cb)c_charlook_init,
 			2, ct_spacial, ct_node);
 

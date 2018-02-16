@@ -22,7 +22,7 @@ void c_charlook_update(c_charlook_t *self);
 void c_charlook_set_controls(c_charlook_t *self,
 		entity_t x_control, entity_t y_control);
 
-void c_charlook_register(ecm_t *ecm);
+void c_charlook_register(void);
 
 vec3_t c_charlook_up(c_charlook_t *self);
 

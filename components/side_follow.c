@@ -23,7 +23,7 @@ c_side_follow_t *c_side_follow_new()
 
 static int c_side_follow_update(c_side_follow_t *self, float *dt)
 {
-	int side = c_side(&c_ecm(self)->common)->side;
+	int side = c_side(&candle->systems)->side;
 	c_spacial_t *sc = c_spacial(self);
 	vec3_t pos = sc->pos;
 
@@ -36,7 +36,7 @@ static int c_side_follow_update(c_side_follow_t *self, float *dt)
 		c_spacial_set_pos(sc, pos);
 
 		/* TODO: remove string search from this */
-		entity_t grid = c_level(&c_ecm(self)->common)->grid;
+		entity_t grid = c_level(&candle->systems)->grid;
 		c_side(self)->side = c_grid_get(c_grid(&grid),
 				pos.x, pos.y, pos.z) & 1;
 	}
@@ -45,9 +45,9 @@ static int c_side_follow_update(c_side_follow_t *self, float *dt)
 }
 
 
-void c_side_follow_register(ecm_t *ecm)
+void c_side_follow_register()
 {
-	ct_t *ct = ecm_register(ecm, "Side Follow", &ct_side_follow,
+	ct_t *ct = ecm_register("Side Follow", &ct_side_follow,
 			sizeof(c_side_follow_t), (init_cb)c_side_follow_init,
 			1, ct_spacial);
 

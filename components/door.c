@@ -21,9 +21,9 @@ c_door_t *c_door_new(const char *next)
 	return self;
 }
 
-void c_door_register(ecm_t *ecm)
+void c_door_register()
 {
-	ecm_register(ecm, "Door", &ct_door, sizeof(c_door_t),
+	ecm_register("Door", &ct_door, sizeof(c_door_t),
 			(init_cb)c_door_init, 1, ct_spacial);
 }
 

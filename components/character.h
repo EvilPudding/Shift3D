@@ -24,6 +24,6 @@ typedef struct
 DEF_CASTER(ct_character, c_character, c_character_t);
 
 c_character_t *c_character_new(entity_t orientation, int plane_movement, entity_t force_down);
-void c_character_register(ecm_t *ecm);
+void c_character_register(void);
 
 #endif /* !CHARACTER_H */

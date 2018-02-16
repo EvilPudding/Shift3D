@@ -18,12 +18,12 @@ DEF_SIG(grid_update);
 
 DEF_CASTER(ct_grid, c_grid, c_grid_t);
 
-c_grid_t *c_grid_new(ecm_t *ecm, int mx, int my, int mz);
+c_grid_t *c_grid_new(int mx, int my, int mz);
 
 int c_grid_get(c_grid_t *self, int x, int y, int z);
 void c_grid_set(c_grid_t *self, int x, int y, int z, int val);
 void c_grid_print(c_grid_t *self);
-void c_grid_register(ecm_t *ecm);
+void c_grid_register(void);
 float c_grid_collider(c_grid_t *self, vec3_t pos);
 
 #endif /* !GRID_H */

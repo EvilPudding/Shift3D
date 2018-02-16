@@ -28,6 +28,6 @@ typedef struct
 DEF_CASTER(ct_bridge, c_bridge, c_bridge_t);
 
 c_bridge_t *c_bridge_new();
-void c_bridge_register(ecm_t *ecm);
+void c_bridge_register(void);
 
 #endif /* !BRIDGE_H */

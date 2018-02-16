@@ -22,7 +22,7 @@ c_level_t *c_level_new(candle_t *engine, const char *filename)
 
 	if(!filename[0]) return self;
 
-	self->scene = entity_new(engine->ecm, 2, c_name_new("scene"), c_node_new());
+	self->scene = entity_new(c_name_new("scene"), c_node_new());
 
 	candle_import(engine, self->scene, filename);
 
@@ -31,8 +31,8 @@ c_level_t *c_level_new(candle_t *engine, const char *filename)
 	return self;
 }
 
-void c_level_register(ecm_t *ecm)
+void c_level_register()
 {
-	ecm_register(ecm, "Level", &ct_level, sizeof(c_level_t),
+	ecm_register("Level", &ct_level, sizeof(c_level_t),
 			(init_cb)c_level_init, 1, ct_side);
 }

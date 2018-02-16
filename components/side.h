@@ -12,6 +12,6 @@ typedef struct
 DEF_CASTER(ct_side, c_side, c_side_t)
 
 c_side_t *c_side_new(int side);
-void c_side_register(ecm_t *ecm);
+void c_side_register(void);
 
 #endif /* !SIDE_H */

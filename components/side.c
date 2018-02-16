@@ -18,9 +18,9 @@ c_side_t *c_side_new(int side)
 	return self;
 }
 
-void c_side_register(ecm_t *ecm)
+void c_side_register()
 {
-	ecm_register(ecm, "Side", &ct_side, sizeof(c_side_t),
+	ecm_register("Side", &ct_side, sizeof(c_side_t),
 			(init_cb)c_side_init, 0);
 }
 

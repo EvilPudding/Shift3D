@@ -16,6 +16,6 @@ typedef struct
 DEF_CASTER(ct_level, c_level, c_level_t);
 
 c_level_t *c_level_new(candle_t *engine, const char *filename);
-void c_level_register(ecm_t *ecm);
+void c_level_register(void);
 
 #endif /* !LEVEL_H */

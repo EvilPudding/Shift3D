@@ -30,8 +30,8 @@ void c_character_init(c_character_t *self)
 	self->swap = 0;
 	self->targR = 0.0;
 	self->max_jump_vel = 0.0;
-	self->orientation = entity_null();
-	self->force_down = entity_null();
+	self->orientation = entity_null;
+	self->force_down = entity_null;
 }
 
 c_character_t *c_character_new(entity_t orientation, int plane_movement, entity_t force_down)
@@ -122,7 +122,7 @@ int c_character_update(c_character_t *self, float *dt)
 	}
 	vec3_t tang_speed = vec3_mul(tang, *vel);
 
-	c_level_t *level = c_level(&c_ecm(self)->common);
+	c_level_t *level = c_level(&candle->systems);
 	if(!level)
 	{
 		floored = 1;
@@ -162,8 +162,8 @@ int c_character_update(c_character_t *self, float *dt)
 			c_force(&self->force_down)->force = up;
 			/* c_force(self->force_down)->force = vec3(0.0, 0.0, 30.0); */
 
-			c_side(&c_ecm(self)->common)->side =
-				!c_side(&c_ecm(self)->common)->side;
+			c_side(&candle->systems)->side =
+				!c_side(&candle->systems)->side;
 			sc->pos = vec3_round(sc->pos);
 			sc->pos = vec3_sub(sc->pos, vec3_scale(up_dir, 0.55));
 
@@ -224,9 +224,9 @@ int c_character_key_down(c_character_t *self, char *key)
 	return 1;
 }
 
-void c_character_register(ecm_t *ecm)
+void c_character_register()
 {
-	ct_t *ct = ecm_register(ecm, "Character",
+	ct_t *ct = ecm_register("Character",
 			&ct_character, sizeof(c_character_t), (init_cb)c_character_init,
 			4, ct_spacial, ct_velocity, ct_node, ct_rigid_body);
 

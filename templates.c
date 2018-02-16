@@ -16,7 +16,7 @@ int template_model_before_draw(c_model_t *self)
 	c_side_t *sc = c_side(self);
 	if(!sc) return 1;
 	int side = sc->side;
-	if(side != c_side(&c_ecm(self)->common)->side && side != 2)
+	if(side != c_side(&candle->systems)->side && side != 2)
 	{
 		/* printf("'%s' on wrong side\n", c_name(self->super.entity)->name); */
 		return 0;
@@ -27,7 +27,7 @@ int template_model_before_draw(c_model_t *self)
 /* static int template_light_before_draw(c_light_t *self) */
 /* { */
 /* 	int side = c_side(self->super.entity)->side; */
-/* 	return side == 2 || side == c_side(self->super.ecm->common)->side; */
+/* 	return side == 2 || side == c_side(&candle->systems)->side; */
 /* } */
 
 static entity_t template_shift_grid(entity_t root, FILE *fd)
@@ -42,7 +42,7 @@ static entity_t template_shift_grid(entity_t root, FILE *fd)
 	ret = fscanf(fd, "%d %d %d ", &mx, &my, &mz);
 	if(!ret) exit(1);
 
-	c_grid_t *grid = c_grid_new(root.ecm, mx, my, mz);
+	c_grid_t *grid = c_grid_new(mx, my, mz);
 
 	l = mx * my * mz;
 
@@ -58,7 +58,7 @@ static entity_t template_shift_grid(entity_t root, FILE *fd)
 	}
 	getc(fd);
 
-	entity = entity_new(root.ecm, 3, c_name_new("grid"), grid, c_node_new());
+	entity = entity_new(c_name_new("grid"), grid, c_node_new());
 
 	c_node_add(c_node(&root), 1, entity);
 
@@ -78,8 +78,7 @@ static entity_t template_key(entity_t root, FILE *fd, candle_t *candle)
 	entity_t grid = c_node_get_by_name(c_node(&root), "grid");
 	side = c_grid_get(c_grid(&grid), x, y, z) & 1;
 
-	entity_t key = entity_new(root.ecm, 5,
-			c_name_new("key"),
+	entity_t key = entity_new(c_name_new("key"),
 			c_node_new(),
 			c_model_paint(c_model_new(sauces_mesh("key.obj"), 1), 0,
 				sauces_mat("key")),
@@ -104,16 +103,14 @@ static entity_t template_spawn(entity_t root, FILE *fd, candle_t *candle)
 	entity_t grid = c_node_get_by_name(c_node(&root), "grid");
 	side = c_grid_get(c_grid(&grid), x, y, z) & 1;
 
-	c_side(&root.ecm->common)->side = side;
+	c_side(&candle->systems)->side = side;
 
-	entity_t spawn = entity_new(root.ecm, 4,
-			c_node_new(),
+	entity_t spawn = entity_new(c_node_new(),
 			c_side_new(side),
 			c_spacial_new(),
 			c_name_new("spawn"));
 
-	c_character_t *fc = (c_character_t*)ct_get_at(ecm_get(root.ecm,
-				ct_character), 0);
+	c_character_t *fc = (c_character_t*)ct_get_at(ecm_get(ct_character), 0);
 
 	/* c_camera_t *cc = c_camera(ecm_get_camera(root.ecm)); */
 
@@ -169,8 +166,7 @@ static entity_t template_bridge(entity_t root, FILE *fd, candle_t *candle)
 			vec3(p->min.x - 0.005f, p->min.y - 0.005f, p->min.z - 0.005f),
 			vec3(p->max.x + 0.005f, p->max.y + 0.005f, p->max.z + 0.005f));
 
-	entity_t bridge = entity_new(root.ecm, 4,
-			c_side_new(2),
+	entity_t bridge = entity_new(c_side_new(2),
 			c_node_new(),
 			c_model_paint(c_model_new(mesh, 1), 0,
 				sauces_mat("bridge")), p);
@@ -196,8 +192,7 @@ static entity_t template_door(entity_t root, FILE *fd, candle_t *candle)
 	entity_t grid = c_node_get_by_name(c_node(&root), "grid");
 	side = c_grid_get(c_grid(&grid), x, y, z) & 1;
 
-	entity_t door = entity_new(root.ecm, 5,
-			c_name_new("door"),
+	entity_t door = entity_new(c_name_new("door"),
 			c_model_paint(c_model_new(sauces_mesh( "door.obj"), 1),
 				0, sauces_mat( "door")),
 			c_side_new(side),
@@ -227,8 +222,7 @@ static entity_t template_light(entity_t root, FILE *fd)
 	entity_t grid = c_node_get_by_name(c_node(&root), "grid");
 	side = c_grid_get(c_grid(&grid), x, y, z) & 1;
 
-	entity_t light = entity_new(root.ecm, 5,
-			c_name_new("light"),
+	entity_t light = entity_new(c_name_new("light"),
 			c_side_new(side),
 			c_node_new(),
 			c_side_follow_new(),
