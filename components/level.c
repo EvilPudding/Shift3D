@@ -8,15 +8,11 @@
 
 DEC_CT(ct_level);
 
-void c_level_init(c_level_t *self)
-{
-	self->super = component_new(ct_level);
-}
+void c_level_init(c_level_t *self) { }
 
 c_level_t *c_level_new(candle_t *engine, const char *filename)
 {
-	c_level_t *self = malloc(sizeof *self);
-	c_level_init(self);
+	c_level_t *self = component_new(ct_level);
 
 	strcpy(self->file, filename);
 

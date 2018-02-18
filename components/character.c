@@ -19,8 +19,6 @@ int control = 1;
 
 void c_character_init(c_character_t *self)
 {
-	self->super = component_new(ct_character);
-
 	self->plane_movement = 0;
 	self->forward = 0;
 	self->backward = 0;
@@ -36,8 +34,7 @@ void c_character_init(c_character_t *self)
 
 c_character_t *c_character_new(entity_t orientation, int plane_movement, entity_t force_down)
 {
-	c_character_t *self = malloc(sizeof *self);
-	c_character_init(self);
+	c_character_t *self = component_new(ct_character);
 	self->plane_movement = plane_movement;
 	self->force_down = force_down;
 

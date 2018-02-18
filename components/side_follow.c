@@ -9,15 +9,11 @@
 
 DEC_CT(ct_side_follow);
 
-void c_side_follow_init(c_side_follow_t *self)
-{
-	self->super = component_new(ct_side_follow);
-}
+void c_side_follow_init(c_side_follow_t *self) { }
 
 c_side_follow_t *c_side_follow_new()
 {
-	c_side_follow_t *self = malloc(sizeof *self);
-	c_side_follow_init(self);
+	c_side_follow_t *self = component_new(ct_side_follow);
 	return self;
 }
 

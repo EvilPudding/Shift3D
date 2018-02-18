@@ -42,7 +42,9 @@ static entity_t template_shift_grid(entity_t root, FILE *fd)
 	ret = fscanf(fd, "%d %d %d ", &mx, &my, &mz);
 	if(!ret) exit(1);
 
-	c_grid_t *grid = c_grid_new(mx, my, mz);
+	entity = entity_new(c_name_new("grid"), c_node_new(), c_grid_new(mx, my, mz));
+
+	c_grid_t *grid = c_grid(&entity);
 
 	l = mx * my * mz;
 
@@ -56,10 +58,10 @@ static entity_t template_shift_grid(entity_t root, FILE *fd)
 
 		if(i == l) break;
 	}
+
 	getc(fd);
 
-	entity = entity_new(c_name_new("grid"), grid, c_node_new());
-
+	entity_signal(entity, grid_update, NULL);
 	c_node_add(c_node(&root), 1, entity);
 
 	return root;
@@ -110,13 +112,13 @@ static entity_t template_spawn(entity_t root, FILE *fd, candle_t *candle)
 			c_spacial_new(),
 			c_name_new("spawn"));
 
-	c_character_t *fc = (c_character_t*)ct_get_at(ecm_get(ct_character), 0);
+	c_character_t *fc = (c_character_t*)ct_get_at(ecm_get(ct_character), 0, 0);
 
 	/* c_camera_t *cc = c_camera(ecm_get_camera(root.ecm)); */
 
 	if(fc)
 	{
-		c_spacial_set_pos(c_spacial(fc), vec3(x, y + 2.5, z));
+		c_spacial_set_pos(c_spacial(fc), vec3(x, y - 0.5, z));
 		/* c_spacial_set_pos(c_spacial(cc->super.entity), 0, 0.7, 0); */
 	}
 	c_spacial_set_pos(c_spacial(&spawn), vec3(x, y, z));
@@ -137,7 +139,10 @@ static entity_t template_bridge(entity_t root, FILE *fd, candle_t *candle)
 			&y2, &z2, &cx, &cy, &cz, &key);
 	if(!ret) exit(1);
 
-	c_bridge_t *p = c_bridge_new();
+	entity_t bridge = entity_new(c_side_new(2),
+			c_bridge_new(),
+			c_node_new());
+	c_bridge_t *p = c_bridge(&bridge);
 
 	order(p->ix1, p->ix2, x1, x2);
 	order(p->iy1, p->iy2, y1, y2);
@@ -162,14 +167,8 @@ static entity_t template_bridge(entity_t root, FILE *fd, candle_t *candle)
 	/* mesh_t *mesh = mesh_cuboid(0.5, */
 			/* p->x1 - 0.01, p->y1 - 0.01, p->z1 - 0.01, */
 			/* p->x2 + 0.01, p->y2 + 0.01, p->z2 + 0.01); */
-	mesh_t *mesh = mesh_cuboid(0.5,
-			vec3(p->min.x - 0.005f, p->min.y - 0.005f, p->min.z - 0.005f),
-			vec3(p->max.x + 0.005f, p->max.y + 0.005f, p->max.z + 0.005f));
+	c_bridge_ready(p);
 
-	entity_t bridge = entity_new(c_side_new(2),
-			c_node_new(),
-			c_model_paint(c_model_new(mesh, 1), 0,
-				sauces_mat("bridge")), p);
 	c_spacial_set_pos(c_spacial(&bridge), vec3(p->cx, p->cy, p->cz));
 
 	c_model(&bridge)->before_draw = (before_draw_cb)template_model_before_draw;

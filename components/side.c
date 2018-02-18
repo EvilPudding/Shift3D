@@ -5,14 +5,12 @@ DEC_CT(ct_side);
 
 void c_side_init(c_side_t *self)
 {
-	self->super = component_new(ct_side);
 	self->side = 2;
 }
 
 c_side_t *c_side_new(int side)
 {
-	c_side_t *self = malloc(sizeof *self);
-	c_side_init(self);
+	c_side_t *self = component_new(ct_side);
 
 	self->side = side;
 	return self;

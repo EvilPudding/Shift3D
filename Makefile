@@ -66,7 +66,7 @@ init:
 
 run: all
 	cp -rvu resauces $(DIR)
-	$(DIR)/shift 8
+	$(DIR)/shift 6
 
 gdb: debug
 	cp -rvu resauces $(DIR)

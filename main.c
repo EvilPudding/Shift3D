@@ -59,12 +59,13 @@ int main(int argc, char **argv)
 
 	g = entity_new(c_name_new("gravity"), c_force_new(0.0, -55, 0.0, 1));
 
-	c_renderer(&candle->systems)->camera = camera = entity_new(
+	camera = entity_new(
 			c_name_new("camera"),
 			c_camera_new(70, 0.1, 50.0),
 			c_charlook_new(g, 1.9),
 			c_node_new()
 	);
+	c_camera_activate(c_camera(&camera));
 
 	character = entity_new(
 			c_name_new("character"),
@@ -100,7 +101,7 @@ int main(int argc, char **argv)
 	entity_signal(entity_null, window_resize,
 			&(window_resize_data){window_width, window_height});
 
-	candle_init(candle);
+	candle_wait(candle);
 
 
 	printf("Exiting.\n");

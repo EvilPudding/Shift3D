@@ -13,20 +13,12 @@ DEC_CT(ct_charlook);
 
 void c_charlook_init(c_charlook_t *self)
 {
-	self->super = component_new(ct_charlook);
 	self->win_min_side = 1080;
-
-	self->xrot = 0;
-	self->yrot = 0;
-	self->x_control = entity_null;
-	self->y_control = entity_null;
-	self->force_down = entity_null;
 }
 
 c_charlook_t *c_charlook_new(entity_t force_down, float sensitivity)
 {
-	c_charlook_t *self = malloc(sizeof *self);
-	c_charlook_init(self);
+	c_charlook_t *self = component_new(ct_charlook);
 
 	self->sensitivity = sensitivity;
 	self->force_down = force_down;

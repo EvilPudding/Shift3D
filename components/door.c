@@ -5,17 +5,11 @@
 
 DEC_CT(ct_door);
 
-void c_door_init(c_door_t *self)
-{
-	self->super = component_new(ct_door);
-
-	self->next[0] = '\0';
-}
+void c_door_init(c_door_t *self) { }
 
 c_door_t *c_door_new(const char *next)
 {
-	c_door_t *self = malloc(sizeof *self);
-	c_door_init(self);
+	c_door_t *self = component_new(ct_door);
 
 	strcpy(self->next, next);
 	return self;

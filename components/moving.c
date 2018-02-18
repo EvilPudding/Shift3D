@@ -5,15 +5,12 @@ DEC_CT(ct_moving);
 
 void c_moving_init(c_moving_t *self)
 {
-	self->super = component_new(ct_moving);
-    self->sy=0;
     self->active=1;
 }
 
 c_moving_t *c_moving_new(float x, float y, float z, float mx, float mz)
 {
-	c_moving_t *self = malloc(sizeof *self);
-	c_moving_init(self);
+	c_moving_t *self = component_new(ct_moving);
 
     self->x=x;
     self->y=y;

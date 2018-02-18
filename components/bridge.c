@@ -6,19 +6,32 @@
 
 DEC_CT(ct_bridge);
 
+static float c_rigid_body_bridge_collider(c_rigid_body_t *self, vec3_t pos);
+
 void c_bridge_init(c_bridge_t *self)
 {
-	self->super = component_new(ct_bridge);
-
-    self->rotate_to = vec3(0.0);
+	self->rotate_to = vec3(0.0);
 }
 
 c_bridge_t *c_bridge_new()
 {
-	c_bridge_t *self = malloc(sizeof *self);
-	c_bridge_init(self);
+	c_bridge_t *self = component_new(ct_bridge);
+
+	entity_add_component(c_entity(self),
+			(c_t*)c_rigid_body_new((collider_cb)c_rigid_body_bridge_collider));
 
 	return self;
+}
+
+void c_bridge_ready(c_bridge_t *self)
+{
+
+	mesh_t *mesh = mesh_cuboid(0.5,
+			vec3(self->min.x - 0.005f, self->min.y - 0.005f, self->min.z - 0.005f),
+			vec3(self->max.x + 0.005f, self->max.y + 0.005f, self->max.z + 0.005f));
+
+	entity_add_component(c_entity(self),
+			c_model_paint(c_model_new(mesh, 1), 0, sauces_mat("bridge")));
 }
 
 static int c_bridge_spacial_changed(c_bridge_t *self)
@@ -48,6 +61,7 @@ static int c_bridge_update(c_bridge_t *self, float *dt)
 	if(!vec3_null(self->rotate_to))
 	{
 		c_spacial_t *s = c_spacial(self);
+		c_spacial_lock(s);
 		vec3_t inc;
 		if(fabs(self->rotate_to.x) < 0.01 &&
 				fabs(self->rotate_to.y) < 0.01 &&
@@ -62,6 +76,8 @@ static int c_bridge_update(c_bridge_t *self, float *dt)
 		c_spacial_rotate_X(s, inc.x);
 		c_spacial_rotate_Y(s, inc.y);
 		c_spacial_rotate_Z(s, inc.z);
+		c_spacial_unlock(s);
+
 		self->rotate_to = vec3_sub(self->rotate_to, inc);
 	}
 	return 1;
@@ -69,8 +85,8 @@ static int c_bridge_update(c_bridge_t *self, float *dt)
 
 static int c_bridge_created(c_bridge_t *self)
 {
-	entity_add_component(c_entity(self),
-			(c_t*)c_rigid_body_new((collider_cb)c_rigid_body_bridge_collider));
+	/* entity_add_component(c_entity(self), */
+			/* (c_t*)c_rigid_body_new((collider_cb)c_rigid_body_bridge_collider)); */
 	return 1;
 }
 

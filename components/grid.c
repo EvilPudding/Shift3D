@@ -32,11 +32,7 @@ int plane_to_side(mesh_t *mesh, int val0, int flag, c_grid_t *grid,
 
 int template_model_before_draw(c_model_t *self);
 
-void c_grid_init(c_grid_t *self)
-{
-	self->super = component_new(ct_grid);
-	self->map = NULL;
-}
+void c_grid_init(c_grid_t *self) { }
 
 float c_rigid_body_grid_collider(c_rigid_body_t *self, vec3_t pos)
 {
@@ -51,8 +47,7 @@ float c_rigid_body_grid_collider(c_rigid_body_t *self, vec3_t pos)
 
 c_grid_t *c_grid_new(int mx, int my, int mz)
 {
-	c_grid_t *self = malloc(sizeof *self);
-	c_grid_init(self);
+	c_grid_t *self = component_new(ct_grid);
 
 	self->mx = mx;
 	self->my = my;
@@ -291,7 +286,7 @@ int c_grid_get(c_grid_t *self, int x, int y, int z)
 void c_grid_register()
 {
 	ct_t *ct = ecm_register("Grid", &ct_grid, sizeof(c_grid_t),
-			(init_cb)c_grid_init, 0);
+			(init_cb)c_grid_init, 1, ct_node);
 
 	ecm_register_signal(&grid_update, 0);
 

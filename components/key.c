@@ -8,10 +8,7 @@
 DEC_CT(ct_key);
 DEC_SIG(key_activated);
 
-void c_key_init(c_key_t *self)
-{
-	self->super = component_new(ct_key);
-}
+void c_key_init(c_key_t *self) { }
 
 static float c_rigid_body_key_collider(c_rigid_body_t *self, vec3_t pos)
 {
@@ -28,10 +25,11 @@ static float c_rigid_body_key_collider(c_rigid_body_t *self, vec3_t pos)
 		c_key_t *key = c_key(self);
 		ct_t *bridges = ecm_get(ct_bridge);
 
-		int i;
-		for(i = 0; i < bridges->components_size; i++)
+		int i, p;
+		for(p = 0; p < bridges->pages_size; p++)
+		for(i = 0; i < bridges->pages[p].components_size; i++)
 		{
-			c_bridge_t *b = (c_bridge_t*)ct_get_at(bridges, i);
+			c_bridge_t *b = (c_bridge_t*)ct_get_at(bridges, p, i);
 			if(b->key == key->key)
 			{
 				b->rotate_to = key->rot;
@@ -51,8 +49,7 @@ static int c_key_created(c_key_t *self)
 
 c_key_t *c_key_new(int rotX, int rotY, int rotZ, int key)
 {
-	c_key_t *self = malloc(sizeof *self);
-	c_key_init(self);
+	c_key_t *self = component_new(ct_key);
 
     self->rot.x = ((float)rotX) * (M_PI / 180);
     self->rot.y = ((float)rotY) * (M_PI / 180);
