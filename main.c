@@ -27,7 +27,7 @@ void load_resources(candle_t *engine)
 
 	sauces_mat("key");
 	sauces_mat("door");
-	material_t *bridge_mat = sauces_mat("bridge");
+	mat_t *bridge_mat = sauces_mat("bridge");
 	bridge_mat->diffuse.color = vec4(0.2f, 0.2f, 0.6f, 1.0f);
 	bridge_mat->diffuse.texture_blend = 0.5;
 

@@ -31,7 +31,7 @@ void c_bridge_ready(c_bridge_t *self)
 			vec3(self->max.x + 0.005f, self->max.y + 0.005f, self->max.z + 0.005f));
 
 	entity_add_component(c_entity(self),
-			c_model_paint(c_model_new(mesh, 1), 0, sauces_mat("bridge")));
+			c_model_new(mesh, sauces_mat("bridge"), 1));
 }
 
 static int c_bridge_spacial_changed(c_bridge_t *self)

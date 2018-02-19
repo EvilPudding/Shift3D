@@ -82,8 +82,7 @@ static entity_t template_key(entity_t root, FILE *fd, candle_t *candle)
 
 	entity_t key = entity_new(c_name_new("key"),
 			c_node_new(),
-			c_model_paint(c_model_new(sauces_mesh("key.obj"), 1), 0,
-				sauces_mat("key")),
+			c_model_new(sauces_mesh("key.obj"), sauces_mat("key"), 1),
 			c_side_new(side),
 			c_key_new(rotX, rotY, rotZ, id));
 	c_model(&key)->before_draw = (before_draw_cb)template_model_before_draw;
@@ -192,8 +191,8 @@ static entity_t template_door(entity_t root, FILE *fd, candle_t *candle)
 	side = c_grid_get(c_grid(&grid), x, y, z) & 1;
 
 	entity_t door = entity_new(c_name_new("door"),
-			c_model_paint(c_model_new(sauces_mesh( "door.obj"), 1),
-				0, sauces_mat( "door")),
+			c_model_new(sauces_mesh("door.obj"),
+				sauces_mat( "door"), 1),
 			c_side_new(side),
 			c_node_new(),
 			c_door_new(next));
