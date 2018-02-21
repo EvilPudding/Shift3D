@@ -15,22 +15,7 @@ DEC_CT(ct_character);
 extern int window_width, window_height;
 int control = 1;
 
-#define friction 0.1
-
-void c_character_init(c_character_t *self)
-{
-	self->plane_movement = 0;
-	self->forward = 0;
-	self->backward = 0;
-	self->left = 0;
-	self->right = 0;
-	self->jump = 0;
-	self->swap = 0;
-	self->targR = 0.0;
-	self->max_jump_vel = 0.0;
-	self->orientation = entity_null;
-	self->force_down = entity_null;
-}
+void c_character_init(c_character_t *self) { }
 
 c_character_t *c_character_new(entity_t orientation, int plane_movement, entity_t force_down)
 {
@@ -40,18 +25,21 @@ c_character_t *c_character_new(entity_t orientation, int plane_movement, entity_
 
 	self->orientation = orientation;
 
+	c_rigid_body(self)->offset = 0.8;
+
 	return self;
 }
 
 int c_character_update(c_character_t *self, float *dt)
 {
-	const float corner = 1.0 / sqrt(2.0);
+	entity_t grid;
+	const float corner = 1.0f / sqrtf(2.0f);
 	c_spacial_t *ori = c_spacial(&self->orientation);
 	float dif;
 
 	c_velocity_t *vc = c_velocity(self);
 	vec3_t *vel = &vc->velocity;
-	float accel = 72 * (*dt);
+	float accel = 75.0f * (*dt);
 
 	c_spacial_t *sc = c_spacial(self);
 
@@ -77,16 +65,6 @@ int c_character_update(c_character_t *self, float *dt)
 		)
 	);
 
-	/* front = vec3( */
-	/* 		sin(ori->rot.y), */
-	/* 		0, */
-	/* 		cos(ori->rot.y)); */
-
-	/* sideways = vec3( */
-	/* 		cos(-ori->rot.y), */
-	/* 		0, */
-	/* 		sin(-ori->rot.y)); */
-
 
 	int floored = vec3_dot(up, vc->normal) > 0;
 
@@ -95,27 +73,24 @@ int c_character_update(c_character_t *self, float *dt)
 		accel *= corner;
 	}
 
-	front = vec3_scale(front, accel);
-	sideways = vec3_scale(sideways, accel);
-
 	if(self->left)
 	{
-		*vel = vec3_sub(*vel, sideways);
+		*vel = vec3_sub(*vel, vec3_scale(sideways, accel));
 	}
 
 	if(self->right)
 	{
-		*vel = vec3_add(*vel, sideways);
+		*vel = vec3_add(*vel, vec3_scale(sideways, accel));
 	}
 
 	if(self->forward)
 	{
-		*vel = vec3_sub(*vel, front);
+		*vel = vec3_sub(*vel, vec3_scale(front, accel));
 	}
 
 	if(self->backward)
 	{
-		*vel = vec3_add(*vel, front);
+		*vel = vec3_add(*vel, vec3_scale(front, accel));
 	}
 	vec3_t tang_speed = vec3_mul(tang, *vel);
 
@@ -148,29 +123,30 @@ int c_character_update(c_character_t *self, float *dt)
 			goto end;
 		}
 
-		/* entity_t grid = level->grid; */
-		/* if(c_grid_collider(c_grid(grid), vec3_add(sc->pos, up_dir)) < 0) */
-		/* { */
-		/*	 return 0; */
-		/* } */
 		if(self->swap == 1)
 		{
 			self->swap = 2;
 			c_force(&self->force_down)->force = up;
 			/* c_force(self->force_down)->force = vec3(0.0, 0.0, 30.0); */
 
-			c_side(&candle->systems)->side =
-				!c_side(&candle->systems)->side;
+			c_side_t *ss = c_side(&candle->systems);
+			ss->side = !ss->side;
+
 			sc->pos = vec3_round(sc->pos);
 			sc->pos = vec3_sub(sc->pos, vec3_scale(up_dir, 0.55));
 
 			/* c_spacial_set_rot(sc, up_dir.x, up_dir.y, up_dir.z, c_charlook(self->orientation)->yrot); */
+			/* c_charlook_toggle_side(c_charlook(&self->orientation)); */
+			/* c_spacial_scale(sc, vec3(1, -1, 1)); */
+
 			if(self->targR == 0)
 			{
+				c_rigid_body(self)->offset = -0.8;
 				self->targR = M_PI;
 			}
 			else
 			{
+				c_rigid_body(self)->offset = 0.8;
 				self->targR = 0;
 			}
 			goto end;
@@ -180,13 +156,25 @@ int c_character_update(c_character_t *self, float *dt)
 	}
 end:
 
-	if(fabs(dif = self->targR - sc->rot.z) > 0.01)
+
+	grid = level->grid;
+	vec3_t t = vec3_add(vec3_sub(sc->pos, vec3_scale(front, 0.45)), up_dir);
+
+	c_grid_t *gc = c_grid(&grid);
+	if(gc)
 	{
-		c_spacial_set_rot(sc, 0, 0, 1, sc->rot.z + dif * 5 * (*dt));
+		int val = c_grid_get(gc, t.x, t.y, t.z);
+		printf("%d\n", val);
 	}
 
-	entity_signal(self->super.entity, spacial_changed, &self->super.entity);
-	c_charlook_update(c_charlook(&self->orientation));
+
+	sc = c_spacial(&self->orientation);
+	if(fabs(dif = self->targR - sc->rot.z) > 0.01)
+	{
+		c_spacial_rotate_Z(sc, dif * 5 * (*dt));
+	}
+
+	entity_signal(c_entity(self), spacial_changed, &c_entity(self));
 
 	return 1;
 }
@@ -200,6 +188,7 @@ int c_character_key_up(c_character_t *self, char *key)
 		case 'D': case 'd': self->right = 0; break;
 		case 'S': case 's': self->backward = 0; break;
 		case 'Q': case 'q': self->swap = 0; break;
+		case 'E': case 'e': self->pushing = 0; break;
 		case '`': control = !control; break;
 		case 32: self->jump = 0; break;
 	}
@@ -215,6 +204,7 @@ int c_character_key_down(c_character_t *self, char *key)
 		case 'D': case 'd': self->right = 1; break;
 		case 'S': case 's': self->backward = 1; break;
 		case 'Q': case 'q': self->swap = self->swap?:1; break;
+		case 'E': case 'e': self->pushing = 1; break;
 		case 32: self->jump = self->jump?:1; break;
 		default: printf("key: %d pressed\n", *key); break;
 	}
@@ -223,15 +213,14 @@ int c_character_key_down(c_character_t *self, char *key)
 
 void c_character_register()
 {
-	ct_t *ct = ecm_register("Character",
+	ct_t *ct = ct_new("c_character",
 			&ct_character, sizeof(c_character_t), (init_cb)c_character_init,
 			4, ct_spacial, ct_velocity, ct_node, ct_rigid_body);
 
-	ct_register_listener(ct, WORLD, key_up, (signal_cb)c_character_key_up);
+	ct_listener(ct, WORLD, key_up, c_character_key_up);
 
-	ct_register_listener(ct, WORLD, key_down, (signal_cb)c_character_key_down);
+	ct_listener(ct, WORLD, key_down, c_character_key_down);
 
-	ct_register_listener(ct, WORLD, world_update,
-			(signal_cb)c_character_update);
+	ct_listener(ct, WORLD, world_update, c_character_update);
 }
 

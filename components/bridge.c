@@ -92,17 +92,15 @@ static int c_bridge_created(c_bridge_t *self)
 
 void c_bridge_register()
 {
-	ct_t *ct = ecm_register("Bridge", &ct_bridge,
+	ct_t *ct = ct_new("c_bridge", &ct_bridge,
 			sizeof(c_bridge_t), (init_cb)c_bridge_init, 1, ct_spacial);
-	ct_register_listener(ct, SAME_ENTITY, entity_created,
-			(signal_cb)c_bridge_created);
-	/* ct_register_listener(ct, WORLD, collider_callback, */
-			/* (signal_cb)c_bridge_collider); */
-	ct_register_listener(ct, SAME_ENTITY, spacial_changed,
-			(signal_cb)c_bridge_spacial_changed);
+	ct_listener(ct, ENTITY, entity_created, c_bridge_created);
 
-	ct_register_listener(ct, WORLD, world_update,
-			(signal_cb)c_bridge_update);
+	/* ct_listener(ct, WORLD, collider_callback, c_bridge_collider); */
+
+	ct_listener(ct, ENTITY, spacial_changed, c_bridge_spacial_changed);
+
+	ct_listener(ct, WORLD, world_update, c_bridge_update);
 }
 
 

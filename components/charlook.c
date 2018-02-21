@@ -16,22 +16,16 @@ void c_charlook_init(c_charlook_t *self)
 	self->win_min_side = 1080;
 }
 
-c_charlook_t *c_charlook_new(entity_t force_down, float sensitivity)
+c_charlook_t *c_charlook_new(entity_t x, float sensitivity)
 {
 	c_charlook_t *self = component_new(ct_charlook);
 
 	self->sensitivity = sensitivity;
-	self->force_down = force_down;
+	candle_grab_mouse(candle, c_entity(self), 0);
+
+	self->x = x;
 
 	return self;
-}
-
-void c_charlook_set_controls(c_charlook_t *self,
-		entity_t x_control, entity_t y_control)
-{
-	candle_grab_mouse(candle, c_entity(self), 0);
-	self->x_control = x_control;
-	self->y_control = y_control;
 }
 
 static int c_charlook_window_resize(c_charlook_t *self,
@@ -42,73 +36,96 @@ static int c_charlook_window_resize(c_charlook_t *self,
 	return 1;
 }
 
-/* TODO remove this extern reference */
-extern int control;
-
-void c_charlook_update(c_charlook_t *self)
+void c_charlook_rotate(c_charlook_t *self, float angle)
 {
-	const float max_up = M_PI / 2.0 - 0.01;
-	const float max_down = -M_PI / 2.0 + 0.01;
+	c_spacial_t *sc = c_spacial(self);
 
-	if(!control)
-	{
-		return;
-	}
-	if(self->x_control == entity_null || self->y_control == entity_null)
-	{
-		return;
-	}
+	float cosy = cosf(angle);
+	float siny = sinf(angle);
+	self->zrot += angle;
 
-	c_spacial_t *sc_x = c_spacial(&self->x_control);
-	c_spacial_t *sc_y = c_spacial(&self->y_control);
+	float front_angle = self->xrot + M_PI / 2;
+	vec3_t front = (vec3(cos(front_angle), 0, sin(front_angle)));
 
-	if(self->xrot > max_up) self->xrot = max_up;
-	if(self->xrot < max_down) self->xrot = max_down;
-
-	c_spacial_t *sc_z = c_spacial(&c_node(&self->y_control)->parent);
-	float r = mat4_mul_vec4(sc_z->rot_matrix, vec4(0, self->xrot, 0, 1.0)).y;
-
-	sc_y->rot_matrix = mat4();
-	sc_x->rot_matrix = mat4();
-
-	sc_y->rot_matrix = mat4_rotate(sc_y->rot_matrix, 0, 1, 0,
-			self->yrot);
-
-	sc_x->rot_matrix = mat4_rotate(sc_x->rot_matrix, 1, 0, 0,
-		r);
-
-	c_spacial_update_model_matrix(sc_x);
-	c_spacial_update_model_matrix(sc_y);
+	c_spacial_lock(sc);
+	c_spacial_set_pos(sc, vec3_rotate(sc->pos, front, cosy, siny));
+	c_spacial_unlock(sc);
+	c_spacial_rotate_Z(sc, angle);
 }
+
+int c_charlook_update(c_charlook_t *self, float *dt)
+{
+	float dif;
+	float targ = self->side ? M_PI : 0;
+	if(fabs(dif = targ - self->zrot) > 0.01)
+	{
+		float inc = dif * 5 * (*dt);
+		c_charlook_rotate(self, inc);
+	}
+	return 1;
+}
+
+void c_charlook_toggle_side(c_charlook_t *self)
+{
+	if(!self->side)
+	{
+		self->side = 1;
+	}
+	else
+	{
+		self->side = 0;
+
+	}
+
+}
+
 
 int c_charlook_mouse_move(c_charlook_t *self, mouse_move_data *event)
 {
 	float frac = self->sensitivity / self->win_min_side;
+	float inc_x = -event->sx * frac;
+	float inc_y = -event->sy * frac;
 
-	c_spacial_t *sc_z = c_spacial(&c_node(&self->y_control)->parent);
-	float r = mat4_mul_vec4(sc_z->rot_matrix, vec4(0, 1, 0, 1.0)).y;
+	const float max_up = M_PI / 2.0 - 0.01;
+	const float max_down = -M_PI / 2.0 + 0.01;
 
-	self->yrot = self->yrot - event->sx * frac;
-	self->xrot = self->xrot - event->sy * frac * r;
 
-	c_charlook_update(self);
+	c_spacial_t *sc = c_spacial(self);
+
+	if(self->xrot > max_up && inc_y > 0) inc_y = 0;
+	if(self->xrot < max_down && inc_y < 0) inc_y = 0;
+
+	int side = c_side(&candle->systems)->side;
+	inc_x = side ? -inc_x : inc_x;
+
+	self->yrot += inc_x;
+	self->xrot += inc_y;
+
+	c_spacial_rotate_X(sc, inc_y);
+
+	sc = c_spacial(&self->x);
+	float old_rot = sc->rot.z;
+
+	c_spacial_rotate_Z(sc, -old_rot);
+	c_spacial_rotate_Y(sc, inc_x);
+	c_spacial_rotate_Z(sc, old_rot);
+
+
+
 
 	return 1;
 }
 
 void c_charlook_register()
 {
-	ct_t *ct = ecm_register("Charlook", &ct_charlook,
+	ct_t *ct = ct_new("c_charlook", &ct_charlook,
 			sizeof(c_charlook_t), (init_cb)c_charlook_init,
 			2, ct_spacial, ct_node);
 
-	ct_register_listener(ct, WORLD, mouse_move,
-			(signal_cb)c_charlook_mouse_move);
+	ct_listener(ct, WORLD, mouse_move, c_charlook_mouse_move);
 
-	ct_register_listener(ct, SAME_ENTITY, entity_created,
-			(signal_cb)c_charlook_update);
+	ct_listener(ct, WORLD, window_resize, c_charlook_window_resize);
 
-	ct_register_listener(ct, WORLD, window_resize,
-			(signal_cb)c_charlook_window_resize);
+	ct_listener(ct, WORLD, world_update, c_charlook_update);
 }
 

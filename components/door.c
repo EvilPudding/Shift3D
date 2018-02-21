@@ -17,7 +17,7 @@ c_door_t *c_door_new(const char *next)
 
 void c_door_register()
 {
-	ecm_register("Door", &ct_door, sizeof(c_door_t),
+	ct_new("c_door", &ct_door, sizeof(c_door_t),
 			(init_cb)c_door_init, 1, ct_spacial);
 }
 

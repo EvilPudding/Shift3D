@@ -18,36 +18,37 @@
 int main(int argc, char **argv)
 {
 	char open_map_name[256];
-	entity_t camera, g, character;
+	entity_t camera, g, body, character;
 	candle_new(10,
 			c_side_register,		c_grid_register,	c_charlook_register,
 			c_character_register,	c_key_register,		c_level_register,
 			c_bridge_register,		c_door_register,	c_moving_register,
 			c_side_follow_register);
 
-	entity_add_component(candle->systems, (c_t*)c_renderer_new(1.0f, 1, 1, 1.0f, 0));
+	entity_add_component(candle->systems, (c_t*)c_renderer_new(0.66f, 1, 1, 1.0f, 0));
 	entity_add_component(candle->systems, (c_t*)c_editmode_new());
 
 	register_custom_templates(candle);
 
 	g = entity_new(c_name_new("gravity"), c_force_new(0.0, -55, 0.0, 1));
 
+	body = entity_new(c_name_new("body"), c_node_new());
+
 	camera = entity_new(
 			c_name_new("camera"),
 			c_camera_new(70, 0.1, 50.0),
-			c_charlook_new(g, 1.9)
+			c_charlook_new(body, 1.9)
 	);
 	c_camera_activate(c_camera(&camera));
 
 	character = entity_new(
 			c_name_new("character"),
-			c_character_new(camera, 1, g)
+			c_character_new(body, 1, g)
 	);
 
-	c_charlook_set_controls(c_charlook(&camera), camera, camera);
-
 	c_spacial_set_pos(c_spacial(&camera), vec3(0.0, 0.7, 0.0));
-	c_node_add(c_node(&character), 1, camera);
+	c_node_add(c_node(&character), 1, body);
+	c_node_add(c_node(&body), 1, camera);
 
 
 	sprintf(open_map_name, "resauces/maps/%s.xmap", argc > 1 ? argv[1] : "0");

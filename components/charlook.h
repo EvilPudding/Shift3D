@@ -10,20 +10,18 @@ typedef struct
 	float sensitivity;
 	float xrot;
 	float yrot;
-	entity_t x_control, y_control, force_down;
+	float zrot;
+	int side;
+	entity_t x;
 } c_charlook_t;
 
 DEF_CASTER(ct_charlook, c_charlook, c_charlook_t);
 
-c_charlook_t *c_charlook_new(entity_t force_down, float sensitivity);
-
-void c_charlook_update(c_charlook_t *self);
-
-void c_charlook_set_controls(c_charlook_t *self,
-		entity_t x_control, entity_t y_control);
+c_charlook_t *c_charlook_new(entity_t x, float sensitivity);
 
 void c_charlook_register(void);
 
 vec3_t c_charlook_up(c_charlook_t *self);
+void c_charlook_toggle_side(c_charlook_t *self);
 
 #endif /* !CHARLOOK_H */

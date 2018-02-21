@@ -29,6 +29,6 @@ c_level_t *c_level_new(candle_t *engine, const char *filename)
 
 void c_level_register()
 {
-	ecm_register("Level", &ct_level, sizeof(c_level_t),
+	ct_new("c_level", &ct_level, sizeof(c_level_t),
 			(init_cb)c_level_init, 1, ct_side);
 }

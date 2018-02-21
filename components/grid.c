@@ -6,6 +6,7 @@
 #include <components/spacial.h>
 #include <components/node.h>
 #include "grid.h"
+#include "level.h"
 #include "side.h"
 #include <stdlib.h>
 
@@ -88,6 +89,10 @@ c_grid_t *c_grid_new(int mx, int my, int mz)
 		c_model(&self->boxes)->before_draw =
 		(before_draw_cb)template_model_before_draw;
 
+	if(c_level(&candle->systems))
+	{
+		c_level(&candle->systems)->grid = c_entity(self);
+	}
 
 	return self;
 }
@@ -281,16 +286,14 @@ int c_grid_get(c_grid_t *self, int x, int y, int z)
 
 void c_grid_register()
 {
-	ct_t *ct = ecm_register("Grid", &ct_grid, sizeof(c_grid_t),
+	ct_t *ct = ct_new("c_grid", &ct_grid, sizeof(c_grid_t),
 			(init_cb)c_grid_init, 1, ct_node);
 
-	ecm_register_signal(&grid_update, 0);
+	signal_init(&grid_update, 0);
 
-	ct_register_listener(ct, WORLD, grid_update, (signal_cb)c_grid_update);
-	/* ct_register_listener(ct, WORLD, collider_callback, */
-			/* (signal_cb)c_grid_collider); */
-	ct_register_listener(ct, SAME_ENTITY, entity_created,
-			(signal_cb)c_grid_created);
+	ct_listener(ct, WORLD, grid_update, (signal_cb)c_grid_update);
+	/* ct_listener(ct, WORLD, collider_callback, c_grid_collider); */
+	ct_listener(ct, ENTITY, entity_created, c_grid_created);
 }
 
 static int c_grid_update(c_grid_t *self)
