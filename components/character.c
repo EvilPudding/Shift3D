@@ -5,6 +5,7 @@
 #include <components/velocity.h>
 #include <components/node.h>
 #include "level.h"
+#include "movable.h"
 #include "charlook.h"
 #include "grid.h"
 #include <keyboard.h>
@@ -32,7 +33,6 @@ c_character_t *c_character_new(entity_t orientation, int plane_movement, entity_
 
 int c_character_update(c_character_t *self, float *dt)
 {
-	entity_t grid;
 	const float corner = 1.0f / sqrtf(2.0f);
 	c_spacial_t *ori = c_spacial(&self->orientation);
 	float dif;
@@ -112,7 +112,7 @@ int c_character_update(c_character_t *self, float *dt)
 	}
 	else
 	{
-		self->max_jump_vel = fmax(vec3_len(tang_speed), 1);
+		self->max_jump_vel = vec3_len(tang_speed);
 
 		if(self->jump == 1)
 		{
@@ -157,14 +157,24 @@ int c_character_update(c_character_t *self, float *dt)
 end:
 
 
-	grid = level->grid;
-	vec3_t t = vec3_add(vec3_sub(sc->pos, vec3_scale(front, 0.45)), up_dir);
 
-	c_grid_t *gc = c_grid(&grid);
-	if(gc)
+	if(self->pushing)
 	{
-		int val = c_grid_get(gc, t.x, t.y, t.z);
-		printf("%d\n", val);
+		c_grid_t *gc = c_grid(&level->grid);
+		if(gc)
+		{
+			vec3_t t = vec3_sub(sc->pos, vec3_scale(front, 0.45));
+			t = vec3_round(t);
+
+			int val = c_grid_get(gc, t.x, t.y, t.z);
+			if(val & 0x2)
+			{
+				c_grid_set(gc, t.x, t.y, t.z, !(val & 1));
+				entity_signal(c_entity(self), grid_update, NULL);
+				push_at(t.x, t.y, t.z, sc->pos);
+				*vel = vec3(0.0f);
+			}
+		}
 	}
 
 

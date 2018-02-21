@@ -4,6 +4,7 @@
 #include "components/key.h"
 #include "components/bridge.h"
 #include "components/door.h"
+#include "components/movable.h"
 #include "components/level.h"
 #include "components/character.h"
 #include "components/charlook.h"
@@ -57,6 +58,25 @@ static entity_t template_shift_grid(entity_t root, FILE *fd)
 		grid->map[i++] = (c >> 4) & (~0x88) & (0x0F);
 
 		if(i == l) break;
+	}
+	mesh_t *mesh = mesh_cuboid(0.5,
+			vec3(-0.5, -0.5, -0.5),
+			vec3(0.5, 0.5, 0.5));
+
+	int x, y, z;
+	for(x = 0; x < grid->mx; x++)
+		for(y = 0; y < grid->my; y++)
+			for(z = 0; z < grid->mz; z++)
+	{
+		int val = c_grid_get(grid, x, y, z);
+		if(val & 0x2)
+		{
+			entity_t box = entity_new(c_movable_new(), c_side_new(!(val&1)),
+					c_node_new(), c_model_new(mesh, sauces_mat("pack1/stone3"), 1));
+			c_model(&box)->before_draw = (before_draw_cb)template_model_before_draw;
+			c_spacial_set_pos(c_spacial(&box), vec3(x, y, z));
+			/* c_node_add(c_node(&root), 1, box); */
+		}
 	}
 
 	getc(fd);

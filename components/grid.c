@@ -8,6 +8,7 @@
 #include "grid.h"
 #include "level.h"
 #include "side.h"
+#include "movable.h"
 #include <stdlib.h>
 
 void mesh_add_spike(mesh_t *self, float s, vec3_t v, vec3_t dir, int inverted_normals);
@@ -27,7 +28,7 @@ typedef void(*create_cb)(mesh_t *self, float s, vec3_t v, vec3_t dir,
 		/* int px, int py, int pz, int inverted_normals); */
 
 static int c_grid_update(c_grid_t *self);
-static mesh_t *mesh_from_grid(c_grid_t *grid, int flags, ...);
+mesh_t *mesh_from_grid(c_grid_t *grid, int side, int flags, ...);
 int plane_to_side(mesh_t *mesh, int val0, int flag, c_grid_t *grid,
 		vec3_t v, vec3_t dir, create_cb create);
 
@@ -77,7 +78,7 @@ c_grid_t *c_grid_new(int mx, int my, int mz)
 			c_model_new(NULL, sauces_mat("pack1/white"), 1));
 
 	self->boxes_inv = entity_new(c_name_new("movab_i"), c_side_new(1),
-			c_model_new(NULL, sauces_mat("movable"), 1));
+			c_model_new(NULL, stone3, 1));
 
 	c_model(&self->blocks_inv)->before_draw =
 		c_model(&self->cage_inv)->before_draw =
@@ -272,7 +273,8 @@ void c_grid_set(c_grid_t *self, int x, int y, int z, int val)
 			y < 0 || y >= self->my ||
 			z < 0 || z >= self->mz) return;
 
-	self->map[x + (y * self->mz + z) * self->mx] = val;
+	self->map[z + (y * self->mz + x) * self->mx] = val;
+
 }
 
 int c_grid_get(c_grid_t *self, int x, int y, int z)
@@ -298,19 +300,19 @@ void c_grid_register()
 
 static int c_grid_update(c_grid_t *self)
 {
-	mesh_t *new_terrainA = mesh_from_grid(self, 2, 0x4 | 0x0, mesh_add_spike,
-			0x0 | 0x0, mesh_add_plane);
+	mesh_t *new_terrainA = mesh_from_grid(self, 0, 2, 0x4, mesh_add_spike,
+			0x0, mesh_add_plane);
 
-	mesh_t *new_terrainB = mesh_from_grid(self, 2, 0x4 | 0x1, mesh_add_spike,
-			0x0 | 0x1, mesh_add_plane);
+	mesh_t *new_terrainB = mesh_from_grid(self, 1, 2, 0x4, mesh_add_spike,
+			0x0, mesh_add_plane);
 
-	mesh_t *new_cageA = mesh_from_grid(self, 1, -2 | 0x0, mesh_add_plane);
+	mesh_t *new_cageA = mesh_from_grid(self, 0, 1, -1, mesh_add_plane);
 
-	mesh_t *new_cageB = mesh_from_grid(self, 1, -2 | 0x1, mesh_add_plane);
+	mesh_t *new_cageB = mesh_from_grid(self, 1, 1, -1, mesh_add_plane);
 
-	mesh_t *new_boxesA = mesh_from_grid(self, 1, 0x2 | 0x0, mesh_add_plane);
+	mesh_t *new_boxesA = mesh_from_grid(self, 0, 1, 0x2, mesh_add_plane);
 
-	mesh_t *new_boxesB = mesh_from_grid(self, 1, 0x2 | 0x1, mesh_add_plane);
+	mesh_t *new_boxesB = mesh_from_grid(self, 1, 1, 0x2, mesh_add_plane);
 
 	/* mesh_cull_face(new_terrainB, 1); */
 	/* mesh_cull_face(new_boxesB, 1); */
@@ -348,7 +350,7 @@ void c_grid_print(c_grid_t *self)
 	}
 }
 
-mesh_t *mesh_from_grid(c_grid_t *grid, int flags, ...)
+mesh_t *mesh_from_grid(c_grid_t *grid, int side, int flags, ...)
 {
 	mesh_t *self = mesh_new();
 	/* self->wireframe = 1; */
@@ -363,19 +365,27 @@ mesh_t *mesh_from_grid(c_grid_t *grid, int flags, ...)
 	{
 		int val = c_grid_get(grid, x, y, z);
 
+		if((val & 1) != side)
+		{
+			if(val&2)
+			{
+				val = side;
+			}
+			else
+			{
+				continue;
+			}
+		}
+
 		int j, r1 = 0, r2 = 0, r3 = 0, r4 = 0, r5 = 0, r6 = 0;
 		va_start(list, flags);
 		for(j = 0; j < flags; j++)
 		{
 			int flag = va_arg(list, int);
-			int side = flag & (0x1);
-			flag = flag & (~0x1);
-
 			create_cb create = va_arg(list, create_cb);
 
-			if((val & 1) != side) continue;
 
-			if((val & ~0x1) == flag || flag == 2 || flag == -2 || (val & ~0x1) == 0x4)
+			if((val & ~0x1) == flag || flag == -1 || (val & ~0x1) == 0x4)
 			{
 				if(!r1) r1 = plane_to_side(self, val, flag, grid, vec3(x, y, z), vec3(-1,  0,  0), create);
 				if(!r2) r2 = plane_to_side(self, val, flag, grid, vec3(x, y, z), vec3( 0, -1,  0), create);
@@ -400,28 +410,35 @@ int plane_to_side(mesh_t *mesh, int val0, int flag, c_grid_t *grid,
 		vec3_t v, vec3_t dir, create_cb create)
 {
 	int val = c_grid_get(grid, v.x + dir.x, v.y + dir.y, v.z + dir.z);
-	if((val & 0x1) == (val0 & 0x1) && flag != -2) return 0;
+	if((val & 0x1) == (val0 & 0x1) && flag != -1) return 0;
 
+	if(val == -1)
+	{
+		if(flag == -1)
+		{
+			create(mesh, 0.5, v, dir, 0);
+		}
+		return 1;
+	}
+	if(val & 2)
+	{
+		return 1;
+	}
 	if(flag == 2)
 	{
-		if((val0 & 2) != (val & 2) && val != -1)
+		if(val0 & 2)
 		{
 			create(mesh, 0.5, v, dir, 0);
 			return 1;
 		}
 		return 0;
 	}
-	if(val == -1 && flag == -2)
+	if((val & ~0x1) == flag && flag)
 	{
 		create(mesh, 0.5, v, dir, 0);
 		return 1;
 	}
-	if((val & ~0x1) == flag)
-	{
-		create(mesh, 0.5, v, dir, 0);
-		return 1;
-	}
-	if(flag == 0 && val != -1 && !(val&2))
+	if(flag == 0 && val != -1)
 	{
 		create(mesh, 0.5, v, dir, 0);
 		return 1;

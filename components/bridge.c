@@ -83,18 +83,10 @@ static int c_bridge_update(c_bridge_t *self, float *dt)
 	return 1;
 }
 
-static int c_bridge_created(c_bridge_t *self)
-{
-	/* entity_add_component(c_entity(self), */
-			/* (c_t*)c_rigid_body_new((collider_cb)c_rigid_body_bridge_collider)); */
-	return 1;
-}
-
 void c_bridge_register()
 {
 	ct_t *ct = ct_new("c_bridge", &ct_bridge,
 			sizeof(c_bridge_t), (init_cb)c_bridge_init, 1, ct_spacial);
-	ct_listener(ct, ENTITY, entity_created, c_bridge_created);
 
 	/* ct_listener(ct, WORLD, collider_callback, c_bridge_collider); */
 

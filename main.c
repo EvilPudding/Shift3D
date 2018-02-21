@@ -7,7 +7,7 @@
 #include "components/grid.h"
 #include "components/key.h"
 #include "components/level.h"
-#include "components/moving.h"
+#include "components/movable.h"
 #include "components/side.h"
 #include "components/side_follow.h"
 
@@ -22,7 +22,7 @@ int main(int argc, char **argv)
 	candle_new(10,
 			c_side_register,		c_grid_register,	c_charlook_register,
 			c_character_register,	c_key_register,		c_level_register,
-			c_bridge_register,		c_door_register,	c_moving_register,
+			c_bridge_register,		c_door_register,	c_movable_register,
 			c_side_follow_register);
 
 	entity_add_component(candle->systems, (c_t*)c_renderer_new(0.66f, 1, 1, 1.0f, 0));
