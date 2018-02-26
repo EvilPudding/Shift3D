@@ -71,7 +71,7 @@ static entity_t template_shift_grid(entity_t root, FILE *fd)
 		int val = c_grid_get(grid, x, y, z);
 		if(val & 0x2)
 		{
-			entity_t box = entity_new(c_movable_new(), c_side_new(!(val&1)),
+			entity_t box = entity_new(c_movable_new(val), c_side_new(!(val&1)),
 					c_node_new(), c_model_new(mesh, sauces_mat("pack1/stone3"), 1));
 			c_model(&box)->before_draw = (before_draw_cb)template_model_before_draw;
 			c_spacial_set_pos(c_spacial(&box), vec3(x, y, z));
@@ -132,6 +132,13 @@ static entity_t template_spawn(entity_t root, FILE *fd, candle_t *candle)
 			c_name_new("spawn"));
 
 	c_character_t *fc = (c_character_t*)ct_get_at(ecm_get(ct_character), 0, 0);
+
+	if(side)
+	{
+		c_force_t *force = c_force(&fc->force_down);
+		force->force = vec3_inv(force->force);
+	}
+
 
 	/* c_camera_t *cc = c_camera(ecm_get_camera(root.ecm)); */
 

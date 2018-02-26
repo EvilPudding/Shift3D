@@ -264,6 +264,7 @@ static int c_grid_created(c_grid_t *self)
 	entity_add_component(c_entity(self),
 			(c_t*)c_rigid_body_new((collider_cb)c_rigid_body_grid_collider));
 
+	self->modified = 1;
 	return 1;
 }
 
@@ -272,6 +273,7 @@ void c_grid_set(c_grid_t *self, int x, int y, int z, int val)
 	if(x < 0 || x >= self->mx ||
 			y < 0 || y >= self->my ||
 			z < 0 || z >= self->mz) return;
+	self->modified = 1;
 
 	self->map[z + (y * self->mz + x) * self->mx] = val;
 
@@ -300,6 +302,9 @@ void c_grid_register()
 
 static int c_grid_update(c_grid_t *self)
 {
+	if(!self->modified) return 1;
+	self->modified = 0;
+
 	mesh_t *new_terrainA = mesh_from_grid(self, 0, 2, 0x4, mesh_add_spike,
 			0x0, mesh_add_plane);
 

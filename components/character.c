@@ -33,13 +33,18 @@ c_character_t *c_character_new(entity_t orientation, int plane_movement, entity_
 
 int c_character_update(c_character_t *self, float *dt)
 {
+	c_level_t *level = c_level(&candle->systems);
+	if(!level) return 1;
+	c_side_t *ss = c_side(&candle->systems);
+	c_grid_t *gc = c_grid(&level->grid);
+	if(!gc) return 1;
 	const float corner = 1.0f / sqrtf(2.0f);
 	c_spacial_t *ori = c_spacial(&self->orientation);
 	float dif;
 
 	c_velocity_t *vc = c_velocity(self);
 	vec3_t *vel = &vc->velocity;
-	float accel = 75.0f * (*dt);
+	float accel = 87.0f * (*dt);
 
 	c_spacial_t *sc = c_spacial(self);
 
@@ -68,6 +73,9 @@ int c_character_update(c_character_t *self, float *dt)
 
 	int floored = vec3_dot(up, vc->normal) > 0;
 
+	vec3_t f = vec3_round(vec3_sub(sc->pos, vec3_scale(up_dir, 0.4)));
+	int shiftable = (c_grid_get(gc, f.x, f.y, f.z) & 1) != ss->side;
+
 	if((self->left + self->right) && (self->forward || self->backward))
 	{
 		accel *= corner;
@@ -94,11 +102,37 @@ int c_character_update(c_character_t *self, float *dt)
 	}
 	vec3_t tang_speed = vec3_mul(tang, *vel);
 
-	c_level_t *level = c_level(&candle->systems);
-	if(!level)
+
+	if(self->swap == 1 && shiftable)
 	{
-		floored = 1;
+		entity_signal(c_entity(self), grid_update, NULL);
+		self->swap = 2;
+		c_force(&self->force_down)->force = up;
+		/* c_force(self->force_down)->force = vec3(0.0, 0.0, 30.0); */
+		/* *vel = self->last_vel; */
+
+		ss->side = !ss->side;
+
+		sc->pos = vec3_round(sc->pos);
+		sc->pos = vec3_sub(sc->pos, vec3_scale(up_dir, 0.55));
+
+		/* c_spacial_set_rot(sc, up_dir.x, up_dir.y, up_dir.z, c_charlook(self->orientation)->yrot); */
+		/* c_charlook_toggle_side(c_charlook(&self->orientation)); */
+		/* c_spacial_scale(sc, vec3(1, -1, 1)); */
+
+		if(self->targR == 0)
+		{
+			c_rigid_body(self)->offset = -0.8;
+			self->targR = M_PI;
+		}
+		else
+		{
+			c_rigid_body(self)->offset = 0.8;
+			self->targR = 0;
+		}
+		goto end;
 	}
+
 
 	if(!floored)
 	{
@@ -107,75 +141,42 @@ int c_character_update(c_character_t *self, float *dt)
 		{
 			vec3_t norm = vec3_mul(up_line, *vel);
 			tang_speed = vec3_scale(tang_speed, self->max_jump_vel / tang_len);
+
 			*vel = vec3_add(tang_speed, norm);
 		}
 	}
 	else
 	{
-		self->max_jump_vel = vec3_len(tang_speed);
-
-		if(self->jump == 1)
+		if(self->pushing)
 		{
-			/* self->jump = 2; REPEAT JUMP SAME CLICK? */
-			/* self->jump = 0; */
-			*vel = vec3_add(*vel, vec3_scale(up_dir, 13));
-
-			goto end;
-		}
-
-		if(self->swap == 1)
-		{
-			self->swap = 2;
-			c_force(&self->force_down)->force = up;
-			/* c_force(self->force_down)->force = vec3(0.0, 0.0, 30.0); */
-
-			c_side_t *ss = c_side(&candle->systems);
-			ss->side = !ss->side;
-
-			sc->pos = vec3_round(sc->pos);
-			sc->pos = vec3_sub(sc->pos, vec3_scale(up_dir, 0.55));
-
-			/* c_spacial_set_rot(sc, up_dir.x, up_dir.y, up_dir.z, c_charlook(self->orientation)->yrot); */
-			/* c_charlook_toggle_side(c_charlook(&self->orientation)); */
-			/* c_spacial_scale(sc, vec3(1, -1, 1)); */
-
-			if(self->targR == 0)
-			{
-				c_rigid_body(self)->offset = -0.8;
-				self->targR = M_PI;
-			}
-			else
-			{
-				c_rigid_body(self)->offset = 0.8;
-				self->targR = 0;
-			}
-			goto end;
-		}
-		vec3_t dec = vec3_scale(*vel, 11 * *dt);
-		*vel = vec3_sub(*vel, dec);
-	}
-end:
-
-
-
-	if(self->pushing)
-	{
-		c_grid_t *gc = c_grid(&level->grid);
-		if(gc)
-		{
-			vec3_t t = vec3_sub(sc->pos, vec3_scale(front, 0.45));
+			vec3_t t = vec3_add(sc->pos, vec3_scale(vec3_norm(*vel), 0.45));
 			t = vec3_round(t);
 
 			int val = c_grid_get(gc, t.x, t.y, t.z);
 			if(val & 0x2)
 			{
-				c_grid_set(gc, t.x, t.y, t.z, !(val & 1));
-				entity_signal(c_entity(self), grid_update, NULL);
-				push_at(t.x, t.y, t.z, sc->pos);
-				*vel = vec3(0.0f);
+				push_at(t.x, t.y, t.z, val, sc->pos);
+				*vel = vec3(0);
 			}
 		}
+
+		if(self->jump == 1)
+		{
+			/* self->jump = 2; REPEAT JUMP SAME CLICK? */
+			/* self->jump = 0; */
+			*vel = vec3_add(*vel, vec3_scale(up_dir, 10));
+
+			self->max_jump_vel = fmax(0.8, vec3_len(tang_speed));
+		}
+
+		vec3_t dec = vec3_scale(*vel, 14 * *dt);
+		*vel = vec3_sub(*vel, dec);
 	}
+
+end:
+	self->last_vel = *vel;
+
+
 
 
 	sc = c_spacial(&self->orientation);

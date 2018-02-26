@@ -12,6 +12,7 @@ typedef struct
 
 	entity_t blocks, cage, boxes,
 			 blocks_inv, cage_inv, boxes_inv;
+	int modified;
 } c_grid_t;
 
 DEF_SIG(grid_update);

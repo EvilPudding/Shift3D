@@ -25,12 +25,11 @@ int main(int argc, char **argv)
 			c_bridge_register,		c_door_register,	c_movable_register,
 			c_side_follow_register);
 
-	entity_add_component(candle->systems, (c_t*)c_renderer_new(0.66f, 1, 1, 1.0f, 0));
-	entity_add_component(candle->systems, (c_t*)c_editmode_new());
+	entity_add_component(candle->systems, (c_t*)c_renderer_new(0.53f, 1, 1, 1.0f, 0));
 
 	register_custom_templates(candle);
 
-	g = entity_new(c_name_new("gravity"), c_force_new(0.0, -55, 0.0, 1));
+	g = entity_new(c_name_new("gravity"), c_force_new(0.0, -21, 0.0, 1));
 
 	body = entity_new(c_name_new("body"), c_node_new());
 
@@ -39,7 +38,9 @@ int main(int argc, char **argv)
 			c_camera_new(70, 0.1, 50.0),
 			c_charlook_new(body, 1.9)
 	);
-	c_camera_activate(c_camera(&camera));
+	c_renderer_add_camera(c_renderer(&candle->systems), camera);
+
+	entity_add_component(candle->systems, (c_t*)c_editmode_new());
 
 	character = entity_new(
 			c_name_new("character"),

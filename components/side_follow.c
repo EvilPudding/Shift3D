@@ -28,7 +28,7 @@ static int c_side_follow_update(c_side_follow_t *self, float *dt)
 	float dist = vec3_len(inc);
 	if(dist > 0.01)
 	{
-		pos = vec3_sub(pos, vec3_scale(inc, 5 * *dt));
+		pos = vec3_sub(pos, vec3_scale(inc, *dt));
 		c_spacial_set_pos(sc, pos);
 
 		/* TODO: remove string search from this */

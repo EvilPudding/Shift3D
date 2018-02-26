@@ -20,6 +20,8 @@ typedef struct
 	entity_t force_down;
 
 	float targR;
+
+	vec3_t last_vel;
 } c_character_t;
 
 DEF_CASTER(ct_character, c_character, c_character_t);
