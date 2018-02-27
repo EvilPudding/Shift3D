@@ -95,7 +95,9 @@ int c_charlook_mouse_move(c_charlook_t *self, mouse_move_data *event)
 	if(self->xrot > max_up && inc_y > 0) inc_y = 0;
 	if(self->xrot < max_down && inc_y < 0) inc_y = 0;
 
-	int side = c_side(&candle->systems)->side;
+	c_side_t *sidec = c_side(&candle->systems);
+	if(!sidec) return 1;
+	int side = sidec->side;
 	inc_x = side ? -inc_x : inc_x;
 
 	self->yrot += inc_x;

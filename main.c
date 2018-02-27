@@ -25,7 +25,7 @@ int main(int argc, char **argv)
 			c_bridge_register,		c_door_register,	c_movable_register,
 			c_side_follow_register);
 
-	entity_add_component(candle->systems, (c_t*)c_renderer_new(0.53f, 1, 1, 1.0f, 0));
+	entity_add_component(candle->systems, (c_t*)c_renderer_new(0.8f, 1, 1, 0));
 
 	register_custom_templates(candle);
 
@@ -50,6 +50,12 @@ int main(int argc, char **argv)
 	c_spacial_set_pos(c_spacial(&camera), vec3(0.0, 0.7, 0.0));
 	c_node_add(c_node(&character), 1, body);
 	c_node_add(c_node(&body), 1, camera);
+
+	entity_t venus = entity_new(
+			c_name_new("venus"),
+			c_model_new(sauces_mesh("venus.obj"), sauces_mat("pack1/marble"), 1)
+	);
+	c_spacial_set_pos(c_spacial(&venus), vec3(2.5, 5.5, 2.5));
 
 
 	sprintf(open_map_name, "resauces/maps/%s.xmap", argc > 1 ? argv[1] : "0");

@@ -137,7 +137,11 @@ int c_character_update(c_character_t *self, float *dt)
 	if(!floored)
 	{
 		float tang_len = vec3_len(tang_speed);
-		if(tang_len > self->max_jump_vel)
+		if(tang_len < self->max_jump_vel && !self->forward)
+		{
+			self->max_jump_vel = fmax(tang_len, 0.3);
+		}
+		else if(tang_len > self->max_jump_vel)
 		{
 			vec3_t norm = vec3_mul(up_line, *vel);
 			tang_speed = vec3_scale(tang_speed, self->max_jump_vel / tang_len);
