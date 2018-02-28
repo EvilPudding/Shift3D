@@ -51,11 +51,11 @@ int main(int argc, char **argv)
 	c_node_add(c_node(&character), 1, body);
 	c_node_add(c_node(&body), 1, camera);
 
-	entity_t venus = entity_new(
-			c_name_new("venus"),
-			c_model_new(sauces_mesh("venus.obj"), sauces_mat("pack1/marble"), 1)
-	);
-	c_spacial_set_pos(c_spacial(&venus), vec3(2.5, 5.5, 2.5));
+	/* entity_t venus = entity_new( */
+	/* 		c_name_new("venus"), */
+	/* 		c_model_new(sauces_mesh("venus.obj"), sauces_mat("pack1/stone3"), 1) */
+	/* ); */
+	/* c_spacial_set_pos(c_spacial(&venus), vec3(2.5, 5.5, 2.5)); */
 
 
 	sprintf(open_map_name, "resauces/maps/%s.xmap", argc > 1 ? argv[1] : "0");
