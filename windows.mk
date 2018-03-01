@@ -15,11 +15,11 @@ SRCS = $(wildcard *.c) $(wildcard components/*.c) $(wildcard systems/*.c)
 OBJS_REL = $(patsubst %.c, $(DIR)/%.o, $(SRCS))
 OBJS_DEB = $(patsubst %.c, $(DIR)/%.debug.o, $(SRCS))
 
-LIBS_REL = $(LIBS) crest/build/libcrest.dll.a
+LIBS_REL = $(LIBS) candle/build/libcandle.dll.a
 
-LIBS_DEB = $(LIBS) crest/build/libcrest_debug.a
+LIBS_DEB = $(LIBS) candle/build/libcandle_debug.a
 
-CFLAGS = -Wall -Icrest -DUSE_VAO
+CFLAGS = -Wall -Icandle -DUSE_VAO
 
 CFLAGS_REL = $(CFLAGS) -O2
 
@@ -31,13 +31,13 @@ all: update_lib init $(DIR)/shift
 	cp -rvu ../resauces $(DIR)
 
 update_lib:
-	rm -f crest/build/libcrest.a
+	rm -f candle/build/libcandle.a
 
-$(DIR)/shift: crest/build/libcrest.a $(OBJS_REL) 
+$(DIR)/shift: candle/build/libcandle.a $(OBJS_REL) 
 	$(LD) -o $@ $(OBJS_REL) $(LIBS_REL)
 
-crest/build/libcrest.a:
-	(cd crest && $(MAKE) -f windows.mk)
+candle/build/libcandle.a:
+	(cd candle && $(MAKE) -f windows.mk)
 
 $(DIR)/%.o: %.c
 	$(CC) -o $@ -c $< $(CFLAGS_REL)
@@ -48,13 +48,13 @@ debug: update_lib_deb init $(DIR)/shift_debug
 	cp -rvu ../resauces $(DIR)
 
 update_lib_deb:
-	rm -f crest/build/libcrest_debug.a
+	rm -f candle/build/libcandle_debug.a
 
-$(DIR)/shift_debug: crest/build/libcrest_debug.a $(OBJS_DEB)
+$(DIR)/shift_debug: candle/build/libcandle_debug.a $(OBJS_DEB)
 	$(LD) -o $@ $(OBJS_DEB) $(LIBS_DEB)
 
-crest/build/libcrest_debug.a:
-	$(MAKE) -C crest debug
+candle/build/libcandle_debug.a:
+	$(MAKE) -C candle debug
 
 $(DIR)/%.debug.o: %.c
 	$(CC) -o $@ -c $< $(CFLAGS_DEB)
@@ -81,4 +81,4 @@ valgrind: debug
 
 clean:
 	rm -r $(DIR)
-	$(MAKE) -C crest clean
+	$(MAKE) -C candle clean
