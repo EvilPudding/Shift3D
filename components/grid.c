@@ -64,9 +64,9 @@ c_grid_t *c_grid_new(int mx, int my, int mz)
 			c_model_new(NULL, sauces_mat("pack1/piramids"), 1));
 
 	mat_t *stone3 = sauces_mat("pack1/stone3");
-	/* stone3->diffuse.color = vec4(0.6f, 0.1f, 0.14f, 1.0f); */
-	/* stone3->diffuse.texture_blend = 0.5; */
-	/* stone3->normal.texture_blend = 0.3; */
+	stone3->diffuse.color = vec4(0.6f, 0.1f, 0.14f, 1.0f);
+	stone3->diffuse.texture_blend = 0.5;
+	stone3->normal.texture_blend = 0.3;
 
 	self->boxes = entity_new(c_name_new("movable"), c_side_new(0),
 			c_model_new(NULL, stone3, 1), 0);
