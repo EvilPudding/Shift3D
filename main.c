@@ -25,7 +25,7 @@ int main(int argc, char **argv)
 			c_bridge_register,		c_door_register,	c_movable_register,
 			c_side_follow_register);
 
-	entity_add_component(candle->systems, (c_t*)c_renderer_new(0.8f, 1, 1, 0));
+	entity_add_component(candle->systems, (c_t*)c_renderer_new(0.66f, 1, 1, 0));
 
 	register_custom_templates(candle);
 

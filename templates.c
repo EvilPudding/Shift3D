@@ -105,6 +105,8 @@ static entity_t template_key(entity_t root, FILE *fd, candle_t *candle)
 			c_model_new(sauces_mesh("key.obj"), sauces_mat("key"), 1),
 			c_side_new(side),
 			c_key_new(rotX, rotY, rotZ, id));
+
+	/* sauces_mat("key")->transparency.color = vec4(1.0f, 1.0f, 1.0f, 0.4f); */
 	c_model(&key)->before_draw = (before_draw_cb)template_model_before_draw;
 
 	c_spacial_set_pos(c_spacial(&key), vec3(x, y, z));
