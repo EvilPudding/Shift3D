@@ -70,6 +70,9 @@ int main(int argc, char **argv)
 	/* entity_t decal = entity_new(c_decal_new(sauces_mat("pack1/piramids"))); */
 	/* c_spacial_set_pos(c_spacial(&decal), vec3(10, 6, 5)); */
 
+	/* entity_t decal = entity_new(c_sprite_new(sauces_mat("bridge"), 0)); */
+	/* c_spacial_set_pos(c_spacial(&decal), vec3(10, 6, 5)); */
+
 	//c_window_toggle_fullscreen(c_window(&candle->systems));
 
 	candle_wait(candle);
