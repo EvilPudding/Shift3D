@@ -19,7 +19,6 @@ void mesh_add_plane(mesh_t *self, float s, vec3_t v, vec3_t dir, int inverted_no
 		/* int px, int py, int pz, int inverted_normals); */
 
 
-DEC_CT(ct_grid);
 DEC_SIG(grid_update);
 
 typedef void(*create_cb)(mesh_t *self, float s, vec3_t v, vec3_t dir,
@@ -288,7 +287,7 @@ int c_grid_get(c_grid_t *self, int x, int y, int z)
 	return self->map[z + (y * self->mz + x) * self->mx];
 }
 
-void c_grid_register()
+DEC_CT(ct_grid)
 {
 	ct_t *ct = ct_new("c_grid", &ct_grid, sizeof(c_grid_t),
 			(init_cb)c_grid_init, 1, ct_node);

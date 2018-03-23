@@ -5,7 +5,6 @@
 #include <components/rigid_body.h>
 #include <stdlib.h>
 
-DEC_CT(ct_key);
 DEC_SIG(key_activated);
 
 void c_key_init(c_key_t *self) { }
@@ -59,7 +58,7 @@ c_key_t *c_key_new(int rotX, int rotY, int rotZ, int key)
 	return self;
 }
 
-void c_key_register()
+DEC_CT(ct_key)
 {
 	ct_t *ct = ct_new("c_key", &ct_key, sizeof(c_key_t),
 			(init_cb)c_key_init, 1, ct_spacial);

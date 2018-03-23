@@ -12,7 +12,6 @@
 #include <math.h>
 #include <stdlib.h>
 
-DEC_CT(ct_character);
 extern int window_width, window_height;
 int control = 1;
 
@@ -226,7 +225,7 @@ int c_character_key_down(c_character_t *self, char *key)
 	return 1;
 }
 
-void c_character_register()
+DEC_CT(ct_character)
 {
 	ct_t *ct = ct_new("c_character",
 			&ct_character, sizeof(c_character_t), (init_cb)c_character_init,

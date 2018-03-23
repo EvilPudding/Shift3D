@@ -9,7 +9,6 @@
 #include <math.h>
 #include <stdlib.h>
 
-DEC_CT(ct_charlook);
 
 void c_charlook_init(c_charlook_t *self)
 {
@@ -118,7 +117,7 @@ int c_charlook_mouse_move(c_charlook_t *self, mouse_move_data *event)
 	return 1;
 }
 
-void c_charlook_register()
+DEC_CT(ct_charlook)
 {
 	ct_t *ct = ct_new("c_charlook", &ct_charlook,
 			sizeof(c_charlook_t), (init_cb)c_charlook_init,

@@ -7,7 +7,6 @@
 #include "side_follow.h"
 #include <stdlib.h>
 
-DEC_CT(ct_side_follow);
 
 void c_side_follow_init(c_side_follow_t *self) { }
 
@@ -41,7 +40,7 @@ static int c_side_follow_update(c_side_follow_t *self, float *dt)
 }
 
 
-void c_side_follow_register()
+DEC_CT(ct_side_follow)
 {
 	ct_t *ct = ct_new("c_side_follow", &ct_side_follow,
 			sizeof(c_side_follow_t), (init_cb)c_side_follow_init,

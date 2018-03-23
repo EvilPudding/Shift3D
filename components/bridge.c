@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <candle.h>
 
-DEC_CT(ct_bridge);
 
 static float c_rigid_body_bridge_collider(c_rigid_body_t *self, vec3_t pos);
 
@@ -85,7 +84,7 @@ static int c_bridge_update(c_bridge_t *self, float *dt)
 	return 1;
 }
 
-void c_bridge_register()
+DEC_CT(ct_bridge)
 {
 	ct_t *ct = ct_new("c_bridge", &ct_bridge,
 			sizeof(c_bridge_t), (init_cb)c_bridge_init, 1, ct_spacial);

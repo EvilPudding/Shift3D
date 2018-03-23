@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include <components/spacial.h>
 
-DEC_CT(ct_movable);
 
 void c_movable_init(c_movable_t *self) { }
 
@@ -132,7 +131,7 @@ static int c_movable_update(c_movable_t *self, float *dt)
 	return 1;
 }
 
-void c_movable_register()
+DEC_CT(ct_movable)
 {
 	ct_t *ct = ct_new("c_movable", &ct_movable, sizeof(c_movable_t),
 			(init_cb)c_movable_init, 0);

@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-DEC_CT(ct_level);
 
 void c_level_init(c_level_t *self) { }
 
@@ -27,7 +26,7 @@ c_level_t *c_level_new(candle_t *engine, const char *filename)
 	return self;
 }
 
-void c_level_register()
+DEC_CT(ct_level)
 {
 	ct_new("c_level", &ct_level, sizeof(c_level_t),
 			(init_cb)c_level_init, 1, ct_side);

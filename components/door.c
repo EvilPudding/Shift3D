@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-DEC_CT(ct_door);
 
 void c_door_init(c_door_t *self) { }
 
@@ -15,7 +14,7 @@ c_door_t *c_door_new(const char *next)
 	return self;
 }
 
-void c_door_register()
+DEC_CT(ct_door)
 {
 	ct_new("c_door", &ct_door, sizeof(c_door_t),
 			(init_cb)c_door_init, 1, ct_spacial);
