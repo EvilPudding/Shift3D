@@ -11,6 +11,14 @@
 #include "components/side.h"
 #include "components/side_follow.h"
 
+#include <components/node.h>
+#include <components/force.h>
+#include <components/name.h>
+#include <components/camera.h>
+#include <components/ambient.h>
+#include <systems/renderer.h>
+#include <systems/editmode.h>
+
 #include "templates.h"
 
 #include <stdio.h>

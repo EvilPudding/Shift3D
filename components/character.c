@@ -4,6 +4,8 @@
 #include <components/spacial.h>
 #include <components/velocity.h>
 #include <components/node.h>
+#include <components/rigid_body.h>
+#include <components/force.h>
 #include "level.h"
 #include "movable.h"
 #include "charlook.h"

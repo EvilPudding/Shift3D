@@ -9,6 +9,13 @@
 #include "components/character.h"
 #include "components/charlook.h"
 #include "components/side_follow.h"
+
+#include <components/model.h>
+#include <components/node.h>
+#include <components/name.h>
+#include <components/force.h>
+#include <components/light.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 
