@@ -72,7 +72,7 @@ int c_character_update(c_character_t *self, float *dt)
 	);
 
 
-	int floored = vec3_dot(up, vc->normal) > 0;
+	int floored = vec3_dot(up_dir, vc->normal) > 0;
 
 	vec3_t f = vec3_round(vec3_sub(sc->pos, vec3_scale(up_dir, 0.4)));
 	int shiftable = (c_grid_get(gc, f.x, f.y, f.z) & 1) != ss->side;
