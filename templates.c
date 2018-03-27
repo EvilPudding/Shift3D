@@ -260,7 +260,7 @@ static entity_t template_light(entity_t root, FILE *fd)
 			c_side_new(side),
 			c_node_new(),
 			c_side_follow_new(),
-			c_light_new(intensity, color, 512));
+			c_light_new(intensity, 20.0f, color, 512));
 
 	/* c_light(light)->before_draw = (before_draw_cb)template_light_before_draw; */
 

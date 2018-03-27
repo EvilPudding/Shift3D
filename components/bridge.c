@@ -1,6 +1,7 @@
 #include "bridge.h"
 #include <components/rigid_body.h>
 #include <components/spacial.h>
+#include <components/model.h>
 #include <stdlib.h>
 #include <candle.h>
 

@@ -16,6 +16,9 @@
 #include <components/name.h>
 #include <components/camera.h>
 #include <components/ambient.h>
+#include <components/decal.h>
+#include <components/sprite.h>
+#include <components/light.h>
 #include <systems/renderer.h>
 #include <systems/editmode.h>
 
@@ -67,14 +70,20 @@ int main(int argc, char **argv)
 
 	entity_add_component(candle->systems, c_level_new(candle, open_map_name));
 
-	entity_t ambient = entity_new(c_ambient_new(64));
-	c_spacial_set_pos(c_spacial(&ambient), vec3(6.5, 6, 6.5));
+	/* entity_t ambient = entity_new(c_ambient_new(64)); */
+	/* c_spacial_set_pos(c_spacial(&ambient), vec3(6.5, 6, 6.5)); */
 
-	/* entity_t decal = entity_new(c_decal_new(sauces_mat("pack1/piramids"))); */
-	/* c_spacial_set_pos(c_spacial(&decal), vec3(10, 6, 5)); */
+	entity_new(c_name_new("ambient"), c_node_new(),
+			c_light_new(0.08f, -1.0f, vec4(1.0f), 0));
 
-	/* entity_t decal = entity_new(c_sprite_new(sauces_mat("bridge"), 0)); */
-	/* c_spacial_set_pos(c_spacial(&decal), vec3(10, 6, 5)); */
+
+	entity_t decal = entity_new(c_decal_new(sauces_mat("pack1/piramids")));
+	c_spacial_set_pos(c_spacial(&decal), vec3(10, 6, 1));
+	c_spacial_rotate_Y(c_spacial(&decal), M_PI / 5);
+	c_spacial_rotate_X(c_spacial(&decal), -M_PI / 2);
+
+	entity_t sprite = entity_new(c_sprite_new(sauces_mat("bridge"), 0));
+	c_spacial_set_pos(c_spacial(&sprite), vec3(10, 6, 5));
 
 	//c_window_toggle_fullscreen(c_window(&candle->systems));
 
