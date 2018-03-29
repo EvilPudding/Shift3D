@@ -19,7 +19,7 @@ c_level_t *c_level_new(candle_t *engine, const char *filename)
 
 	self->scene = entity_new(c_name_new("scene"), c_node_new());
 
-	candle_import(engine, self->scene, filename);
+	candle_run(engine, self->scene, filename);
 
 	self->grid = c_node_get_by_name(c_node(&self->scene), "grid");
 

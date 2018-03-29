@@ -31,7 +31,7 @@ mesh_t *mesh_from_grid(c_grid_t *grid, int side, int flags, ...);
 int plane_to_side(mesh_t *mesh, int val0, int flag, c_grid_t *grid,
 		vec3_t v, vec3_t dir, create_cb create);
 
-int template_model_before_draw(c_model_t *self);
+int prefab_model_before_draw(c_model_t *self);
 
 void c_grid_init(c_grid_t *self) { }
 
@@ -82,12 +82,12 @@ c_grid_t *c_grid_new(int mx, int my, int mz)
 	c_model(&self->blocks_inv)->before_draw =
 		c_model(&self->cage_inv)->before_draw =
 		c_model(&self->boxes_inv)->before_draw =
-		(before_draw_cb)template_model_before_draw;
+		(before_draw_cb)prefab_model_before_draw;
 
 	c_model(&self->blocks)->before_draw =
 		c_model(&self->cage)->before_draw =
 		c_model(&self->boxes)->before_draw =
-		(before_draw_cb)template_model_before_draw;
+		(before_draw_cb)prefab_model_before_draw;
 
 	if(c_level(&candle->systems))
 	{
