@@ -50,8 +50,7 @@ static entity_t prefab_shift_grid(entity_t root, int argc, const char **argv)
 	sscanf(argv[2], "%d", &my);
 	sscanf(argv[3], "%d", &mz);
 
-	entity = entity_new(c_name_new("grid"), c_node_new(),
-			c_grid_new(mx, my, mz));
+	entity = entity_new(c_name_new("grid"), c_grid_new(mx, my, mz));
 
 	c_grid_t *grid = c_grid(&entity);
 
@@ -84,10 +83,12 @@ static entity_t prefab_shift_grid(entity_t root, int argc, const char **argv)
 
 	/* getc(fd); */
 
-	entity_signal(entity, grid_update, NULL);
-	c_node_add(c_node(&root), 1, entity);
+	entity_t scene = c_level(&candle->systems)->scene;
 
-	return root;
+	entity_signal(entity, grid_update, NULL);
+	c_node_add(c_node(&scene), 1, entity);
+
+	return entity;
 }
 
 static entity_t prefab_key(entity_t root, int argc, const char **argv)
@@ -104,7 +105,9 @@ static entity_t prefab_key(entity_t root, int argc, const char **argv)
 	sscanf(argv[6], "%d", &rotZ);
 	sscanf(argv[7], "%d", &id);
 
-	entity_t grid = c_node_get_by_name(c_node(&root), "grid");
+	entity_t scene = c_level(&candle->systems)->scene;
+
+	entity_t grid = c_node_get_by_name(c_node(&scene), "grid");
 	side = c_grid_get(c_grid(&grid), x, y, z) & 1;
 
 	entity_t key = entity_new(c_name_new("key"),
@@ -118,8 +121,8 @@ static entity_t prefab_key(entity_t root, int argc, const char **argv)
 
 	c_spacial_set_pos(c_spacial(&key), vec3(x, y, z));
 
-	c_node_add(c_node(&root), 1, key);
-	return root;
+	c_node_add(c_node(&scene), 1, key);
+	return key;
 }
 
 static entity_t prefab_spawn(entity_t root, int argc, const char **argv)
@@ -132,7 +135,9 @@ static entity_t prefab_spawn(entity_t root, int argc, const char **argv)
 	sscanf(argv[3], "%f", &z);
 	sscanf(argv[4], "%d", &dir);
 
-	entity_t grid = c_node_get_by_name(c_node(&root), "grid");
+	entity_t scene = c_level(&candle->systems)->scene;
+
+	entity_t grid = c_node_get_by_name(c_node(&scene), "grid");
 	side = c_grid_get(c_grid(&grid), x, y, z) & 1;
 
 	c_side(&candle->systems)->side = side;
@@ -160,8 +165,7 @@ static entity_t prefab_spawn(entity_t root, int argc, const char **argv)
 	}
 	c_spacial_set_pos(c_spacial(&spawn), vec3(x, y, z));
 
-	c_node_add(c_node(&root), 1, spawn);
-	return root;
+	return spawn;
 }
 
 static entity_t prefab_bridge(entity_t root, int argc, const char **argv)
@@ -218,8 +222,7 @@ static entity_t prefab_bridge(entity_t root, int argc, const char **argv)
 
 	c_model(&bridge)->before_draw = (before_draw_cb)prefab_model_before_draw;
 
-	c_node_add(c_node(&root), 1, bridge);
-	return root;
+	return bridge;
 }
 
 static entity_t prefab_door(entity_t root, int argc, const char **argv)
@@ -235,7 +238,9 @@ static entity_t prefab_door(entity_t root, int argc, const char **argv)
 	sscanf(argv[4], "%d", &dir);
 	strcpy(next, argv[5]); 
 
-	entity_t grid = c_node_get_by_name(c_node(&root), "grid");
+	entity_t scene = c_level(&candle->systems)->scene;
+
+	entity_t grid = c_node_get_by_name(c_node(&scene), "grid");
 	side = c_grid_get(c_grid(&grid), x, y, z) & 1;
 
 	entity_t door = entity_new(c_name_new("door"),
@@ -250,8 +255,7 @@ static entity_t prefab_door(entity_t root, int argc, const char **argv)
 	c_spacial_set_rot(c_spacial(&door), 0, 1, 0, dir * M_PI / 2);
 	/* c_spacial_set_rot(c_spacial(door), 0, 1, 0, side ? -M_PI / 2.0 : 0); */
 
-	c_node_add(c_node(&root), 1, door);
-	return root;
+	return door;
 }
 
 static entity_t prefab_light(entity_t root, int argc, const char **argv)
@@ -268,7 +272,9 @@ static entity_t prefab_light(entity_t root, int argc, const char **argv)
 	sscanf(argv[6], "%f", &color.g);
 	sscanf(argv[7], "%f", &color.b);
 
-	entity_t grid = c_node_get_by_name(c_node(&root), "grid");
+	entity_t scene = c_level(&candle->systems)->scene;
+
+	entity_t grid = c_node_get_by_name(c_node(&scene), "grid");
 	side = c_grid_get(c_grid(&grid), x, y, z) & 1;
 
 	entity_t light = entity_new(c_name_new("light"),
@@ -281,8 +287,7 @@ static entity_t prefab_light(entity_t root, int argc, const char **argv)
 
 	c_spacial_set_pos(c_spacial(&light), vec3(x, y, z));
 
-	c_node_add(c_node(&root), 1, light);
-	return root;
+	return light;
 }
 
 void reg_custom_prefabs(candle_t *candle)
