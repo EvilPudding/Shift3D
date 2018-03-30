@@ -19,7 +19,7 @@ static float c_rigid_body_key_collider(c_rigid_body_t *self, vec3_t pos)
 	if(model->visible && vec3_len(vec3_sub(pos, kpos)) < 0.4)
 	{
 		model->visible = 0;
-		entity_signal(ent, spacial_changed, &ent);
+		/* entity_signal(ent, spacial_changed, &ent); */
 
 		c_key_t *key = c_key(self);
 		ct_t *bridges = ecm_get(ct_bridge);
@@ -34,6 +34,7 @@ static float c_rigid_body_key_collider(c_rigid_body_t *self, vec3_t pos)
 				b->rotate_to = key->rot;
 			}
 		}
+		entity_destroy(ent);
 	}
 
 	return -1;
