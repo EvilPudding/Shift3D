@@ -15,8 +15,6 @@ typedef struct
 	int modified;
 } c_grid_t;
 
-DEF_SIG(grid_update);
-
 DEF_CASTER(ct_grid, c_grid, c_grid_t);
 
 c_grid_t *c_grid_new(int mx, int my, int mz);

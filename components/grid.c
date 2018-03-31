@@ -18,9 +18,6 @@ void mesh_add_plane(mesh_t *self, float s, vec3_t v, vec3_t dir, int inverted_no
 /* void mesh_add_plane(mesh_t *self, float s, float x, float y, float z, */
 		/* int px, int py, int pz, int inverted_normals); */
 
-
-DEC_SIG(grid_update);
-
 typedef void(*create_cb)(mesh_t *self, float s, vec3_t v, vec3_t dir,
 		int inverted_normals);
 /* typedef void(*create_cb)(mesh_t *self, float s, float x, float y, float z, */
@@ -292,11 +289,11 @@ DEC_CT(ct_grid)
 	ct_t *ct = ct_new("c_grid", &ct_grid, sizeof(c_grid_t),
 			(init_cb)c_grid_init, 1, ct_node);
 
-	signal_init(&grid_update, 0);
+	signal_init(sig("grid_update"), 0);
 
-	ct_listener(ct, WORLD, grid_update, (signal_cb)c_grid_update);
-	/* ct_listener(ct, WORLD, collider_callback, c_grid_collider); */
-	ct_listener(ct, ENTITY, entity_created, c_grid_created);
+	ct_listener(ct, WORLD, sig("grid_update"), (signal_cb)c_grid_update);
+	/* ct_listener(ct, WORLD, sig("collider_callback"), c_grid_collider); */
+	ct_listener(ct, ENTITY, sig("entity_created"), c_grid_created);
 }
 
 static int c_grid_update(c_grid_t *self)
@@ -329,7 +326,7 @@ static int c_grid_update(c_grid_t *self)
 	c_model_set_mesh(c_model(&self->cage_inv), new_cageB);
 	c_model_set_mesh(c_model(&self->boxes_inv), new_boxesB);
 
-	entity_signal(c_entity(self), spacial_changed, &self->blocks);
+	entity_signal(c_entity(self), sig("spacial_changed"), &self->blocks);
 
 	/* c_grid_print(self); */
 

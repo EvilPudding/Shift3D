@@ -123,10 +123,10 @@ DEC_CT(ct_charlook)
 			sizeof(c_charlook_t), (init_cb)c_charlook_init,
 			2, ct_spacial, ct_node);
 
-	ct_listener(ct, WORLD, mouse_move, c_charlook_mouse_move);
+	ct_listener(ct, WORLD, sig("mouse_move"), c_charlook_mouse_move);
 
-	ct_listener(ct, WORLD, window_resize, c_charlook_window_resize);
+	ct_listener(ct, WORLD, sig("window_resize"), c_charlook_window_resize);
 
-	ct_listener(ct, WORLD, world_update, c_charlook_update);
+	ct_listener(ct, WORLD, sig("world_update"), c_charlook_update);
 }
 

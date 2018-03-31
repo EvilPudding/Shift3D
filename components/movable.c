@@ -118,7 +118,7 @@ static int c_movable_update(c_movable_t *self, float *dt)
 			c_grid_set(gc, sc->pos.x, sc->pos.y, sc->pos.z, 2 | (!side));
 			self->moving = 0;
 			self->sy = 0;
-			entity_signal(c_entity(self), grid_update, NULL);
+			entity_signal(c_entity(self), sig("grid_update"), NULL);
 		}
 		else
 		{
@@ -136,7 +136,7 @@ DEC_CT(ct_movable)
 	ct_t *ct = ct_new("c_movable", &ct_movable, sizeof(c_movable_t),
 			(init_cb)c_movable_init, 0);
 
-	ct_listener(ct, WORLD, world_update, c_movable_update);
+	ct_listener(ct, WORLD, sig("world_update"), c_movable_update);
 }
 
 

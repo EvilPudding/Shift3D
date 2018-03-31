@@ -85,7 +85,7 @@ static entity_t prefab_shift_grid(entity_t root, int argc, const char **argv)
 
 	entity_t scene = c_level(&candle->systems)->scene;
 
-	entity_signal(entity, grid_update, NULL);
+	entity_signal(entity, sig("grid_update"), NULL);
 	c_node_add(c_node(&scene), 1, entity);
 
 	return entity;

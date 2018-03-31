@@ -90,11 +90,11 @@ DEC_CT(ct_bridge)
 	ct_t *ct = ct_new("c_bridge", &ct_bridge,
 			sizeof(c_bridge_t), (init_cb)c_bridge_init, 1, ct_spacial);
 
-	/* ct_listener(ct, WORLD, collider_callback, c_bridge_collider); */
+	/* ct_listener(ct, WORLD, "collider_callback", c_bridge_collider); */
 
-	ct_listener(ct, ENTITY, spacial_changed, c_bridge_spacial_changed);
+	ct_listener(ct, ENTITY, sig("spacial_changed"), c_bridge_spacial_changed);
 
-	ct_listener(ct, WORLD, world_update, c_bridge_update);
+	ct_listener(ct, WORLD, sig("world_update"), c_bridge_update);
 }
 
 

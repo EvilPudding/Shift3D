@@ -106,7 +106,7 @@ int c_character_update(c_character_t *self, float *dt)
 
 	if(self->swap == 1 && shiftable)
 	{
-		entity_signal(c_entity(self), grid_update, NULL);
+		entity_signal(c_entity(self), sig("grid_update"), NULL);
 		self->swap = 2;
 		c_force(&self->force_down)->force = up;
 		/* c_force(self->force_down)->force = vec3(0.0, 0.0, 30.0); */
@@ -190,7 +190,7 @@ end:
 		c_spacial_rotate_Z(sc, dif * 5 * (*dt));
 	}
 
-	entity_signal(c_entity(self), spacial_changed, &c_entity(self));
+	entity_signal(c_entity(self), sig("spacial_changed"), &c_entity(self));
 
 	return 1;
 }
@@ -233,10 +233,10 @@ DEC_CT(ct_character)
 			&ct_character, sizeof(c_character_t), (init_cb)c_character_init,
 			4, ct_spacial, ct_velocity, ct_node, ct_rigid_body);
 
-	ct_listener(ct, WORLD, key_up, c_character_key_up);
+	ct_listener(ct, WORLD, sig("key_up"), c_character_key_up);
 
-	ct_listener(ct, WORLD, key_down, c_character_key_down);
+	ct_listener(ct, WORLD, sig("key_down"), c_character_key_down);
 
-	ct_listener(ct, WORLD, world_update, c_character_update);
+	ct_listener(ct, WORLD, sig("world_update"), c_character_update);
 }
 

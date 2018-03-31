@@ -5,8 +5,6 @@
 #include <components/rigid_body.h>
 #include <stdlib.h>
 
-DEC_SIG(key_activated);
-
 void c_key_init(c_key_t *self) { }
 
 static float c_rigid_body_key_collider(c_rigid_body_t *self, vec3_t pos)
@@ -64,7 +62,7 @@ DEC_CT(ct_key)
 	ct_t *ct = ct_new("c_key", &ct_key, sizeof(c_key_t),
 			(init_cb)c_key_init, 1, ct_spacial);
 
-	signal_init(&key_activated, sizeof(key_activated_data));
+	signal_init(sig("key_activated"), sizeof(key_activated_data));
 
-	ct_listener(ct, ENTITY, entity_created, c_key_created);
+	ct_listener(ct, ENTITY, sig("entity_created"), c_key_created);
 }

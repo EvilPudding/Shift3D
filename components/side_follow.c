@@ -46,6 +46,6 @@ DEC_CT(ct_side_follow)
 			sizeof(c_side_follow_t), (init_cb)c_side_follow_init,
 			1, ct_spacial);
 
-	ct_listener(ct, WORLD, world_update, c_side_follow_update);
+	ct_listener(ct, WORLD, sig("world_update"), c_side_follow_update);
 }
 
