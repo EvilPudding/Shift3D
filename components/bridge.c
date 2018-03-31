@@ -90,83 +90,8 @@ DEC_CT(ct_bridge)
 	ct_t *ct = ct_new("c_bridge", &ct_bridge,
 			sizeof(c_bridge_t), (init_cb)c_bridge_init, 1, ct_spacial);
 
-	/* ct_listener(ct, WORLD, "collider_callback", c_bridge_collider); */
-
 	ct_listener(ct, ENTITY, sig("spacial_changed"), c_bridge_spacial_changed);
 
 	ct_listener(ct, WORLD, sig("world_update"), c_bridge_update);
 }
-
-
-/* void updateBridges(state_t *self) */
-/* { */
-/* 	int i; */
-/* 	float x1, y1, z1, x2, y2, z2; */
-/* 	entity_t lvl = &self->levels[0]; */
-/* 	for(i=0;i<lvl->bridgeNum;i++) */
-/* 	{ */
-/* 		BRIDGE *bridge = &lvl->bridges[i]; */
-
-/* 		if(abs(bridge->angFinx - bridge->angRotx) > 0.01 || */
-/* 				abs(bridge->angFiny - bridge->angRoty) > 0.01 || */
-/* 				abs(bridge->angFinz - bridge->angRotz) > 0.01) */
-/* 		{ */
-/* 			bridge->x1=bridge->ix1-0.5; */
-/* 			bridge->y1=bridge->iy1-0.5; */
-/* 			bridge->z1=bridge->iz1-0.5; */
-/* 			bridge->x2=bridge->ix2+0.5; */
-/* 			bridge->y2=bridge->iy2+0.5; */
-/* 			bridge->z2=bridge->iz2+0.5; */
-
-/* 			bridge->angRotx+=(bridge->angFinx-bridge->angRotx)/12; */
-/* 			bridge->angRoty+=(bridge->angFiny-bridge->angRoty)/12; */
-/* 			bridge->angRotz+=(bridge->angFinz-bridge->angRotz)/12; */
-
-/* 			translatePoint(&(bridge->x1),&(bridge->y1),&(bridge->z1),-bridge->cx,-bridge->cy,-bridge->cz); */
-/* 			translatePoint(&(bridge->x2),&(bridge->y2),&(bridge->z2),-bridge->cx,-bridge->cy,-bridge->cz); */
-/* 			rotatePoint(&(bridge->x1),&(bridge->y1),&(bridge->z1),bridge->angFinx,bridge->angFiny,bridge->angFinz); */
-/* 			rotatePoint(&(bridge->x2),&(bridge->y2),&(bridge->z2),bridge->angFinx,bridge->angFiny,bridge->angFinz); */
-/* 			translatePoint(&(bridge->x1),&(bridge->y1),&(bridge->z1),bridge->cx,bridge->cy,bridge->cz); */
-/* 			translatePoint(&(bridge->x2),&(bridge->y2),&(bridge->z2),bridge->cx,bridge->cy,bridge->cz); */
-
-/* 			x1=bridge->x1; y1=bridge->y1; z1=bridge->z1; */
-/* 			x2=bridge->x2; y2=bridge->y2; z2=bridge->z2; */
-
-
-/* 			if(x1<x2) */
-/* 			{ */
-/* 				bridge->x1=x1;bridge->x2=x2; */
-/* 			} */
-/* 			else */
-/* 			{ */
-/* 				bridge->x1=x2;bridge->x2=x1; */
-/* 			} */
-
-/* 			if(y1<y2) */
-/* 			{ */
-/* 				bridge->y1=y1;bridge->y2=y2; */
-/* 			} */
-/* 			else */
-/* 			{ */
-/* 				bridge->y1=y2;bridge->y2=y1; */
-/* 			} */
-
-/* 			if(bridge->z1<bridge->z2) */
-/* 			{ */
-/* 				bridge->z1=z1;bridge->z2=z2; */
-/* 			} */
-/* 			else */
-/* 			{ */
-/* 				bridge->z1=z2;bridge->z2=z1; */
-/* 			} */
-
-/* 			entity_reset_model_matrix(bridge->entity); */
-/* 			entity_translate(bridge->entity, bridge->cx, bridge->cy, bridge->cz); */
-/* 			entity_set_rot(bridge->entity, 1, 0, 0, bridge->angRotx * (M_PI / 180.0f)); */
-/* 			entity_set_rot(bridge->entity, 0, 1, 0, bridge->angRoty * (M_PI / 180.0f)); */
-/* 			entity_set_rot(bridge->entity, 0, 0, 1, bridge->angRotz * (M_PI / 180.0f)); */
-/* 			entity_translate(bridge->entity, -bridge->cx, -bridge->cy, -bridge->cz); */
-/* 		} */
-/* 	} */
-/* } */
 
