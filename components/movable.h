@@ -14,7 +14,7 @@ typedef struct
 	int value;
 } c_movable_t;
 
-DEF_CASTER(ct_movable, c_movable, c_movable_t);
+DEF_CASTER("c_movable", c_movable, c_movable_t);
 
 c_movable_t *c_movable_new(int value);
 void c_movable_register(void);

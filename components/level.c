@@ -11,7 +11,7 @@ void c_level_init(c_level_t *self) { }
 
 c_level_t *c_level_new(candle_t *engine, const char *filename)
 {
-	c_level_t *self = component_new(ct_level);
+	c_level_t *self = component_new("c_level");
 
 	strcpy(self->file, filename);
 
@@ -26,8 +26,8 @@ c_level_t *c_level_new(candle_t *engine, const char *filename)
 	return self;
 }
 
-DEC_CT(ct_level)
+REG()
 {
-	ct_new("c_level", &ct_level, sizeof(c_level_t),
-			(init_cb)c_level_init, 1, ct_side);
+	ct_new("c_level", sizeof(c_level_t), (init_cb)c_level_init, 1,
+			ref("c_side"));
 }

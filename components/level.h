@@ -13,7 +13,7 @@ typedef struct
 	char file[256];
 } c_level_t;
 
-DEF_CASTER(ct_level, c_level, c_level_t);
+DEF_CASTER("c_level", c_level, c_level_t);
 
 c_level_t *c_level_new(candle_t *engine, const char *filename);
 void c_level_register(void);

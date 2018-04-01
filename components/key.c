@@ -5,8 +5,6 @@
 #include <components/rigid_body.h>
 #include <stdlib.h>
 
-void c_key_init(c_key_t *self) { }
-
 static float c_rigid_body_key_collider(c_rigid_body_t *self, vec3_t pos)
 {
 	entity_t ent = c_entity(self);
@@ -20,7 +18,7 @@ static float c_rigid_body_key_collider(c_rigid_body_t *self, vec3_t pos)
 		/* entity_signal(ent, spacial_changed, &ent); */
 
 		c_key_t *key = c_key(self);
-		ct_t *bridges = ecm_get(ct_bridge);
+		ct_t *bridges = ecm_get(ref("c_bridge"));
 
 		int i, p;
 		for(p = 0; p < bridges->pages_size; p++)
@@ -47,7 +45,7 @@ static int c_key_created(c_key_t *self)
 
 c_key_t *c_key_new(int rotX, int rotY, int rotZ, int key)
 {
-	c_key_t *self = component_new(ct_key);
+	c_key_t *self = component_new("c_key");
 
     self->rot.x = ((float)rotX) * (M_PI / 180);
     self->rot.y = ((float)rotY) * (M_PI / 180);
@@ -57,10 +55,9 @@ c_key_t *c_key_new(int rotX, int rotY, int rotZ, int key)
 	return self;
 }
 
-DEC_CT(ct_key)
+REG()
 {
-	ct_t *ct = ct_new("c_key", &ct_key, sizeof(c_key_t),
-			(init_cb)c_key_init, 1, ct_spacial);
+	ct_t *ct = ct_new("c_key", sizeof(c_key_t), NULL, 1, ref("c_spacial"));
 
 	signal_init(sig("key_activated"), sizeof(key_activated_data));
 

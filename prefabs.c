@@ -147,7 +147,7 @@ static entity_t prefab_spawn(entity_t root, int argc, const char **argv)
 			c_spacial_new(),
 			c_name_new("spawn"));
 
-	c_character_t *fc = (c_character_t*)ct_get_at(ecm_get(ct_character), 0, 0);
+	c_character_t *fc = (c_character_t*)ct_get_at(ecm_get(ref("c_character")), 0, 0);
 
 	if(side)
 	{

@@ -17,7 +17,7 @@ void c_charlook_init(c_charlook_t *self)
 
 c_charlook_t *c_charlook_new(entity_t x, float sensitivity)
 {
-	c_charlook_t *self = component_new(ct_charlook);
+	c_charlook_t *self = component_new("c_charlook");
 
 	self->sensitivity = sensitivity;
 	candle_grab_mouse(candle, c_entity(self), 0);
@@ -117,11 +117,10 @@ int c_charlook_mouse_move(c_charlook_t *self, mouse_move_data *event)
 	return 1;
 }
 
-DEC_CT(ct_charlook)
+REG()
 {
-	ct_t *ct = ct_new("c_charlook", &ct_charlook,
-			sizeof(c_charlook_t), (init_cb)c_charlook_init,
-			2, ct_spacial, ct_node);
+	ct_t *ct = ct_new("c_charlook", sizeof(c_charlook_t),
+			(init_cb)c_charlook_init, 1, ref("c_node"));
 
 	ct_listener(ct, WORLD, sig("mouse_move"), c_charlook_mouse_move);
 

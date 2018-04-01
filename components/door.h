@@ -11,7 +11,7 @@ typedef struct
 	char next[256];
 } c_door_t;
 
-DEF_CASTER(ct_door, c_door, c_door_t);
+DEF_CASTER("c_door", c_door, c_door_t);
 
 c_door_t *c_door_new(const char *next);
 void c_door_register(void);

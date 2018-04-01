@@ -15,7 +15,7 @@ void c_bridge_init(c_bridge_t *self)
 
 c_bridge_t *c_bridge_new()
 {
-	c_bridge_t *self = component_new(ct_bridge);
+	c_bridge_t *self = component_new("c_bridge");
 
 	entity_add_component(c_entity(self),
 			(c_t*)c_rigid_body_new((collider_cb)c_rigid_body_bridge_collider));
@@ -85,10 +85,10 @@ static int c_bridge_update(c_bridge_t *self, float *dt)
 	return 1;
 }
 
-DEC_CT(ct_bridge)
+REG()
 {
-	ct_t *ct = ct_new("c_bridge", &ct_bridge,
-			sizeof(c_bridge_t), (init_cb)c_bridge_init, 1, ct_spacial);
+	ct_t *ct = ct_new("c_bridge", sizeof(c_bridge_t), (init_cb)c_bridge_init,
+			1, ref("c_spacial"));
 
 	ct_listener(ct, ENTITY, sig("spacial_changed"), c_bridge_spacial_changed);
 

@@ -21,7 +21,7 @@ void c_character_init(c_character_t *self) { }
 
 c_character_t *c_character_new(entity_t orientation, int plane_movement, entity_t force_down)
 {
-	c_character_t *self = component_new(ct_character);
+	c_character_t *self = component_new("c_character");
 	self->plane_movement = plane_movement;
 	self->force_down = force_down;
 
@@ -227,11 +227,11 @@ int c_character_key_down(c_character_t *self, char *key)
 	return 1;
 }
 
-DEC_CT(ct_character)
+REG()
 {
-	ct_t *ct = ct_new("c_character",
-			&ct_character, sizeof(c_character_t), (init_cb)c_character_init,
-			4, ct_spacial, ct_velocity, ct_node, ct_rigid_body);
+	ct_t *ct = ct_new("c_character", sizeof(c_character_t),
+			(init_cb)c_character_init, 3, ref("c_velocity"), ref("c_node"),
+			ref("c_rigid_body"));
 
 	ct_listener(ct, WORLD, sig("key_up"), c_character_key_up);
 

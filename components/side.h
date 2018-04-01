@@ -9,7 +9,7 @@ typedef struct
 	int side;
 } c_side_t;
 
-DEF_CASTER(ct_side, c_side, c_side_t)
+DEF_CASTER("c_side", c_side, c_side_t)
 
 c_side_t *c_side_new(int side);
 void c_side_register(void);

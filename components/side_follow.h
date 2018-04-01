@@ -8,7 +8,7 @@ typedef struct
 	c_t super; /* extends c_t */
 } c_side_follow_t;
 
-DEF_CASTER(ct_side_follow, c_side_follow, c_side_follow_t);
+DEF_CASTER("c_side_follow", c_side_follow, c_side_follow_t);
 
 c_side_follow_t *c_side_follow_new();
 void c_side_follow_register(void);
