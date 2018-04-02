@@ -6,9 +6,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
-void c_level_init(c_level_t *self) { }
-
 c_level_t *c_level_new(candle_t *engine, const char *filename)
 {
 	c_level_t *self = component_new("level");
@@ -28,6 +25,6 @@ c_level_t *c_level_new(candle_t *engine, const char *filename)
 
 REG()
 {
-	ct_new("level", sizeof(c_level_t), (init_cb)c_level_init, 1,
+	ct_new("level", sizeof(c_level_t), NULL, NULL, 1,
 			ref("side"));
 }

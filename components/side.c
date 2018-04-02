@@ -17,7 +17,7 @@ c_side_t *c_side_new(int side)
 
 REG()
 {
-	ct_new("side", sizeof(c_side_t), (init_cb)c_side_init, 0);
+	ct_new("side", sizeof(c_side_t), c_side_init, NULL, 0);
 }
 
 

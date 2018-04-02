@@ -30,8 +30,6 @@ int plane_to_side(mesh_t *mesh, int val0, int flag, c_grid_t *grid,
 
 int prefab_model_before_draw(c_model_t *self);
 
-void c_grid_init(c_grid_t *self) { }
-
 float c_rigid_body_grid_collider(c_rigid_body_t *self, vec3_t pos)
 {
 	
@@ -286,8 +284,7 @@ int c_grid_get(c_grid_t *self, int x, int y, int z)
 
 REG()
 {
-	ct_t *ct = ct_new("grid", sizeof(c_grid_t), (init_cb)c_grid_init,
-			1, ref("node"));
+	ct_t *ct = ct_new("grid", sizeof(c_grid_t), NULL, NULL, 1, ref("node"));
 
 	signal_init(sig("grid_update"), 0);
 

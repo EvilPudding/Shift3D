@@ -8,11 +8,6 @@
 
 static float c_rigid_body_bridge_collider(c_rigid_body_t *self, vec3_t pos);
 
-void c_bridge_init(c_bridge_t *self)
-{
-	self->rotate_to = vec3(0.0);
-}
-
 c_bridge_t *c_bridge_new()
 {
 	c_bridge_t *self = component_new("bridge");
@@ -87,7 +82,7 @@ static int c_bridge_update(c_bridge_t *self, float *dt)
 
 REG()
 {
-	ct_t *ct = ct_new("bridge", sizeof(c_bridge_t), (init_cb)c_bridge_init,
+	ct_t *ct = ct_new("bridge", sizeof(c_bridge_t), NULL, NULL,
 			1, ref("spacial"));
 
 	ct_listener(ct, ENTITY, sig("spacial_changed"), c_bridge_spacial_changed);

@@ -57,7 +57,7 @@ c_key_t *c_key_new(int rotX, int rotY, int rotZ, int key)
 
 REG()
 {
-	ct_t *ct = ct_new("key", sizeof(c_key_t), NULL, 1, ref("spacial"));
+	ct_t *ct = ct_new("key", sizeof(c_key_t), NULL, NULL, 1, ref("spacial"));
 
 	signal_init(sig("key_activated"), sizeof(key_activated_data));
 

@@ -6,9 +6,6 @@
 #include <stdlib.h>
 #include <components/spacial.h>
 
-
-void c_movable_init(c_movable_t *self) { }
-
 c_movable_t *c_movable_new(int value)
 {
 	c_movable_t *self = component_new("movable");
@@ -133,8 +130,7 @@ static int c_movable_update(c_movable_t *self, float *dt)
 
 REG()
 {
-	ct_t *ct = ct_new("movable", sizeof(c_movable_t),
-			(init_cb)c_movable_init, 0);
+	ct_t *ct = ct_new("movable", sizeof(c_movable_t), NULL, NULL, 0);
 
 	ct_listener(ct, WORLD, sig("world_update"), c_movable_update);
 }

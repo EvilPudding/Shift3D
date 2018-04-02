@@ -119,8 +119,8 @@ int c_charlook_mouse_move(c_charlook_t *self, mouse_move_data *event)
 
 REG()
 {
-	ct_t *ct = ct_new("charlook", sizeof(c_charlook_t),
-			(init_cb)c_charlook_init, 1, ref("node"));
+	ct_t *ct = ct_new("charlook", sizeof(c_charlook_t), c_charlook_init, NULL,
+			1, ref("node"));
 
 	ct_listener(ct, WORLD, sig("mouse_move"), c_charlook_mouse_move);
 
