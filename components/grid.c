@@ -45,7 +45,7 @@ float c_rigid_body_grid_collider(c_rigid_body_t *self, vec3_t pos)
 
 c_grid_t *c_grid_new(int mx, int my, int mz)
 {
-	c_grid_t *self = component_new("c_grid");
+	c_grid_t *self = component_new("grid");
 
 	self->mx = mx;
 	self->my = my;
@@ -286,8 +286,8 @@ int c_grid_get(c_grid_t *self, int x, int y, int z)
 
 REG()
 {
-	ct_t *ct = ct_new("c_grid", sizeof(c_grid_t), (init_cb)c_grid_init,
-			1, ref("c_node"));
+	ct_t *ct = ct_new("grid", sizeof(c_grid_t), (init_cb)c_grid_init,
+			1, ref("node"));
 
 	signal_init(sig("grid_update"), 0);
 

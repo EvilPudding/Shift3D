@@ -24,7 +24,7 @@ typedef struct
 	vec3_t last_vel;
 } c_character_t;
 
-DEF_CASTER("c_character", c_character, c_character_t);
+DEF_CASTER("character", c_character, c_character_t);
 
 c_character_t *c_character_new(entity_t orientation, int plane_movement,
 		entity_t force_down);

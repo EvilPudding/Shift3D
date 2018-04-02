@@ -15,7 +15,7 @@ typedef struct
 	entity_t x;
 } c_charlook_t;
 
-DEF_CASTER("c_charlook", c_charlook, c_charlook_t);
+DEF_CASTER("charlook", c_charlook, c_charlook_t);
 
 c_charlook_t *c_charlook_new(entity_t x, float sensitivity);
 

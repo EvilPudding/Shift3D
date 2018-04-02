@@ -12,7 +12,7 @@ void c_side_follow_init(c_side_follow_t *self) { }
 
 c_side_follow_t *c_side_follow_new()
 {
-	c_side_follow_t *self = component_new("c_side_follow");
+	c_side_follow_t *self = component_new("side_follow");
 	return self;
 }
 
@@ -42,8 +42,8 @@ static int c_side_follow_update(c_side_follow_t *self, float *dt)
 
 REG()
 {
-	ct_t *ct = ct_new("c_side_follow", sizeof(c_side_follow_t),
-			(init_cb)c_side_follow_init, 1, ref("c_spacial"));
+	ct_t *ct = ct_new("side_follow", sizeof(c_side_follow_t),
+			(init_cb)c_side_follow_init, 1, ref("spacial"));
 
 	ct_listener(ct, WORLD, sig("world_update"), c_side_follow_update);
 }

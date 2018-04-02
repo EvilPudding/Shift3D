@@ -25,7 +25,7 @@ typedef struct
 
 } c_bridge_t;
 
-DEF_CASTER("c_bridge", c_bridge, c_bridge_t);
+DEF_CASTER("bridge", c_bridge, c_bridge_t);
 
 c_bridge_t *c_bridge_new(void);
 void c_bridge_ready(c_bridge_t *self);
