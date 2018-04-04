@@ -15,7 +15,7 @@ c_side_follow_t *c_side_follow_new()
 
 static int c_side_follow_update(c_side_follow_t *self, float *dt)
 {
-	int side = c_side(&candle->systems)->side;
+	int side = c_side(&SYS)->side;
 	c_spacial_t *sc = c_spacial(self);
 	vec3_t pos = sc->pos;
 
@@ -28,7 +28,7 @@ static int c_side_follow_update(c_side_follow_t *self, float *dt)
 		c_spacial_set_pos(sc, pos);
 
 		/* TODO: remove string search from this */
-		entity_t grid = c_level(&candle->systems)->grid;
+		entity_t grid = c_level(&SYS)->grid;
 		c_side(self)->side = c_grid_get(c_grid(&grid),
 				pos.x, pos.y, pos.z) & 1;
 	}

@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-c_level_t *c_level_new(candle_t *engine, const char *filename)
+c_level_t *c_level_new(const char *filename)
 {
 	c_level_t *self = component_new("level");
 
@@ -16,9 +16,9 @@ c_level_t *c_level_new(candle_t *engine, const char *filename)
 
 	self->scene = entity_new(c_name_new("scene"), c_node_new());
 
-	candle_run(engine, self->scene, filename);
+	candle_run(self->scene, filename);
 
-	self->grid = c_node_get_by_name(c_node(&self->scene), "grid");
+	self->grid = c_node_get_by_name(c_node(&self->scene), ref("grid"));
 
 	return self;
 }

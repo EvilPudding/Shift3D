@@ -28,12 +28,12 @@ mesh_t *mesh_from_grid(c_grid_t *grid, int side, int flags, ...);
 int plane_to_side(mesh_t *mesh, int val0, int flag, c_grid_t *grid,
 		vec3_t v, vec3_t dir, create_cb create);
 
-int prefab_model_before_draw(c_model_t *self);
+int cmd_model_before_draw(c_model_t *self);
 
 float c_rigid_body_grid_collider(c_rigid_body_t *self, vec3_t pos)
 {
 	
-	int side = c_side(&candle->systems)->side;
+	int side = c_side(&SYS)->side;
 
 	c_grid_t *g = c_grid(self);
 	int val = c_grid_get(g, round(pos.x), round(pos.y), round(pos.z));
@@ -77,16 +77,16 @@ c_grid_t *c_grid_new(int mx, int my, int mz)
 	c_model(&self->blocks_inv)->before_draw =
 		c_model(&self->cage_inv)->before_draw =
 		c_model(&self->boxes_inv)->before_draw =
-		(before_draw_cb)prefab_model_before_draw;
+		(before_draw_cb)cmd_model_before_draw;
 
 	c_model(&self->blocks)->before_draw =
 		c_model(&self->cage)->before_draw =
 		c_model(&self->boxes)->before_draw =
-		(before_draw_cb)prefab_model_before_draw;
+		(before_draw_cb)cmd_model_before_draw;
 
-	if(c_level(&candle->systems))
+	if(c_level(&SYS))
 	{
-		c_level(&candle->systems)->grid = c_entity(self);
+		c_level(&SYS)->grid = c_entity(self);
 	}
 
 	return self;
@@ -243,7 +243,7 @@ void mesh_add_plane(mesh_t *self, float s, vec3_t v, vec3_t dir, int invert_norm
 			v1, vec3(0.0), v1t,
 			v2, vec3(0.0), v2t,
 			v3, vec3(0.0), v3t,
-			v4, vec3(0.0), v4t);
+			v4, vec3(0.0), v4t, 1);
 	mesh_restore(self);
 	mesh_modified(self);
 }

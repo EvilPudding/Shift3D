@@ -4,7 +4,7 @@ LD = cc
 DIR = build
 
 LIBS = -Lcandle/build $(shell sdl2-config --libs) -lglut -lGLU -lm -lGL -lGLEW \
-	   -lpng
+	   -lpng -lassimp
 
 SRCS = $(wildcard *.c) $(wildcard components/*.c) $(wildcard systems/*.c)
 
@@ -66,7 +66,7 @@ init:
 
 run: all
 	cp -rvu resauces $(DIR)
-	$(DIR)/shift 12
+	$(DIR)/shift 6
 
 gdb: debug
 	cp -rvu resauces $(DIR)

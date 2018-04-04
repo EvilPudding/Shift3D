@@ -17,7 +17,7 @@ c_movable_t *c_movable_new(int value)
 void push_at(int x, int y, int z, int value, vec3_t from)
 {
 	int i, p;
-	c_level_t *level = c_level(&candle->systems);
+	c_level_t *level = c_level(&SYS);
 	c_grid_t *gc = c_grid(&level->grid);
 
 	ct_t *movables = ecm_get(ref("movable"));
@@ -100,7 +100,7 @@ static int c_movable_update(c_movable_t *self, float *dt)
 	}
 	else
 	{
-		c_level_t *level = c_level(&candle->systems);
+		c_level_t *level = c_level(&SYS);
 		c_grid_t *gc = c_grid(&level->grid);
 
 		int side = c_side(self)->side;

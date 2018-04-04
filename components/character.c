@@ -32,9 +32,9 @@ c_character_t *c_character_new(entity_t orientation, int plane_movement, entity_
 
 int c_character_update(c_character_t *self, float *dt)
 {
-	c_level_t *level = c_level(&candle->systems);
+	c_level_t *level = c_level(&SYS);
 	if(!level) return 1;
-	c_side_t *ss = c_side(&candle->systems);
+	c_side_t *ss = c_side(&SYS);
 	c_grid_t *gc = c_grid(&level->grid);
 	if(!gc) return 1;
 	const float corner = 1.0f / sqrtf(2.0f);

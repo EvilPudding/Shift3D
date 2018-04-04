@@ -22,7 +22,7 @@
 #include <systems/renderer.h>
 #include <systems/editmode.h>
 
-#include "prefabs.h"
+#include "cmds.h"
 
 #include <stdio.h>
 
@@ -31,9 +31,9 @@ int main(int argc, char **argv)
 	char open_map_name[256];
 	entity_t camera, g, body, character;
 
-	entity_add_component(candle->systems, (c_t*)c_renderer_new(0.66f, 1, 1, 0));
+	entity_add_component(SYS, (c_t*)c_renderer_new(0.66f, 1, 1, 0));
 
-	reg_custom_prefabs(candle);
+	reg_custom_cmds();
 
 	g = entity_new(c_name_new("gravity"), c_force_new(0.0, -21, 0.0, 1));
 
@@ -44,9 +44,9 @@ int main(int argc, char **argv)
 			c_camera_new(70, 0.1, 50.0),
 			c_charlook_new(body, 1.9)
 	);
-	c_renderer_add_camera(c_renderer(&candle->systems), camera);
+	c_renderer_add_camera(c_renderer(&SYS), camera);
 
-	entity_add_component(candle->systems, (c_t*)c_editmode_new());
+	entity_add_component(SYS, (c_t*)c_editmode_new());
 
 	character = entity_new(
 			c_name_new("character"),
@@ -59,9 +59,9 @@ int main(int argc, char **argv)
 
 	sprintf(open_map_name, "resauces/maps/%s.xmap", argc > 1 ? argv[1] : "0");
 
-	entity_add_component(candle->systems, c_side_new(0));
+	entity_add_component(SYS, c_side_new(0));
 
-	entity_add_component(candle->systems, c_level_new(candle, open_map_name));
+	entity_add_component(SYS, c_level_new(open_map_name));
 
 	entity_new(c_name_new("ambient"), c_light_new(0.08f, -1.0f, vec4(1.0f), 0));
 
@@ -75,7 +75,7 @@ int main(int argc, char **argv)
 
 	//c_window_toggle_fullscreen(c_window(&candle->systems));
 
-	candle_wait(candle);
+	candle_wait();
 
 	printf("Exiting.\n");
 

@@ -2,6 +2,6 @@
 #define PREFABS_H
 
 #include <candle.h>
-void reg_custom_prefabs(candle_t *candle);
+void reg_custom_cmds();
 
 #endif /* !PREFABS_H */
