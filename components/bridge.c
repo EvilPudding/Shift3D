@@ -28,7 +28,7 @@ void c_bridge_ready(c_bridge_t *self)
 	sauces_mat("bridge")->transparency.color = vec4(0.3, 0.3, 0.3, 1.0);
 
 	entity_add_component(c_entity(self),
-			c_model_new(mesh, sauces_mat("bridge"), 1));
+			c_model_new(mesh, sauces_mat("bridge"), 1, 1));
 }
 
 static int c_bridge_spacial_changed(c_bridge_t *self)
@@ -36,7 +36,7 @@ static int c_bridge_spacial_changed(c_bridge_t *self)
 	c_spacial_t *spacial = c_spacial(self);
 	self->inverse_model = mat4_invert(spacial->model_matrix);
 
-	return 1;
+	return CONTINUE;
 }
 
 static float c_rigid_body_bridge_collider(c_rigid_body_t *self, vec3_t pos)
@@ -77,7 +77,7 @@ static int c_bridge_update(c_bridge_t *self, float *dt)
 
 		self->rotate_to = vec3_sub(self->rotate_to, inc);
 	}
-	return 1;
+	return CONTINUE;
 }
 
 REG()

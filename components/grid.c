@@ -52,10 +52,10 @@ c_grid_t *c_grid_new(int mx, int my, int mz)
 
 	self->blocks = entity_new(c_name_new("blocks"), c_side_new(0),
 			/* c_model_new(NULL, candle_mat_get(candle, "pack1/white"), 1)); */
-			c_model_new(NULL, sauces_mat("pack1/white"), 1));
+			c_model_new(NULL, sauces_mat("pack1/white"), 1, 1));
 
 	self->cage = entity_new(c_name_new("cage"), c_side_new(0),
-			c_model_new(NULL, sauces_mat("pack1/piramids"), 1));
+			c_model_new(NULL, sauces_mat("pack1/piramids"), 1, 1));
 
 	mat_t *stone3 = sauces_mat("pack1/stone3");
 	stone3->diffuse.color = vec4(0.6f, 0.1f, 0.14f, 1.0f);
@@ -63,16 +63,16 @@ c_grid_t *c_grid_new(int mx, int my, int mz)
 	stone3->normal.texture_blend = 0.3;
 
 	self->boxes = entity_new(c_name_new("movable"), c_side_new(0),
-			c_model_new(NULL, stone3, 1), 0);
+			c_model_new(NULL, stone3, 1, 1), 0, 1);
 
 	self->blocks_inv = entity_new(c_name_new("bloc_i"), c_side_new(1),
-			c_model_new(NULL, sauces_mat("pack1/piramids"), 1));
+			c_model_new(NULL, sauces_mat("pack1/piramids"), 1, 1));
 
 	self->cage_inv = entity_new(c_name_new("cage_i"), c_side_new(1),
-			c_model_new(NULL, sauces_mat("pack1/white"), 1));
+			c_model_new(NULL, sauces_mat("pack1/white"), 1, 1));
 
 	self->boxes_inv = entity_new(c_name_new("movab_i"), c_side_new(1),
-			c_model_new(NULL, stone3, 1));
+			c_model_new(NULL, stone3, 1, 1));
 
 	c_model(&self->blocks_inv)->before_draw =
 		c_model(&self->cage_inv)->before_draw =
@@ -259,7 +259,7 @@ static int c_grid_created(c_grid_t *self)
 			(c_t*)c_rigid_body_new((collider_cb)c_rigid_body_grid_collider));
 
 	self->modified = 1;
-	return 1;
+	return CONTINUE;
 }
 
 void c_grid_set(c_grid_t *self, int x, int y, int z, int val)
@@ -295,7 +295,7 @@ REG()
 
 static int c_grid_update(c_grid_t *self)
 {
-	if(!self->modified) return 1;
+	if(!self->modified) return CONTINUE;
 	self->modified = 0;
 
 	mesh_t *new_terrainA = mesh_from_grid(self, 0, 2, 0x4, mesh_add_spike,
@@ -327,7 +327,7 @@ static int c_grid_update(c_grid_t *self)
 
 	/* c_grid_print(self); */
 
-	return 1;
+	return CONTINUE;
 }
 
 void c_grid_print(c_grid_t *self)

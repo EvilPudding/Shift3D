@@ -33,7 +33,7 @@ static int c_side_follow_update(c_side_follow_t *self, float *dt)
 				pos.x, pos.y, pos.z) & 1;
 	}
 	
-	return 1;
+	return CONTINUE;
 }
 
 

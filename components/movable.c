@@ -66,7 +66,7 @@ void push_at(int x, int y, int z, int value, vec3_t from)
 
 static int c_movable_update(c_movable_t *self, float *dt)
 {
-	if(!self->moving) return 1;
+	if(!self->moving) return CONTINUE;
 	float inc = (*dt) * 6;
 	c_spacial_t *sc = c_spacial(self);
 
@@ -125,7 +125,7 @@ static int c_movable_update(c_movable_t *self, float *dt)
 		}
 	}
 
-	return 1;
+	return CONTINUE;
 }
 
 REG()

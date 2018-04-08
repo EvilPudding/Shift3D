@@ -190,7 +190,7 @@ end:
 
 	entity_signal(c_entity(self), sig("spacial_changed"), &c_entity(self));
 
-	return 1;
+	return CONTINUE;
 }
 
 int c_character_key_up(c_character_t *self, char *key)
@@ -206,7 +206,7 @@ int c_character_key_up(c_character_t *self, char *key)
 		case '`': control = !control; break;
 		case 32: self->jump = 0; break;
 	}
-	return 1;
+	return CONTINUE;
 }
 
 int c_character_key_down(c_character_t *self, char *key)
@@ -222,7 +222,7 @@ int c_character_key_down(c_character_t *self, char *key)
 		case 32: self->jump = self->jump?:1; break;
 		default: printf("key: %d pressed\n", *key); break;
 	}
-	return 1;
+	return CONTINUE;
 }
 
 REG()

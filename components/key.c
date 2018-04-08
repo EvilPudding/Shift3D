@@ -40,7 +40,7 @@ static int c_key_created(c_key_t *self)
 {
 	entity_add_component(c_entity(self),
 			(c_t*)c_rigid_body_new((collider_cb)c_rigid_body_key_collider));
-	return 1;
+	return CONTINUE;
 }
 
 c_key_t *c_key_new(int rotX, int rotY, int rotZ, int key)

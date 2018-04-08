@@ -74,7 +74,8 @@ static entity_t cmd_shift_grid(entity_t root, int argc, const char **argv)
 		if(val & 0x2)
 		{
 			entity_t box = entity_new(c_movable_new(val), c_side_new(!(val&1)),
-					c_node_new(), c_model_new(mesh, sauces_mat("pack1/stone3"), 1));
+					c_node_new(),
+					c_model_new(mesh, sauces_mat("pack1/stone3"), 1, 1));
 			c_model(&box)->before_draw = (before_draw_cb)cmd_model_before_draw;
 			c_spacial_set_pos(c_spacial(&box), vec3(x, y, z));
 			/* c_node_add(c_node(&root), 1, box); */
@@ -112,7 +113,7 @@ static entity_t cmd_key(entity_t root, int argc, const char **argv)
 
 	entity_t key = entity_new(c_name_new("key"),
 			c_node_new(),
-			c_model_new(sauces_mesh("key.obj"), sauces_mat("key"), 1),
+			c_model_new(sauces_mesh("key.obj"), sauces_mat("key"), 1, 1),
 			c_side_new(side),
 			c_key_new(rotX, rotY, rotZ, id));
 
@@ -244,8 +245,7 @@ static entity_t cmd_door(entity_t root, int argc, const char **argv)
 	side = c_grid_get(c_grid(&grid), x, y, z) & 1;
 
 	entity_t door = entity_new(c_name_new("door"),
-			c_model_new(sauces_mesh("door.obj"),
-				sauces_mat( "door"), 1),
+			c_model_new(sauces_mesh("door.obj"), sauces_mat( "door"), 1, 1),
 			c_side_new(side),
 			c_node_new(),
 			c_door_new(next));

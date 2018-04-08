@@ -32,7 +32,7 @@ static int c_charlook_window_resize(c_charlook_t *self,
 {
 	self->win_min_side = (event->width < event->height) ?
 		event->width : event->height;
-	return 1;
+	return CONTINUE;
 }
 
 void c_charlook_rotate(c_charlook_t *self, float angle)
@@ -61,7 +61,7 @@ int c_charlook_update(c_charlook_t *self, float *dt)
 		float inc = dif * 5 * (*dt);
 		c_charlook_rotate(self, inc);
 	}
-	return 1;
+	return CONTINUE;
 }
 
 void c_charlook_toggle_side(c_charlook_t *self)
@@ -95,7 +95,7 @@ int c_charlook_mouse_move(c_charlook_t *self, mouse_move_data *event)
 	if(self->xrot < max_down && inc_y < 0) inc_y = 0;
 
 	c_side_t *sidec = c_side(&SYS);
-	if(!sidec) return 1;
+	if(!sidec) return CONTINUE;
 	int side = sidec->side;
 	inc_x = side ? -inc_x : inc_x;
 
@@ -114,7 +114,7 @@ int c_charlook_mouse_move(c_charlook_t *self, mouse_move_data *event)
 
 
 
-	return 1;
+	return CONTINUE;
 }
 
 REG()
