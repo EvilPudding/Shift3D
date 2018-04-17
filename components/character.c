@@ -10,7 +10,7 @@
 #include "movable.h"
 #include "charlook.h"
 #include "grid.h"
-#include <keyboard.h>
+#include <systems/keyboard.h>
 #include <math.h>
 #include <stdlib.h>
 

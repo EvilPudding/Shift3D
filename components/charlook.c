@@ -4,7 +4,7 @@
 #include <components/spacial.h>
 #include <components/force.h>
 #include <components/node.h>
-#include <mouse.h>
+#include <systems/mouse.h>
 #include <candle.h>
 #include <math.h>
 #include <stdlib.h>

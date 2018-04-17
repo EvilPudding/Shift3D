@@ -154,7 +154,7 @@ void mesh_add_spike(mesh_t *mesh, float s, vec3_t v, vec3_t dir, int inverted_no
 		mesh_add_triangle(mesh, 
 				v1, zero, vec2(P1.x, P1.z),
 				v2, zero, vec2(P2.x, P2.z),
-				v3, zero, vec2(P3.x, P3.z), 1);
+				v3, zero, vec2(P3.x, P3.z));
 
 		P1 = vec3(mainx, mainy, mainz);
 		P2 = vec3(i+wid, 0, j+wid);
@@ -165,7 +165,7 @@ void mesh_add_spike(mesh_t *mesh, float s, vec3_t v, vec3_t dir, int inverted_no
 		mesh_add_triangle(mesh,
 				v1, zero, vec2(P1.x, P1.z),
 				v2, zero, vec2(P2.x, P2.z),
-				v3, zero, vec2(P3.x, P3.z), 1);
+				v3, zero, vec2(P3.x, P3.z));
 
 		P1 = vec3(mainx, mainy, mainz);
 		P2 = vec3(i+wid, 0, j);
@@ -176,7 +176,7 @@ void mesh_add_spike(mesh_t *mesh, float s, vec3_t v, vec3_t dir, int inverted_no
 		mesh_add_triangle(mesh,
 				v1, zero, vec2(P1.x, P1.z),
 				v2, zero, vec2(P2.x, P2.z),
-				v3, zero, vec2(P3.x, P3.z), 1);
+				v3, zero, vec2(P3.x, P3.z));
 
 		P1 = vec3(mainx, mainy, mainz);
 		P2 = vec3(i, 0, j);
@@ -187,7 +187,7 @@ void mesh_add_spike(mesh_t *mesh, float s, vec3_t v, vec3_t dir, int inverted_no
 		mesh_add_triangle(mesh,
 				v1, zero, vec2(P1.x, P1.z),
 				v2, zero, vec2(P2.x, P2.z),
-				v3, zero, vec2(P3.x, P3.z), 1);
+				v3, zero, vec2(P3.x, P3.z));
 
 	}
 	mesh_restore(mesh);
@@ -243,7 +243,7 @@ void mesh_add_plane(mesh_t *self, float s, vec3_t v, vec3_t dir, int invert_norm
 			v1, vec3(0.0), v1t,
 			v2, vec3(0.0), v2t,
 			v3, vec3(0.0), v3t,
-			v4, vec3(0.0), v4t, 1);
+			v4, vec3(0.0), v4t);
 	mesh_restore(self);
 	mesh_modified(self);
 }
