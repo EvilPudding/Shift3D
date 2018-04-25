@@ -61,7 +61,8 @@ static entity_t cmd_shift_grid(entity_t root, int argc, const char **argv)
 		grid->map[i] = argv[4][i] - '0';
 	}
 
-	mesh_t *mesh = mesh_cuboid(0.5,
+	mesh_t *mesh = mesh_new();
+	mesh_cuboid(mesh, 0.5,
 			vec3(-0.5, -0.5, -0.5),
 			vec3(0.5, 0.5, 0.5));
 

@@ -21,7 +21,8 @@ c_bridge_t *c_bridge_new()
 void c_bridge_ready(c_bridge_t *self)
 {
 
-	mesh_t *mesh = mesh_cuboid(0.5,
+	mesh_t *mesh = mesh_new();
+	mesh_cuboid(mesh, 0.5,
 			vec3(self->min.x - 0.005f, self->min.y - 0.005f, self->min.z - 0.005f),
 			vec3(self->max.x + 0.005f, self->max.y + 0.005f, self->max.z + 0.005f));
 
