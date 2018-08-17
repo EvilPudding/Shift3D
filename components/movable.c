@@ -16,7 +16,7 @@ c_movable_t *c_movable_new(int value)
 
 void push_at(int x, int y, int z, int value, vec3_t from)
 {
-	int i, p;
+	khiter_t k;
 	c_level_t *level = c_level(&SYS);
 	c_grid_t *gc = c_grid(&level->grid);
 
@@ -47,10 +47,10 @@ void push_at(int x, int y, int z, int value, vec3_t from)
 	}
 	c_grid_set(gc, x, y, z, air);
 
-	for(p = 0; p < movables->pages_size; p++)
-	for(i = 0; i < movables->pages[p].components_size; i++)
+	for(k = kh_begin(movables->cs); k != kh_end(movables->cs); ++k)
 	{
-		c_movable_t *m = (c_movable_t*)ct_get_at(movables, p, i);
+		if(!kh_exist(movables->cs, k)) continue;
+		c_movable_t *m = (c_movable_t*)kh_value(movables->cs, k);
 		if(m->value == value) if(vec3_dist(c_spacial(m)->pos, pos) < 0.4)
 		{
 			m->mx = -dif.x;
@@ -115,7 +115,7 @@ static int c_movable_update(c_movable_t *self, float *dt)
 			c_grid_set(gc, sc->pos.x, sc->pos.y, sc->pos.z, 2 | (!side));
 			self->moving = 0;
 			self->sy = 0;
-			entity_signal(c_entity(self), sig("grid_update"), NULL);
+			entity_signal(c_entity(self), sig("grid_update"), NULL, NULL);
 		}
 		else
 		{

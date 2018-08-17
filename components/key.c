@@ -20,11 +20,11 @@ static float c_rigid_body_key_collider(c_rigid_body_t *self, vec3_t pos)
 		c_key_t *key = c_key(self);
 		ct_t *bridges = ecm_get(ref("bridge"));
 
-		int i, p;
-		for(p = 0; p < bridges->pages_size; p++)
-		for(i = 0; i < bridges->pages[p].components_size; i++)
+		khiter_t k;
+		for(k = kh_begin(bridges->cs); k != kh_end(bridges->cs); ++k)
 		{
-			c_bridge_t *b = (c_bridge_t*)ct_get_at(bridges, p, i);
+			if(!kh_exist(bridges->cs, k)) continue;
+			c_bridge_t *b = (c_bridge_t*)kh_value(bridges->cs, k);
 			if(b->key == key->key)
 			{
 				b->rotate_to = key->rot;

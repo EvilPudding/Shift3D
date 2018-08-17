@@ -1,7 +1,7 @@
 #ifndef LEVEL_H
 #define LEVEL_H
 
-#include <ecm.h>
+#include <ecs/ecm.h>
 #include <candle.h>
 
 typedef struct

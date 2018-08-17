@@ -1,4 +1,4 @@
-#include <ecm.h>
+#include <ecs/ecm.h>
 #include <candle.h>
 #include <components/rigid_body.h>
 #include <components/name.h>
@@ -28,7 +28,7 @@ mesh_t *mesh_from_grid(c_grid_t *grid, int side, int flags, ...);
 int plane_to_side(mesh_t *mesh, int val0, int flag, c_grid_t *grid,
 		vec3_t v, vec3_t dir, create_cb create);
 
-int cmd_model_before_draw(c_model_t *self);
+/* int cmd_model_before_draw(c_model_t *self); */
 
 float c_rigid_body_grid_collider(c_rigid_body_t *self, vec3_t pos)
 {
@@ -51,38 +51,38 @@ c_grid_t *c_grid_new(int mx, int my, int mz)
 	self->map = calloc(mx * my * mz, sizeof(*self->map));
 
 	self->blocks = entity_new(c_name_new("blocks"), c_side_new(0),
-			/* c_model_new(NULL, candle_mat_get(candle, "pack1/white"), 1)); */
-			c_model_new(NULL, sauces_mat("pack1/white"), 1, 1));
+			/* c_model_new(NULL, candle_mat_get(candle, "white"), 1)); */
+			c_model_new(NULL, sauces("white.mat"), 1, 1));
 
 	self->cage = entity_new(c_name_new("cage"), c_side_new(0),
-			c_model_new(NULL, sauces_mat("pack1/piramids"), 1, 1));
+			c_model_new(NULL, sauces("piramids.mat"), 1, 1));
 
-	mat_t *stone3 = sauces_mat("pack1/stone3");
-	stone3->diffuse.color = vec4(0.6f, 0.1f, 0.14f, 1.0f);
-	stone3->diffuse.texture_blend = 0.5;
+	mat_t *stone3 = sauces("stone3.mat");
+	stone3->albedo.color = vec4(0.6f, 0.1f, 0.14f, 1.0f);
+	stone3->albedo.texture_blend = 0.5;
 	stone3->normal.texture_blend = 0.3;
 
 	self->boxes = entity_new(c_name_new("movable"), c_side_new(0),
 			c_model_new(NULL, stone3, 1, 1), 0, 1);
 
 	self->blocks_inv = entity_new(c_name_new("bloc_i"), c_side_new(1),
-			c_model_new(NULL, sauces_mat("pack1/piramids"), 1, 1));
+			c_model_new(NULL, sauces("piramids.mat"), 1, 1));
 
 	self->cage_inv = entity_new(c_name_new("cage_i"), c_side_new(1),
-			c_model_new(NULL, sauces_mat("pack1/white"), 1, 1));
+			c_model_new(NULL, sauces("white.mat"), 1, 1));
 
 	self->boxes_inv = entity_new(c_name_new("movab_i"), c_side_new(1),
 			c_model_new(NULL, stone3, 1, 1));
 
-	c_model(&self->blocks_inv)->before_draw =
-		c_model(&self->cage_inv)->before_draw =
-		c_model(&self->boxes_inv)->before_draw =
-		(before_draw_cb)cmd_model_before_draw;
+	/* c_model(&self->blocks_inv)->before_draw = */
+	/* 	c_model(&self->cage_inv)->before_draw = */
+	/* 	c_model(&self->boxes_inv)->before_draw = */
+	/* 	(before_draw_cb)cmd_model_before_draw; */
 
-	c_model(&self->blocks)->before_draw =
-		c_model(&self->cage)->before_draw =
-		c_model(&self->boxes)->before_draw =
-		(before_draw_cb)cmd_model_before_draw;
+	/* c_model(&self->blocks)->before_draw = */
+	/* 	c_model(&self->cage)->before_draw = */
+	/* 	c_model(&self->boxes)->before_draw = */
+	/* 	(before_draw_cb)cmd_model_before_draw; */
 
 	if(c_level(&SYS))
 	{
@@ -97,7 +97,7 @@ void mesh_add_spike(mesh_t *mesh, float s, vec3_t v, vec3_t dir, int inverted_no
 	/* return; */
 	mesh_save(mesh);
 
-	mesh_translate(mesh, v.x, v.y, v.z);
+	mesh_translate(mesh, v);
     if(dir.x > 0)
 	{
 		mesh_rotate(mesh, 90, 0, 0, 1);
@@ -122,7 +122,7 @@ void mesh_add_spike(mesh_t *mesh, float s, vec3_t v, vec3_t dir, int inverted_no
 	{
 		mesh_rotate(mesh, 90, 1, 0, 0);
 	}
-	mesh_translate(mesh, 0, -0.5, 0);
+	mesh_translate(mesh, vec3(0, -0.5, 0));
 
 	int v1, v2, v3;
 	/* mesh_add_plane(mesh, s, 0, 0, 0, 0, -1, 1); */
@@ -201,7 +201,7 @@ void mesh_add_plane(mesh_t *self, float s, vec3_t v, vec3_t dir, int invert_norm
 
 	mesh_save(self);
 
-	mesh_translate(self, v.x, v.y, v.z);
+	mesh_translate(self, v);
     if(dir.x > 0)
 	{
 		mesh_rotate(self, 90, 0, 0, 1);
@@ -323,7 +323,7 @@ static int c_grid_update(c_grid_t *self)
 	c_model_set_mesh(c_model(&self->cage_inv), new_cageB);
 	c_model_set_mesh(c_model(&self->boxes_inv), new_boxesB);
 
-	entity_signal(c_entity(self), sig("spacial_changed"), &self->blocks);
+	entity_signal(c_entity(self), sig("spacial_changed"), &self->blocks, NULL);
 
 	/* c_grid_print(self); */
 

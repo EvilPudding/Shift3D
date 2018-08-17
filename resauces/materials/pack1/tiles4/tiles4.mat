@@ -1,3 +1,3 @@
-diffuse diffuse
-specular specular
-normal normal
+diffuse tiles4_diffuse
+roughness tiles4_specular
+normal tiles4_normal

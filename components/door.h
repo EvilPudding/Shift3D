@@ -1,7 +1,7 @@
 #ifndef DOOR_H
 #define DOOR_H
 
-#include <ecm.h>
+#include <ecs/ecm.h>
 
 typedef struct
 {

@@ -55,19 +55,11 @@ int c_character_update(c_character_t *self, float *dt)
 	vec3_t up_line = vec3_mul(up_dir, up_dir);
 	vec3_t tang = vec3_norm(vec3_sub(vec3(1.0, 1.0, 1.0), up_line));
 
-	mat4_t ori_rot = mat4_mul(sc->rot_matrix, ori->rot_matrix);
+	vec4_t ori_rot = quat_mul(sc->rot_quat, ori->rot_quat);
 	front = vec3_norm(
-		vec3_mul(
-			mat4_mul_vec4( ori_rot, vec4(0.0, 0.0, 1.0, 1.0)).xyz,
-			tang
-		)
-	);
+		vec3_mul(quat_mul_vec3(ori_rot, vec3(0.0, 0.0, 1.0)), tang));
 	sideways = vec3_norm(
-		vec3_mul(
-			mat4_mul_vec4( ori_rot, vec4(1.0, 0.0, 0.0, 1.0)).xyz,
-			tang
-		)
-	);
+		vec3_mul(quat_mul_vec3(ori_rot, vec3(1.0, 0.0, 0.0)), tang));
 
 
 	int floored = vec3_dot(up_dir, vc->normal) > 0;
@@ -104,7 +96,7 @@ int c_character_update(c_character_t *self, float *dt)
 
 	if(self->swap == 1 && shiftable)
 	{
-		entity_signal(c_entity(self), sig("grid_update"), NULL);
+		entity_signal(c_entity(self), sig("grid_update"), NULL, NULL);
 		self->swap = 2;
 		c_force(&self->force_down)->force = up;
 		/* c_force(self->force_down)->force = vec3(0.0, 0.0, 30.0); */
@@ -188,7 +180,7 @@ end:
 		c_spacial_rotate_Z(sc, dif * 5 * (*dt));
 	}
 
-	entity_signal(c_entity(self), sig("spacial_changed"), &c_entity(self));
+	entity_signal(c_entity(self), sig("spacial_changed"), &c_entity(self), NULL);
 
 	return CONTINUE;
 }

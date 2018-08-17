@@ -111,9 +111,6 @@ int c_charlook_mouse_move(c_charlook_t *self, mouse_move_data *event)
 	c_spacial_rotate_Y(sc, inc_x);
 	c_spacial_rotate_Z(sc, old_rot);
 
-
-
-
 	return CONTINUE;
 }
 
@@ -122,7 +119,7 @@ REG()
 	ct_t *ct = ct_new("charlook", sizeof(c_charlook_t), c_charlook_init, NULL,
 			1, ref("node"));
 
-	ct_listener(ct, WORLD, sig("mouse_move"), c_charlook_mouse_move);
+	ct_listener(ct, ENTITY, sig("mouse_move"), c_charlook_mouse_move);
 
 	ct_listener(ct, WORLD, sig("window_resize"), c_charlook_window_resize);
 

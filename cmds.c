@@ -19,19 +19,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int cmd_model_before_draw(c_model_t *self)
-{
-	c_side_t *sc = c_side(self);
-	if(!sc) return 1;
-	int side = sc->side;
-	if(side != c_side(&SYS)->side && side != 2)
-	{
-		/* printf("'%s' on wrong side\n", c_name(self->super.entity)->name); */
-		return 0;
-	}
-	return 1;
-}
-
 /* static int cmd_light_before_draw(c_light_t *self) */
 /* { */
 /* 	int side = c_side(self->super.entity)->side; */
@@ -61,6 +48,8 @@ static entity_t cmd_shift_grid(entity_t root, int argc, const char **argv)
 		grid->map[i] = argv[4][i] - '0';
 	}
 
+	/* mesh_t *mesh = mesh_new(); */
+	/* mesh_cube(mesh, 1, 1); */
 	mesh_t *mesh = mesh_new();
 	mesh_cuboid(mesh, 0.5,
 			vec3(-0.5, -0.5, -0.5),
@@ -76,8 +65,8 @@ static entity_t cmd_shift_grid(entity_t root, int argc, const char **argv)
 		{
 			entity_t box = entity_new(c_movable_new(val), c_side_new(!(val&1)),
 					c_node_new(),
-					c_model_new(mesh, sauces_mat("pack1/stone3"), 1, 1));
-			c_model(&box)->before_draw = (before_draw_cb)cmd_model_before_draw;
+					c_model_new(mesh, sauces("stone3.mat"), 1, 1));
+			/* c_model(&box)->before_draw = (before_draw_cb)cmd_model_before_draw; */
 			c_spacial_set_pos(c_spacial(&box), vec3(x, y, z));
 			/* c_node_add(c_node(&root), 1, box); */
 		}
@@ -87,7 +76,7 @@ static entity_t cmd_shift_grid(entity_t root, int argc, const char **argv)
 
 	entity_t scene = c_level(&SYS)->scene;
 
-	entity_signal(entity, sig("grid_update"), NULL);
+	entity_signal(entity, sig("grid_update"), NULL, NULL);
 	c_node_add(c_node(&scene), 1, entity);
 
 	return entity;
@@ -114,12 +103,12 @@ static entity_t cmd_key(entity_t root, int argc, const char **argv)
 
 	entity_t key = entity_new(c_name_new("key"),
 			c_node_new(),
-			c_model_new(sauces_mesh("key.obj"), sauces_mat("key"), 1, 1),
+			c_model_new(sauces("key.obj"), sauces("key.mat"), 1, 1),
 			c_side_new(side),
 			c_key_new(rotX, rotY, rotZ, id));
 
 	/* sauces_mat("key")->transparency.color = vec4(1.0f, 1.0f, 1.0f, 0.4f); */
-	c_model(&key)->before_draw = (before_draw_cb)cmd_model_before_draw;
+	/* c_model(&key)->before_draw = (before_draw_cb)cmd_model_before_draw; */
 
 	c_spacial_set_pos(c_spacial(&key), vec3(x, y, z));
 
@@ -149,7 +138,7 @@ static entity_t cmd_spawn(entity_t root, int argc, const char **argv)
 			c_spacial_new(),
 			c_name_new("spawn"));
 
-	c_character_t *fc = (c_character_t*)ct_get_at(ecm_get(ref("character")), 0, 0);
+	c_character_t *fc = (c_character_t*)ct_get_nth(ecm_get(ref("character")), 0);
 
 	if(side)
 	{
@@ -222,7 +211,7 @@ static entity_t cmd_bridge(entity_t root, int argc, const char **argv)
 
 	c_spacial_set_pos(c_spacial(&bridge), vec3(p->cx, p->cy, p->cz));
 
-	c_model(&bridge)->before_draw = (before_draw_cb)cmd_model_before_draw;
+	/* c_model(&bridge)->before_draw = (before_draw_cb)cmd_model_before_draw; */
 
 	return bridge;
 }
@@ -246,11 +235,11 @@ static entity_t cmd_door(entity_t root, int argc, const char **argv)
 	side = c_grid_get(c_grid(&grid), x, y, z) & 1;
 
 	entity_t door = entity_new(c_name_new("door"),
-			c_model_new(sauces_mesh("door.obj"), sauces_mat( "door"), 1, 1),
+			c_model_new(sauces("door.obj"), sauces("door.mat"), 1, 1),
 			c_side_new(side),
 			c_node_new(),
 			c_door_new(next));
-	c_model(&door)->before_draw = (before_draw_cb)cmd_model_before_draw;
+	/* c_model(&door)->before_draw = (before_draw_cb)cmd_model_before_draw; */
 
 	c_spacial_set_pos(c_spacial(&door), vec3(x, y - 0.5 * (side ? -1:1), z));
 	c_spacial_set_rot(c_spacial(&door), 0, 1, 0, dir * M_PI / 2);
@@ -263,7 +252,7 @@ static entity_t cmd_light(entity_t root, int argc, const char **argv)
 {
 	float x, y, z, intensity;
 	int side;
-	vec4_t color;
+	vec4_t color = vec4(0,0,0,1);
 
 	sscanf(argv[1], "%f", &x);
 	sscanf(argv[2], "%f", &y);
@@ -282,7 +271,7 @@ static entity_t cmd_light(entity_t root, int argc, const char **argv)
 			c_side_new(side),
 			c_node_new(),
 			c_side_follow_new(),
-			c_light_new(intensity, 20.0f, color, 512));
+			c_light_new(20.0f, color, 512));
 
 	/* c_light(light)->before_draw = (before_draw_cb)cmd_light_before_draw; */
 

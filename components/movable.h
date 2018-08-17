@@ -1,7 +1,7 @@
 #ifndef MOVABLE_H
 #define MOVABLE_H
 
-#include <ecm.h>
+#include <ecs/ecm.h>
 
 typedef struct
 {

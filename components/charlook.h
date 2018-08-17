@@ -1,7 +1,7 @@
 #ifndef CHARLOOK_H
 #define CHARLOOK_H
 
-#include <ecm.h>
+#include <ecs/ecm.h>
 
 typedef struct
 {

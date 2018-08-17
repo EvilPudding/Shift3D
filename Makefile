@@ -1,19 +1,22 @@
 CC = cc
 LD = cc
 
+PLUGINS = $(wildcard *.candle) candle
+
 DIR = build
 
-LIBS = -Lcandle/build $(shell sdl2-config --libs) -lglut -lGLU -lm -lGL -lGLEW \
-	   -lpng -lassimp
+LIBS = -llua
 
-SRCS = $(wildcard *.c) $(wildcard components/*.c) $(wildcard systems/*.c)
+SRCS = $(wildcard *.c) $(wildcard components/*.c)
 
 OBJS_REL = $(patsubst %.c, $(DIR)/%.o, $(SRCS))
 OBJS_DEB = $(patsubst %.c, $(DIR)/%.debug.o, $(SRCS))
 
-LIBS_REL = $(LIBS) candle/build/candle.a
+PLUGINS_REL = $(patsubst %, %/build/export.a, $(PLUGINS))
+PLUGINS_DEB = $(patsubst %, %/build/export_debug.a, $(PLUGINS))
 
-LIBS_DEB = $(LIBS) candle/build/candle_debug.a
+LIBS_REL = $(LIBS) $(PLUGINS_REL)
+LIBS_DEB = $(LIBS) $(PLUGINS_DEB)
 
 CFLAGS = -Wall -I. -Icandle -DUSE_VAO \
 		 $(shell sdl2-config --cflags)
@@ -22,36 +25,34 @@ CFLAGS_REL = $(CFLAGS) -O2
 
 CFLAGS_DEB = $(CFLAGS) -g3
 
-##############################################################################
 
-all: update_lib init $(DIR)/shift
+all: init $(DIR)/shift
 	cp -rvu resauces $(DIR)
 
-update_lib:
-	rm -f candle/build/candle.a
+$(DIR)/shift: $(OBJS_REL) $(PLUGINS_REL)
+	$(LD) -o $@ $(OBJS_REL) $(LIBS_REL) $(shell cat $(DIR)/deps)
 
-$(DIR)/shift: candle/build/candle.a $(OBJS_REL) 
-	$(LD) -o $@ $(OBJS_REL) $(LIBS_REL)
-
-candle/build/candle.a:
-	$(MAKE) -C candle PARENTCFLAGS=
+%/build/export.a:
+	$(MAKE) -C $(patsubst %/build/export.a, %, $@)
+	echo " " >> $(DIR)/deps
+	-cat $(patsubst %/build/export.a, %/build/deps, $@) >> $(DIR)/deps
 
 $(DIR)/%.o: %.c
 	$(CC) -o $@ -c $< $(CFLAGS_REL)
 
 ##############################################################################
 
-debug: update_lib_deb init $(DIR)/shift_debug
+debug: init $(DIR)/shift_debug
+	rm $(PLUGINS_DEB)
 	cp -rvu resauces $(DIR)
 
-update_lib_deb:
-	rm -f candle/build/candle_debug.a
+$(DIR)/shift_debug: $(OBJS_DEB) $(PLUGINS_DEB)
+	$(LD) -o $@ $(OBJS_DEB) $(LIBS_DEB) $(shell cat $(DIR)/deps)
 
-$(DIR)/shift_debug: candle/build/candle_debug.a $(OBJS_DEB)
-	$(LD) -o $@ $(OBJS_DEB) $(LIBS_DEB)
-
-candle/build/candle_debug.a:
-	$(MAKE) -C candle debug PARENTCFLAGS=
+%/build/export_debug.a:
+	$(MAKE) -C $(patsubst %/build/export_debug.a, %, $@) debug
+	echo " " >> $(DIR)/deps
+	-cat $(patsubst %/build/export_debug.a, %/build/deps, $@) >> $(DIR)/deps
 
 $(DIR)/%.debug.o: %.c
 	$(CC) -o $@ -c $< $(CFLAGS_DEB)
@@ -61,12 +62,16 @@ $(DIR)/%.debug.o: %.c
 init:
 	mkdir -p $(DIR)
 	mkdir -p $(DIR)/components
+	-rm $(DIR)/deps
+	touch $(DIR)/deps
+	-rm $(PLUGINS_REL)
+	-rm $(PLUGINS_DEB)
 
 ##############################################################################
 
 run: all
 	cp -rvu resauces $(DIR)
-	$(DIR)/shift 6
+	$(DIR)/shift 10
 
 gdb: debug
 	cp -rvu resauces $(DIR)

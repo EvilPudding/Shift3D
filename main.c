@@ -1,5 +1,6 @@
 #include <candle.h>
 
+#include "components/physics.h"
 #include "components/bridge.h"
 #include "components/character.h"
 #include "components/charlook.h"
@@ -31,7 +32,12 @@ int main(int argc, char **argv)
 	char open_map_name[256];
 	entity_t camera, g, body, character;
 
-	entity_add_component(SYS, (c_t*)c_renderer_new(0.66f, 1, 1, 0));
+	entity_add_component(SYS, c_physics_new());
+	entity_add_component(SYS, c_renderer_new(0.66f, 1, 1, 0));
+	entity_add_component(SYS, (c_t*)c_editmode_new());
+	/* c_editmode_activate(c_editmode(&SYS)); */
+
+	c_sauces_index_dir(c_sauces(&SYS), "resauces");
 
 	reg_custom_cmds();
 
@@ -45,8 +51,6 @@ int main(int argc, char **argv)
 			c_charlook_new(body, 1.9)
 	);
 	c_renderer_add_camera(c_renderer(&SYS), camera);
-
-	entity_add_component(SYS, (c_t*)c_editmode_new());
 
 	character = entity_new(
 			c_name_new("character"),
@@ -63,14 +67,15 @@ int main(int argc, char **argv)
 
 	entity_add_component(SYS, c_level_new(open_map_name));
 
-	entity_new(c_name_new("ambient"), c_light_new(0.08f, -1.0f, vec4(1.0f), 0));
+	entity_new(c_name_new("ambient"), c_light_new(-1.0f, vec4(1.0f, 1.0f, 1.0f,
+					0.08f), 0));
 
-	entity_t decal = entity_new(c_decal_new(sauces_mat("pack1/piramids")));
+	entity_t decal = entity_new(c_decal_new(sauces("piramids.mat")));
 	c_spacial_set_pos(c_spacial(&decal), vec3(10, 6, 10));
 	c_spacial_rotate_Y(c_spacial(&decal), M_PI / 5);
 	c_spacial_rotate_X(c_spacial(&decal), -M_PI / 2);
 
-	entity_t sprite = entity_new(c_sprite_new(sauces_mat("bridge"), 0));
+	entity_t sprite = entity_new(c_sprite_new(sauces("bridge.mat"), 0));
 	c_spacial_set_pos(c_spacial(&sprite), vec3(10, 6, 5));
 
 	//c_window_toggle_fullscreen(c_window(&candle->systems));

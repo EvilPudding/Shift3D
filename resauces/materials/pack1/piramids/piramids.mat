@@ -1,3 +1,3 @@
-diffuse diffuse
-specular specular
-normal normal
+albedo piramids_diffuse
+roughness piramids_specular
+normal piramids_normal

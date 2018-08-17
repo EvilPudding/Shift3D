@@ -1,7 +1,7 @@
 #ifndef SIDE_H
 #define SIDE_H
 
-#include <ecm.h>
+#include <ecs/ecm.h>
 
 typedef struct
 {

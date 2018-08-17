@@ -1,7 +1,7 @@
 #ifndef BRIDGE_H
 #define BRIDGE_H
 
-#include <ecm.h>
+#include <ecs/ecm.h>
 
 typedef struct
 {

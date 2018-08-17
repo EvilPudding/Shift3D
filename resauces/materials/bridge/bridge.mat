@@ -1,3 +1,4 @@
-diffuse #8888EE diffuse*.4965
-specular specular*.4965
-normal normal*.4965
+albedo #8888EE bridge_diffuse*.4965
+roughness bridge_specular*.4965
+normal bridge_normal*.4965
+metalness bridge_specular*.4965

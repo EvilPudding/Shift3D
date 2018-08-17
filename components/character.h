@@ -1,7 +1,7 @@
 #ifndef CHARACTER_H
 #define CHARACTER_H
 
-#include <ecm.h>
+#include <ecs/ecm.h>
 
 typedef struct
 {

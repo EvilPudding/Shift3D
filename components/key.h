@@ -1,7 +1,7 @@
 #ifndef KEY_H
 #define KEY_H
 
-#include <ecm.h>
+#include <ecs/ecm.h>
 
 typedef struct
 {
