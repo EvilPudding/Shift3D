@@ -62,10 +62,10 @@ $(DIR)/%.debug.o: %.c
 init:
 	mkdir -p $(DIR)
 	mkdir -p $(DIR)/components
-	-rm $(DIR)/deps
+	rm -f $(DIR)/deps
 	touch $(DIR)/deps
-	-rm $(PLUGINS_REL)
-	-rm $(PLUGINS_DEB)
+	rm -f $(PLUGINS_REL)
+	rm -f $(PLUGINS_DEB)
 
 ##############################################################################
 

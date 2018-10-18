@@ -59,8 +59,8 @@ c_grid_t *c_grid_new(int mx, int my, int mz)
 
 	mat_t *stone3 = sauces("stone3.mat");
 	stone3->albedo.color = vec4(0.6f, 0.1f, 0.14f, 1.0f);
-	stone3->albedo.texture_blend = 0.5;
-	stone3->normal.texture_blend = 0.3;
+	stone3->albedo.blend = 0.5;
+	stone3->normal.blend = 0.3;
 
 	self->boxes = entity_new(c_name_new("movable"), c_side_new(0),
 			c_model_new(NULL, stone3, 1, 1), 0, 1);

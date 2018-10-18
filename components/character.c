@@ -45,7 +45,9 @@ int c_character_update(c_character_t *self, float *dt)
 	vec3_t *vel = &vc->velocity;
 	float accel = 87.0f * (*dt);
 
+
 	c_spacial_t *sc = c_spacial(self);
+	c_spacial_lock(sc);
 
 	vec3_t front;
 	vec3_t sideways;
@@ -171,6 +173,7 @@ int c_character_update(c_character_t *self, float *dt)
 end:
 	self->last_vel = *vel;
 
+	c_spacial_unlock(sc);
 
 
 
