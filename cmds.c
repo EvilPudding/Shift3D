@@ -268,6 +268,7 @@ static entity_t cmd_light(entity_t root, int argc, const char **argv)
 	side = c_grid_get(c_grid(&grid), x, y, z) & 1;
 
 	entity_t light = entity_new(c_name_new("light"),
+			c_name_new("light"),
 			c_side_new(side),
 			c_node_new(),
 			c_side_follow_new(),

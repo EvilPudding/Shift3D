@@ -5,6 +5,7 @@
 #include "grid.h"
 #include <stdlib.h>
 #include <components/spacial.h>
+#include <components/model.h>
 
 c_movable_t *c_movable_new(int value)
 {
@@ -64,6 +65,12 @@ void push_at(int x, int y, int z, int value, vec3_t from)
 	}
 }
 
+static int c_movable_side_changed(c_movable_t *self, int *side)
+{
+	c_model_set_visible(c_model(self), (self->value & 1) != (*side & 1));
+	return CONTINUE;
+}
+
 static int c_movable_update(c_movable_t *self, float *dt)
 {
 	if(!self->moving) return CONTINUE;
@@ -115,7 +122,7 @@ static int c_movable_update(c_movable_t *self, float *dt)
 			c_grid_set(gc, sc->pos.x, sc->pos.y, sc->pos.z, 2 | (!side));
 			self->moving = 0;
 			self->sy = 0;
-			entity_signal(c_entity(self), sig("grid_update"), NULL, NULL);
+			/* entity_signal(c_entity(self), sig("grid_update"), NULL, NULL); */
 		}
 		else
 		{
@@ -133,6 +140,7 @@ REG()
 	ct_t *ct = ct_new("movable", sizeof(c_movable_t), NULL, NULL, 0);
 
 	ct_listener(ct, WORLD, sig("world_update"), c_movable_update);
+	ct_listener(ct, WORLD, sig("side_changed"), c_movable_side_changed);
 }
 
 

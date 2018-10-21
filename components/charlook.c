@@ -4,6 +4,8 @@
 #include <components/spacial.h>
 #include <components/force.h>
 #include <components/node.h>
+#include "level.h"
+#include "grid.h"
 #include <systems/mouse.h>
 #include <candle.h>
 #include <math.h>
@@ -55,29 +57,31 @@ void c_charlook_rotate(c_charlook_t *self, float angle)
 int c_charlook_update(c_charlook_t *self, float *dt)
 {
 	float dif;
-	float targ = self->side ? M_PI : 0;
-	if(fabs(dif = targ - self->zrot) > 0.01)
+	if(fabs(dif = - self->zrot) > 0.01)
 	{
 		float inc = dif * 5 * (*dt);
 		c_charlook_rotate(self, inc);
 	}
+	vec3_t cam_pos = vec3_round(c_node_local_to_global(c_node(self), vec3(0.0f)));
+
+	c_level_t *level = c_level(&SYS);
+
+	if(level)
+	{
+		c_grid_t *gc = c_grid(&level->grid);
+		if(gc)
+		{
+			int side = c_grid_get(gc, _vec3(cam_pos));
+			if(side != self->side)
+			{
+				self->side = side;
+				entity_signal(c_entity(self), ref("side_changed"), &side, NULL);
+			}
+		}
+	}
+
 	return CONTINUE;
 }
-
-void c_charlook_toggle_side(c_charlook_t *self)
-{
-	if(!self->side)
-	{
-		self->side = 1;
-	}
-	else
-	{
-		self->side = 0;
-
-	}
-
-}
-
 
 int c_charlook_mouse_move(c_charlook_t *self, mouse_move_data *event)
 {
@@ -124,5 +128,7 @@ REG()
 	ct_listener(ct, WORLD, sig("window_resize"), c_charlook_window_resize);
 
 	ct_listener(ct, WORLD, sig("world_update"), c_charlook_update);
+
+	signal_init(ref("side_changed"), 0);
 }
 

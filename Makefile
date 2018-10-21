@@ -21,7 +21,7 @@ LIBS_DEB = $(LIBS) $(PLUGINS_DEB)
 CFLAGS = -Wall -I. -Icandle -DUSE_VAO \
 		 $(shell sdl2-config --cflags)
 
-CFLAGS_REL = $(CFLAGS) -O2
+CFLAGS_REL = $(CFLAGS) -O3
 
 CFLAGS_DEB = $(CFLAGS) -g3
 
@@ -79,7 +79,7 @@ gdb: debug
 
 valgrind: debug
 	cp -rvu resauces $(DIR)
-	valgrind --log-fd=1 --suppressions=val_sup $(DIR)/shift_debug | tee val_log | less
+	valgrind --log-fd=1 --suppressions=val_sup $(DIR)/shift_debug 10 | tee val_log | less
 		
 clean:
 	rm -r $(DIR)

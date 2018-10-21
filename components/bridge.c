@@ -26,7 +26,10 @@ void c_bridge_ready(c_bridge_t *self)
 			vec3(self->min.x - 0.005f, self->min.y - 0.005f, self->min.z - 0.005f),
 			vec3(self->max.x + 0.005f, self->max.y + 0.005f, self->max.z + 0.005f));
 
-	/* ((mat_t*)sauces("bridge.mat"))->transparency.color = vec4(0.3, 0.3, 0.3, 1.0); */
+	/* ((mat_t*)sauces("bridge.mat"))->albedo.texture = NULL; */
+	/* ((mat_t*)sauces("bridge.mat"))->albedo.blend = 0; */
+	/* ((mat_t*)sauces("bridge.mat"))->albedo.color = vec4(0); */
+	((mat_t*)sauces("bridge.mat"))->transparency.color = vec4(0.3f, 0.3f, 0.0f, 1.0);
 
 	entity_add_component(c_entity(self),
 			c_model_new(mesh, sauces("bridge.mat"), 1, 1));

@@ -24,7 +24,7 @@ typedef void(*create_cb)(mesh_t *self, float s, vec3_t v, vec3_t dir,
 		/* int px, int py, int pz, int inverted_normals); */
 
 static int c_grid_update(c_grid_t *self);
-mesh_t *mesh_from_grid(c_grid_t *grid, int side, int flags, ...);
+mesh_t *mesh_from_grid(mesh_t *self, c_grid_t *grid, int side, int flags, ...);
 int plane_to_side(mesh_t *mesh, int val0, int flag, c_grid_t *grid,
 		vec3_t v, vec3_t dir, create_cb create);
 
@@ -52,10 +52,10 @@ c_grid_t *c_grid_new(int mx, int my, int mz)
 
 	self->blocks = entity_new(c_name_new("blocks"), c_side_new(0),
 			/* c_model_new(NULL, candle_mat_get(candle, "white"), 1)); */
-			c_model_new(NULL, sauces("white.mat"), 1, 1));
+			c_model_new(mesh_new(), sauces("white.mat"), 1, 1));
 
 	self->cage = entity_new(c_name_new("cage"), c_side_new(0),
-			c_model_new(NULL, sauces("piramids.mat"), 1, 1));
+			c_model_new(mesh_new(), sauces("piramids.mat"), 1, 1));
 
 	mat_t *stone3 = sauces("stone3.mat");
 	stone3->albedo.color = vec4(0.6f, 0.1f, 0.14f, 1.0f);
@@ -63,16 +63,16 @@ c_grid_t *c_grid_new(int mx, int my, int mz)
 	stone3->normal.blend = 0.3;
 
 	self->boxes = entity_new(c_name_new("movable"), c_side_new(0),
-			c_model_new(NULL, stone3, 1, 1), 0, 1);
+			c_model_new(mesh_new(), stone3, 1, 1), 0, 1);
 
 	self->blocks_inv = entity_new(c_name_new("bloc_i"), c_side_new(1),
-			c_model_new(NULL, sauces("piramids.mat"), 1, 1));
+			c_model_new(mesh_new(), sauces("piramids.mat"), 1, 1));
 
 	self->cage_inv = entity_new(c_name_new("cage_i"), c_side_new(1),
-			c_model_new(NULL, sauces("white.mat"), 1, 1));
+			c_model_new(mesh_new(), sauces("white.mat"), 1, 1));
 
 	self->boxes_inv = entity_new(c_name_new("movab_i"), c_side_new(1),
-			c_model_new(NULL, stone3, 1, 1));
+			c_model_new(mesh_new(), stone3, 1, 1));
 
 	/* c_model(&self->blocks_inv)->before_draw = */
 	/* 	c_model(&self->cage_inv)->before_draw = */
@@ -282,46 +282,59 @@ int c_grid_get(c_grid_t *self, int x, int y, int z)
 	return self->map[z + (y * self->mz + x) * self->mx];
 }
 
+int c_grid_side_changed(c_grid_t *self, int *side)
+{
+	int none = *side == -1;
+	int normal = !none && ((*side) & 1) == 0;
+	int inverse = !none && ((*side) & 1) == 1;
+
+	c_model_set_visible(c_model(&self->blocks), normal);
+	c_model_set_visible(c_model(&self->cage), normal);
+	c_model_set_visible(c_model(&self->boxes), normal);
+	c_model_set_visible(c_model(&self->blocks_inv), inverse);
+	c_model_set_visible(c_model(&self->cage_inv), inverse);
+	c_model_set_visible(c_model(&self->boxes_inv), inverse);
+	return CONTINUE;
+}
+
 REG()
 {
 	ct_t *ct = ct_new("grid", sizeof(c_grid_t), NULL, NULL, 1, ref("node"));
 
 	signal_init(sig("grid_update"), 0);
 
-	ct_listener(ct, WORLD, sig("grid_update"), (signal_cb)c_grid_update);
-	/* ct_listener(ct, WORLD, sig("collider_callback"), c_grid_collider); */
+	ct_listener(ct, WORLD, sig("grid_update"), c_grid_update);
+	ct_listener(ct, WORLD, sig("side_changed"), c_grid_side_changed);
 	ct_listener(ct, ENTITY, sig("entity_created"), c_grid_created);
 }
 
 static int c_grid_update(c_grid_t *self)
 {
-	if(!self->modified) return CONTINUE;
+	/* if(!self->modified) return CONTINUE; */
 	self->modified = 0;
 
-	mesh_t *new_terrainA = mesh_from_grid(self, 0, 2, 0x4, mesh_add_spike,
-			0x0, mesh_add_plane);
 
-	mesh_t *new_terrainB = mesh_from_grid(self, 1, 2, 0x4, mesh_add_spike,
-			0x0, mesh_add_plane);
+	mesh_t *new_terrainA = c_model(&self->blocks)->mesh;
+	mesh_t *new_cageA = c_model(&self->cage)->mesh;
+	mesh_t *new_boxesA = c_model(&self->boxes)->mesh;
+	mesh_t *new_terrainB = c_model(&self->blocks_inv)->mesh;
+	mesh_t *new_cageB = c_model(&self->cage_inv)->mesh;
+	mesh_t *new_boxesB = c_model(&self->boxes_inv)->mesh;
 
-	mesh_t *new_cageA = mesh_from_grid(self, 0, 1, -1, mesh_add_plane);
+	mesh_from_grid(new_terrainA, self, 0, 2, 0x4, mesh_add_spike, 0x0, mesh_add_plane);
 
-	mesh_t *new_cageB = mesh_from_grid(self, 1, 1, -1, mesh_add_plane);
+	mesh_from_grid(new_terrainB, self, 1, 2, 0x4, mesh_add_spike, 0x0, mesh_add_plane);
 
-	mesh_t *new_boxesA = mesh_from_grid(self, 0, 1, 0x2, mesh_add_plane);
+	mesh_from_grid(new_cageA, self, 0, 1, -1, mesh_add_plane);
 
-	mesh_t *new_boxesB = mesh_from_grid(self, 1, 1, 0x2, mesh_add_plane);
+	mesh_from_grid(new_cageB, self, 1, 1, -1, mesh_add_plane);
 
-	/* mesh_cull_face(new_terrainB, 1); */
-	/* mesh_cull_face(new_boxesB, 1); */
+	mesh_from_grid(new_boxesA, self, 0, 1, 0x2, mesh_add_plane);
 
-	c_model_set_mesh(c_model(&self->blocks), new_terrainA);
-	c_model_set_mesh(c_model(&self->cage), new_cageA);
-	c_model_set_mesh(c_model(&self->boxes), new_boxesA);
+	mesh_from_grid(new_boxesB, self, 1, 1, 0x2, mesh_add_plane);
 
-	c_model_set_mesh(c_model(&self->blocks_inv), new_terrainB);
-	c_model_set_mesh(c_model(&self->cage_inv), new_cageB);
-	c_model_set_mesh(c_model(&self->boxes_inv), new_boxesB);
+	/* new_terrainB->cull = 2; */
+	/* new_boxesB->cull = 1; */
 
 	entity_signal(c_entity(self), sig("spacial_changed"), &self->blocks, NULL);
 
@@ -348,12 +361,12 @@ void c_grid_print(c_grid_t *self)
 	}
 }
 
-mesh_t *mesh_from_grid(c_grid_t *grid, int side, int flags, ...)
+mesh_t *mesh_from_grid(mesh_t *self, c_grid_t *grid, int side, int flags, ...)
 {
-	mesh_t *self = mesh_new();
 	/* self->wireframe = 1; */
 	int x, y, z;
 	mesh_lock(self);
+	mesh_clear(self);
 
 	va_list list;
 
