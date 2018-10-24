@@ -1,21 +1,27 @@
 #include <candle.h>
 #include <components/spacial.h>
 #include <components/node.h>
+#include <utils/nk.h>
 #include "side.h"
-#include "level.h"
+#include "state.h"
 #include "grid.h"
+#include "character.h"
 #include "side_follow.h"
 #include <stdlib.h>
 
 c_side_follow_t *c_side_follow_new()
 {
 	c_side_follow_t *self = component_new("side_follow");
+	self->active = 1;
 	return self;
 }
 
 static int c_side_follow_update(c_side_follow_t *self, float *dt)
 {
-	int side = c_side(&SYS)->side;
+	if(!self->active) return CONTINUE;
+	c_character_t *fc = (c_character_t*)ct_get_nth(ecm_get(ref("character")), 0);
+
+	int side = c_side(fc)->side;
 	c_spacial_t *sc = c_spacial(self);
 	vec3_t pos = sc->pos;
 
@@ -28,11 +34,18 @@ static int c_side_follow_update(c_side_follow_t *self, float *dt)
 		c_spacial_set_pos(sc, pos);
 
 		/* TODO: remove string search from this */
-		entity_t grid = c_level(&SYS)->grid;
-		c_side(self)->side = c_grid_get(c_grid(&grid),
-				pos.x, pos.y, pos.z) & 1;
+		/* entity_t grid = c_state(&SYS)->grid; */
+		/* c_side(self)->side = c_grid_get(c_grid(&grid), */
+				/* pos.x, pos.y, pos.z) & 1; */
 	}
 	
+	return CONTINUE;
+}
+
+int c_side_follow_menu(c_side_follow_t *self, void *ctx)
+{
+	self->active = nk_check_label(ctx, "Follow side", self->active);
+
 	return CONTINUE;
 }
 
@@ -43,5 +56,6 @@ REG()
 			NULL, NULL, 1, ref("spacial"));
 
 	ct_listener(ct, WORLD, sig("world_update"), c_side_follow_update);
+	ct_listener(ct, WORLD, sig("component_menu"), c_side_follow_menu);
 }
 

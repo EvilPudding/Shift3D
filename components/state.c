@@ -1,14 +1,14 @@
 #include <candle.h>
 #include <components/node.h>
 #include <components/name.h>
-#include "level.h"
+#include "state.h"
 #include "side.h"
 #include <stdlib.h>
 #include <string.h>
 
-c_level_t *c_level_new(const char *filename)
+c_state_t *c_state_new(const char *filename)
 {
-	c_level_t *self = component_new("level");
+	c_state_t *self = component_new("state");
 
 	strcpy(self->file, filename);
 
@@ -25,6 +25,5 @@ c_level_t *c_level_new(const char *filename)
 
 REG()
 {
-	ct_new("level", sizeof(c_level_t), NULL, NULL, 1,
-			ref("side"));
+	ct_new("state", sizeof(c_state_t), NULL, NULL, 0);
 }

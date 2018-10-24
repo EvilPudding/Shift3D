@@ -122,7 +122,7 @@ static void c_physics_handle_collisions(c_rigid_body_t *c1,
 
 	if(cb)
 	{
-		const float width = 0.20;
+		const float width = 0.15;
 		c_velocity_t *vc = c_velocity(d);
 		c_rigid_body_t *rb = c_rigid_body(d);
 		/* if(!vc) return; */
@@ -146,8 +146,8 @@ static void c_physics_handle_collisions(c_rigid_body_t *c1,
 
 		}
 		if(vc->computed_pos.x == vc->pre_movement_pos.x) vc->velocity.x = 0;
-		if(vc->computed_pos.y == vc->pre_movement_pos.y) vc->velocity.y = 0;
 		if(vc->computed_pos.z == vc->pre_movement_pos.z) vc->velocity.z = 0;
+		if(vc->computed_pos.y == vc->pre_movement_pos.y) vc->velocity.y = 0;
 		/* if(friction) */
 		/* { */
 		/*	 vec3_t dec = vec3_scale(*new_vel, friction); */
@@ -185,8 +185,6 @@ static int c_physics_update(c_physics_t *self, float *dt)
 	{
 		if(!kh_exist(vels->cs, k)) continue;
 		c_velocity_t *vc = (c_velocity_t*)kh_value(vels->cs, k);
-
-		if(!entity_exists(c_entity(vc))) continue;
 
 		c_spacial_t *sc = c_spacial(vc);
 

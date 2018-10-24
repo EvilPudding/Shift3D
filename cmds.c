@@ -5,7 +5,7 @@
 #include "components/bridge.h"
 #include "components/door.h"
 #include "components/movable.h"
-#include "components/level.h"
+#include "components/state.h"
 #include "components/character.h"
 #include "components/charlook.h"
 #include "components/side_follow.h"
@@ -63,7 +63,7 @@ static entity_t cmd_shift_grid(entity_t root, int argc, const char **argv)
 		int val = c_grid_get(grid, x, y, z);
 		if(val & 0x2)
 		{
-			entity_t box = entity_new(c_movable_new(val), c_side_new(!(val&1)),
+			entity_t box = entity_new(c_movable_new(val), c_side_new(!(val&1), 1),
 					c_node_new(),
 					c_model_new(mesh, sauces("stone3.mat"), 1, 1));
 			/* c_model(&box)->before_draw = (before_draw_cb)cmd_model_before_draw; */
@@ -74,7 +74,7 @@ static entity_t cmd_shift_grid(entity_t root, int argc, const char **argv)
 
 	/* getc(fd); */
 
-	entity_t scene = c_level(&SYS)->scene;
+	entity_t scene = c_state(&SYS)->scene;
 
 	entity_signal(entity, sig("grid_update"), NULL, NULL);
 	c_node_add(c_node(&scene), 1, entity);
@@ -96,7 +96,7 @@ static entity_t cmd_key(entity_t root, int argc, const char **argv)
 	sscanf(argv[6], "%d", &rotZ);
 	sscanf(argv[7], "%d", &id);
 
-	entity_t scene = c_level(&SYS)->scene;
+	entity_t scene = c_state(&SYS)->scene;
 
 	entity_t grid = c_node_get_by_name(c_node(&scene), ref("grid"));
 	side = c_grid_get(c_grid(&grid), x, y, z) & 1;
@@ -104,7 +104,7 @@ static entity_t cmd_key(entity_t root, int argc, const char **argv)
 	entity_t key = entity_new(c_name_new("key"),
 			c_node_new(),
 			c_model_new(sauces("key.obj"), sauces("key.mat"), 1, 1),
-			c_side_new(side),
+			c_side_new(side, 0),
 			c_key_new(rotX, rotY, rotZ, id));
 
 	/* sauces_mat("key")->transparency.color = vec4(1.0f, 1.0f, 1.0f, 0.4f); */
@@ -126,19 +126,20 @@ static entity_t cmd_spawn(entity_t root, int argc, const char **argv)
 	sscanf(argv[3], "%f", &z);
 	sscanf(argv[4], "%d", &dir);
 
-	entity_t scene = c_level(&SYS)->scene;
+	entity_t scene = c_state(&SYS)->scene;
 
 	entity_t grid = c_node_get_by_name(c_node(&scene), ref("grid"));
 	side = c_grid_get(c_grid(&grid), x, y, z) & 1;
 
-	c_side(&SYS)->side = side;
-
 	entity_t spawn = entity_new(c_node_new(),
-			c_side_new(side),
+			c_side_new(side, 1),
 			c_spacial_new(),
 			c_name_new("spawn"));
+	c_state(&SYS)->spawn = spawn;
 
 	c_character_t *fc = (c_character_t*)ct_get_nth(ecm_get(ref("character")), 0);
+	c_side(fc)->side = side;
+
 
 	if(side)
 	{
@@ -152,9 +153,10 @@ static entity_t cmd_spawn(entity_t root, int argc, const char **argv)
 	if(fc)
 	{
 		c_spacial_set_pos(c_spacial(fc), vec3(x, y - 0.5, z));
+		c_spacial_rotate_Y(c_spacial(fc), -M_PI / 2);
 		/* c_spacial_set_pos(c_spacial(cc->super.entity), 0, 0.7, 0); */
 	}
-	c_spacial_set_pos(c_spacial(&spawn), vec3(x, y, z));
+	c_spacial_set_pos(c_spacial(&spawn), vec3(x, y - 0.5, z));
 
 	return spawn;
 }
@@ -179,7 +181,7 @@ static entity_t cmd_bridge(entity_t root, int argc, const char **argv)
 	sscanf(argv[9], "%f", &cz);
 	sscanf(argv[10], "%d", &key);
 
-	entity_t bridge = entity_new(c_side_new(2),
+	entity_t bridge = entity_new(c_side_new(2, 1),
 			c_bridge_new(),
 			c_node_new());
 	c_bridge_t *p = c_bridge(&bridge);
@@ -216,6 +218,7 @@ static entity_t cmd_bridge(entity_t root, int argc, const char **argv)
 	return bridge;
 }
 
+static mesh_t *g_portal;
 static entity_t cmd_door(entity_t root, int argc, const char **argv)
 {
 	float x, y, z;
@@ -229,16 +232,28 @@ static entity_t cmd_door(entity_t root, int argc, const char **argv)
 	sscanf(argv[4], "%d", &dir);
 	strcpy(next, argv[5]); 
 
-	entity_t scene = c_level(&SYS)->scene;
+	entity_t scene = c_state(&SYS)->scene;
+
+	if(!g_portal)
+	{
+		g_portal = mesh_new();
+		mesh_add_regular_quad(g_portal,
+				vec3(0.0f, 0.0f, 0.3f), Z3, Z2, vec3(0.0f, 0.0f, -0.3f), Z3, Z2,
+				vec3(0.0f, 0.9f, -0.3f), Z3, Z2, vec3(0.0f, 0.9f, 0.3f), Z3, Z2);
+		g_portal->cull = 0;
+	}
 
 	entity_t grid = c_node_get_by_name(c_node(&scene), ref("grid"));
 	side = c_grid_get(c_grid(&grid), x, y, z) & 1;
 
 	entity_t door = entity_new(c_name_new("door"),
 			c_model_new(sauces("door.obj"), sauces("door.mat"), 1, 1),
-			c_side_new(side),
+			c_side_new(side, 0),
 			c_node_new(),
 			c_door_new(next));
+	entity_t portal = entity_new(c_model_new(g_portal, mat_new("portal"), 0, 1));
+	drawable_set_group(&c_model(&portal)->draw, ref("portal"));
+	c_node_add(c_node(&door), 1, portal);
 	/* c_model(&door)->before_draw = (before_draw_cb)cmd_model_before_draw; */
 
 	c_spacial_set_pos(c_spacial(&door), vec3(x, y - 0.5 * (side ? -1:1), z));
@@ -262,14 +277,14 @@ static entity_t cmd_light(entity_t root, int argc, const char **argv)
 	sscanf(argv[6], "%f", &color.g);
 	sscanf(argv[7], "%f", &color.b);
 
-	entity_t scene = c_level(&SYS)->scene;
+	entity_t scene = c_state(&SYS)->scene;
 
 	entity_t grid = c_node_get_by_name(c_node(&scene), ref("grid"));
 	side = c_grid_get(c_grid(&grid), x, y, z) & 1;
 
 	entity_t light = entity_new(c_name_new("light"),
 			c_name_new("light"),
-			c_side_new(side),
+			c_side_new(side, 0),
 			c_node_new(),
 			c_side_follow_new(),
 			c_light_new(20.0f, color, 512));

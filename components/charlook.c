@@ -4,8 +4,9 @@
 #include <components/spacial.h>
 #include <components/force.h>
 #include <components/node.h>
-#include "level.h"
+#include "state.h"
 #include "grid.h"
+#include "character.h"
 #include <systems/mouse.h>
 #include <candle.h>
 #include <math.h>
@@ -15,6 +16,7 @@
 void c_charlook_init(c_charlook_t *self)
 {
 	self->win_min_side = 1080;
+	self->side = -1;
 }
 
 c_charlook_t *c_charlook_new(entity_t x, float sensitivity)
@@ -64,11 +66,11 @@ int c_charlook_update(c_charlook_t *self, float *dt)
 	}
 	vec3_t cam_pos = vec3_round(c_node_local_to_global(c_node(self), vec3(0.0f)));
 
-	c_level_t *level = c_level(&SYS);
+	c_state_t *state = c_state(&SYS);
 
-	if(level)
+	if(state)
 	{
-		c_grid_t *gc = c_grid(&level->grid);
+		c_grid_t *gc = c_grid(&state->grid);
 		if(gc)
 		{
 			int side = c_grid_get(gc, _vec3(cam_pos));
@@ -98,7 +100,8 @@ int c_charlook_mouse_move(c_charlook_t *self, mouse_move_data *event)
 	if(self->xrot > max_up && inc_y > 0) inc_y = 0;
 	if(self->xrot < max_down && inc_y < 0) inc_y = 0;
 
-	c_side_t *sidec = c_side(&SYS);
+	c_character_t *fc = (c_character_t*)ct_get_nth(ecm_get(ref("character")), 0);
+	c_side_t *sidec = c_side(fc);
 	if(!sidec) return CONTINUE;
 	int side = sidec->side;
 	inc_x = side ? -inc_x : inc_x;
@@ -114,6 +117,7 @@ int c_charlook_mouse_move(c_charlook_t *self, mouse_move_data *event)
 	c_spacial_rotate_Z(sc, -old_rot);
 	c_spacial_rotate_Y(sc, inc_x);
 	c_spacial_rotate_Z(sc, old_rot);
+	/* vec4_print(sc->rot_quat); */
 
 	return CONTINUE;
 }

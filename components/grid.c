@@ -6,8 +6,9 @@
 #include <components/spacial.h>
 #include <components/node.h>
 #include "grid.h"
-#include "level.h"
+#include "state.h"
 #include "side.h"
+#include "character.h"
 #include "movable.h"
 #include <stdlib.h>
 
@@ -32,13 +33,16 @@ int plane_to_side(mesh_t *mesh, int val0, int flag, c_grid_t *grid,
 
 float c_rigid_body_grid_collider(c_rigid_body_t *self, vec3_t pos)
 {
-	
-	int side = c_side(&SYS)->side;
+	c_character_t *fc = (c_character_t*)ct_get_nth(ecm_get(ref("character")), 0);
+	int side = c_side(fc)->side;
 
 	c_grid_t *g = c_grid(self);
-	int val = c_grid_get(g, round(pos.x), round(pos.y), round(pos.z));
+	pos = vec3_round(pos);
+	int val = c_grid_get(g, _vec3(pos));
 
-	return ((val&1) != side || val == -1) ? 0 : -1;
+	int ret = ((val&1) != side || val == -1) ? 0 : -1;
+
+	return ret;
 }
 
 c_grid_t *c_grid_new(int mx, int my, int mz)
@@ -50,11 +54,11 @@ c_grid_t *c_grid_new(int mx, int my, int mz)
 	self->mz = mz;
 	self->map = calloc(mx * my * mz, sizeof(*self->map));
 
-	self->blocks = entity_new(c_name_new("blocks"), c_side_new(0),
+	self->blocks = entity_new(c_name_new("blocks"), c_side_new(0, 1),
 			/* c_model_new(NULL, candle_mat_get(candle, "white"), 1)); */
 			c_model_new(mesh_new(), sauces("white.mat"), 1, 1));
 
-	self->cage = entity_new(c_name_new("cage"), c_side_new(0),
+	self->cage = entity_new(c_name_new("cage"), c_side_new(0, 1),
 			c_model_new(mesh_new(), sauces("piramids.mat"), 1, 1));
 
 	mat_t *stone3 = sauces("stone3.mat");
@@ -62,16 +66,16 @@ c_grid_t *c_grid_new(int mx, int my, int mz)
 	stone3->albedo.blend = 0.5;
 	stone3->normal.blend = 0.3;
 
-	self->boxes = entity_new(c_name_new("movable"), c_side_new(0),
+	self->boxes = entity_new(c_name_new("movable"), c_side_new(0, 1),
 			c_model_new(mesh_new(), stone3, 1, 1), 0, 1);
 
-	self->blocks_inv = entity_new(c_name_new("bloc_i"), c_side_new(1),
+	self->blocks_inv = entity_new(c_name_new("bloc_i"), c_side_new(1, 1),
 			c_model_new(mesh_new(), sauces("piramids.mat"), 1, 1));
 
-	self->cage_inv = entity_new(c_name_new("cage_i"), c_side_new(1),
+	self->cage_inv = entity_new(c_name_new("cage_i"), c_side_new(1, 1),
 			c_model_new(mesh_new(), sauces("white.mat"), 1, 1));
 
-	self->boxes_inv = entity_new(c_name_new("movab_i"), c_side_new(1),
+	self->boxes_inv = entity_new(c_name_new("movab_i"), c_side_new(1, 1),
 			c_model_new(mesh_new(), stone3, 1, 1));
 
 	/* c_model(&self->blocks_inv)->before_draw = */
@@ -84,9 +88,9 @@ c_grid_t *c_grid_new(int mx, int my, int mz)
 	/* 	c_model(&self->boxes)->before_draw = */
 	/* 	(before_draw_cb)cmd_model_before_draw; */
 
-	if(c_level(&SYS))
+	if(c_state(&SYS))
 	{
-		c_level(&SYS)->grid = c_entity(self);
+		c_state(&SYS)->grid = c_entity(self);
 	}
 
 	return self;
@@ -282,20 +286,20 @@ int c_grid_get(c_grid_t *self, int x, int y, int z)
 	return self->map[z + (y * self->mz + x) * self->mx];
 }
 
-int c_grid_side_changed(c_grid_t *self, int *side)
-{
-	int none = *side == -1;
-	int normal = !none && ((*side) & 1) == 0;
-	int inverse = !none && ((*side) & 1) == 1;
+/* int c_grid_side_changed(c_grid_t *self, int *side) */
+/* { */
+/* 	int none = *side == -1; */
+/* 	int normal = !none && ((*side) & 1) == 0; */
+/* 	int inverse = !none && ((*side) & 1) == 1; */
 
-	c_model_set_visible(c_model(&self->blocks), normal);
-	c_model_set_visible(c_model(&self->cage), normal);
-	c_model_set_visible(c_model(&self->boxes), normal);
-	c_model_set_visible(c_model(&self->blocks_inv), inverse);
-	c_model_set_visible(c_model(&self->cage_inv), inverse);
-	c_model_set_visible(c_model(&self->boxes_inv), inverse);
-	return CONTINUE;
-}
+/* 	c_model_set_visible(c_model(&self->blocks), normal); */
+/* 	c_model_set_visible(c_model(&self->cage), normal); */
+/* 	c_model_set_visible(c_model(&self->boxes), normal); */
+/* 	c_model_set_visible(c_model(&self->blocks_inv), inverse); */
+/* 	c_model_set_visible(c_model(&self->cage_inv), inverse); */
+/* 	c_model_set_visible(c_model(&self->boxes_inv), inverse); */
+/* 	return CONTINUE; */
+/* } */
 
 REG()
 {
@@ -304,7 +308,6 @@ REG()
 	signal_init(sig("grid_update"), 0);
 
 	ct_listener(ct, WORLD, sig("grid_update"), c_grid_update);
-	ct_listener(ct, WORLD, sig("side_changed"), c_grid_side_changed);
 	ct_listener(ct, ENTITY, sig("entity_created"), c_grid_created);
 }
 

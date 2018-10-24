@@ -1,6 +1,6 @@
 #include <candle.h>
 #include "movable.h"
-#include "level.h"
+#include "state.h"
 #include "side.h"
 #include "grid.h"
 #include <stdlib.h>
@@ -18,8 +18,8 @@ c_movable_t *c_movable_new(int value)
 void push_at(int x, int y, int z, int value, vec3_t from)
 {
 	khiter_t k;
-	c_level_t *level = c_level(&SYS);
-	c_grid_t *gc = c_grid(&level->grid);
+	c_state_t *state = c_state(&SYS);
+	c_grid_t *gc = c_grid(&state->grid);
 
 	ct_t *movables = ecm_get(ref("movable"));
 	vec3_t pos = vec3(x, y, z);
@@ -65,12 +65,6 @@ void push_at(int x, int y, int z, int value, vec3_t from)
 	}
 }
 
-static int c_movable_side_changed(c_movable_t *self, int *side)
-{
-	c_model_set_visible(c_model(self), (self->value & 1) != (*side & 1));
-	return CONTINUE;
-}
-
 static int c_movable_update(c_movable_t *self, float *dt)
 {
 	if(!self->moving) return CONTINUE;
@@ -107,8 +101,8 @@ static int c_movable_update(c_movable_t *self, float *dt)
 	}
 	else
 	{
-		c_level_t *level = c_level(&SYS);
-		c_grid_t *gc = c_grid(&level->grid);
+		c_state_t *state = c_state(&SYS);
+		c_grid_t *gc = c_grid(&state->grid);
 
 		int side = c_side(self)->side;
 		int dir = (side?side:-1);
@@ -140,7 +134,6 @@ REG()
 	ct_t *ct = ct_new("movable", sizeof(c_movable_t), NULL, NULL, 0);
 
 	ct_listener(ct, WORLD, sig("world_update"), c_movable_update);
-	ct_listener(ct, WORLD, sig("side_changed"), c_movable_side_changed);
 }
 
 

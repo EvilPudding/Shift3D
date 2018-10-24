@@ -6,7 +6,7 @@
 #include <components/node.h>
 #include <components/rigid_body.h>
 #include <components/force.h>
-#include "level.h"
+#include "state.h"
 #include "movable.h"
 #include "charlook.h"
 #include "grid.h"
@@ -30,12 +30,56 @@ c_character_t *c_character_new(entity_t orientation, int plane_movement, entity_
 	return self;
 }
 
+void c_character_teleport(c_character_t *self, entity_t in, entity_t out)
+{
+	if(entity_exists(self->in)) return;
+	self->in = in;
+	self->out = out;
+}
+
+static void _c_character_teleport(c_character_t *self)
+{
+	/* c_charlook_t *charlook = (c_charlook_t*)ct_get_nth(ecm_get(ref("charlook")), 0); */
+	/* c_spacial_t *cam = c_spacial(charlook); */
+	c_spacial_t *in = c_spacial(&self->in);
+	c_spacial_t *out = c_spacial(&self->out);
+	c_spacial_t *body = c_spacial(&self->orientation);
+	c_spacial_t *sc = c_spacial(self);
+	c_velocity_t *vc = c_velocity(self);
+
+	mat4_t model = sc->model_matrix;
+	vec4_t rot = body->rot_quat;
+	vec4_print(body->rot_quat);
+
+	{
+		model = mat4_mul(mat4_invert(in->model_matrix), model);
+		rot = quat_mul(quat_invert(in->rot_quat), rot);
+	}
+	{
+		model = mat4_mul(out->model_matrix, model);
+	}
+
+	vec3_t npos = mat4_mul_vec4(model, vec4(0.0f, 0.01f, 0.0f, 1.0f)).xyz;
+	c_spacial_lock(body);
+	vc->velocity = quat_mul_vec3(rot, vc->velocity);
+	body->rot_quat = rot;
+	body->update_id++;
+	body->modified = 1;
+	c_spacial_unlock(body);
+
+	c_spacial_set_pos(sc, npos);
+
+	self->in = entity_null;
+	self->out = entity_null;
+}
+
+
 int c_character_update(c_character_t *self, float *dt)
 {
-	c_level_t *level = c_level(&SYS);
-	if(!level) return 1;
-	c_side_t *ss = c_side(&SYS);
-	c_grid_t *gc = c_grid(&level->grid);
+	c_state_t *state = c_state(&SYS);
+	if(!state) return 1;
+	c_side_t *ss = c_side(self);
+	c_grid_t *gc = c_grid(&state->grid);
 	if(!gc) return 1;
 	const float corner = 1.0f / sqrtf(2.0f);
 	c_spacial_t *ori = c_spacial(&self->orientation);
@@ -45,6 +89,7 @@ int c_character_update(c_character_t *self, float *dt)
 	vec3_t *vel = &vc->velocity;
 	float accel = 87.0f * (*dt);
 
+	if(entity_exists(self->in)) _c_character_teleport(self);
 
 	c_spacial_t *sc = c_spacial(self);
 	c_spacial_lock(sc);
@@ -67,7 +112,11 @@ int c_character_update(c_character_t *self, float *dt)
 	int floored = vec3_dot(up_dir, vc->normal) > 0;
 
 	vec3_t f = vec3_round(vec3_sub(sc->pos, vec3_scale(up_dir, 0.4)));
-	int shiftable = (c_grid_get(gc, f.x, f.y, f.z) & 1) != ss->side;
+	/* vec3_t f = vec3_round(vec3_sub(sc->pos, vec3_scale(up_dir, 0.4))); */
+	int shiftable = (c_grid_get(gc, _vec3(f)) & 1) != ss->side;
+
+	*vel = vec3_add(*vel, self->last_vel);
+	self->last_vel = vec3(0.0f);
 
 	if((self->left + self->right) && (self->forward || self->backward))
 	{
@@ -95,7 +144,6 @@ int c_character_update(c_character_t *self, float *dt)
 	}
 	vec3_t tang_speed = vec3_mul(tang, *vel);
 
-
 	if(self->swap == 1 && shiftable)
 	{
 		entity_signal(c_entity(self), sig("grid_update"), NULL, NULL);
@@ -104,6 +152,7 @@ int c_character_update(c_character_t *self, float *dt)
 		/* c_force(self->force_down)->force = vec3(0.0, 0.0, 30.0); */
 		/* *vel = self->last_vel; */
 
+		self->last_vel = *vel;
 		ss->side = !ss->side;
 
 		sc->pos = vec3_round(sc->pos);
@@ -113,14 +162,13 @@ int c_character_update(c_character_t *self, float *dt)
 		/* c_charlook_toggle_side(c_charlook(&self->orientation)); */
 		/* c_spacial_scale(sc, vec3(1, -1, 1)); */
 
+		c_rigid_body(self)->offset = -c_rigid_body(self)->offset;
 		if(self->targR == 0)
 		{
-			c_rigid_body(self)->offset = -0.8;
 			self->targR = M_PI;
 		}
 		else
 		{
-			c_rigid_body(self)->offset = 0.8;
 			self->targR = 0;
 		}
 		goto end;
@@ -156,6 +204,7 @@ int c_character_update(c_character_t *self, float *dt)
 				*vel = vec3(0);
 			}
 		}
+		self->max_jump_vel = fmax(0.8, vec3_len(tang_speed));
 
 		if(self->jump == 1)
 		{
@@ -163,7 +212,6 @@ int c_character_update(c_character_t *self, float *dt)
 			/* self->jump = 0; */
 			*vel = vec3_add(*vel, vec3_scale(up_dir, 10));
 
-			self->max_jump_vel = fmax(0.8, vec3_len(tang_speed));
 		}
 
 		vec3_t dec = vec3_scale(*vel, 14 * *dt);
@@ -171,7 +219,6 @@ int c_character_update(c_character_t *self, float *dt)
 	}
 
 end:
-	self->last_vel = *vel;
 
 	c_spacial_unlock(sc);
 
@@ -223,8 +270,8 @@ int c_character_key_down(c_character_t *self, char *key)
 REG()
 {
 	ct_t *ct = ct_new("character", sizeof(c_character_t),
-			NULL, NULL, 3, ref("velocity"), ref("node"),
-			ref("rigid_body"));
+			NULL, NULL, 4, ref("velocity"), ref("node"),
+			ref("rigid_body"), ref("side"));
 
 	ct_listener(ct, WORLD, sig("key_up"), c_character_key_up);
 

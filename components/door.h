@@ -2,6 +2,8 @@
 #define DOOR_H
 
 #include <ecs/ecm.h>
+#include <utils/renderer.h>
+#include <utils/drawable.h>
 
 typedef struct
 {
@@ -9,6 +11,9 @@ typedef struct
 
     int activated;
 	char next[256];
+	drawable_t draw;
+	renderer_t *renderer;
+	entity_t mirror;
 } c_door_t;
 
 DEF_CASTER("door", c_door, c_door_t);

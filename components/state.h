@@ -10,12 +10,13 @@ typedef struct
 
 	entity_t grid;
 	entity_t scene;
+	entity_t spawn;
 	char file[256];
-} c_level_t;
+} c_state_t;
 
-DEF_CASTER("level", c_level, c_level_t);
+DEF_CASTER("state", c_state, c_state_t);
 
-c_level_t *c_level_new(const char *filename);
-void c_level_register(void);
+c_state_t *c_state_new(const char *filename);
+void c_state_register(void);
 
 #endif /* !LEVEL_H */

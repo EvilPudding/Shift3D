@@ -6,6 +6,7 @@
 typedef struct
 {
 	c_t super; /* extends c_t */
+	int active;
 } c_side_follow_t;
 
 DEF_CASTER("side_follow", c_side_follow, c_side_follow_t);
