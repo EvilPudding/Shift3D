@@ -34,7 +34,7 @@ int plane_to_side(mesh_t *mesh, int val0, int flag, c_grid_t *grid,
 float c_rigid_body_grid_collider(c_rigid_body_t *self, vec3_t pos)
 {
 	c_character_t *fc = (c_character_t*)ct_get_nth(ecm_get(ref("character")), 0);
-	int side = c_side(fc)->side;
+	int side = c_side(fc)->side & 1;
 
 	c_grid_t *g = c_grid(self);
 	pos = vec3_round(pos);

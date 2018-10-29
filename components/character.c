@@ -87,7 +87,7 @@ int c_character_update(c_character_t *self, float *dt)
 
 	c_velocity_t *vc = c_velocity(self);
 	vec3_t *vel = &vc->velocity;
-	float accel = 87.0f * (*dt);
+	float accel = 81.5f * (*dt);
 
 	if(entity_exists(self->in)) _c_character_teleport(self);
 
@@ -115,8 +115,14 @@ int c_character_update(c_character_t *self, float *dt)
 	/* vec3_t f = vec3_round(vec3_sub(sc->pos, vec3_scale(up_dir, 0.4))); */
 	int shiftable = (c_grid_get(gc, _vec3(f)) & 1) != ss->side;
 
-	*vel = vec3_add(*vel, self->last_vel);
-	self->last_vel = vec3(0.0f);
+	if(self->last_vel.x != 0 || self->last_vel.y != 0 || self->last_vel.z != 0)
+	{
+		*vel = vec3_add(*vel, self->last_vel);
+		vec3_t tang_speed = vec3_mul(tang, *vel);
+		self->max_jump_vel = fmax(self->max_jump_vel, 5.0f);
+		self->max_jump_vel = fmax(vec3_len(tang_speed), self->max_jump_vel);
+		self->last_vel = vec3(0.0f);
+	}
 
 	if((self->left + self->right) && (self->forward || self->backward))
 	{
@@ -153,14 +159,33 @@ int c_character_update(c_character_t *self, float *dt)
 		/* *vel = self->last_vel; */
 
 		self->last_vel = *vel;
-		ss->side = !ss->side;
 
+		float oy = sc->pos.y;
+		float ox = sc->pos.x;
+		float oz = sc->pos.z;
 		sc->pos = vec3_round(sc->pos);
-		sc->pos = vec3_sub(sc->pos, vec3_scale(up_dir, 0.55));
+		sc->pos = vec3_sub(sc->pos, vec3_scale(up_dir, 0.51));
+		if(up_dir.y != 0.0f)
+		{
+			float dif = oy - sc->pos.y;
+			sc->pos.y = oy - dif * 2;
+		}
+		else if(up_dir.x != 0.0f)
+		{
+			float dif = ox - sc->pos.x;
+			sc->pos.x = ox - dif * 2;
+		}
+		else if(up_dir.z != 0.0f)
+		{
+			float dif = oz - sc->pos.z;
+			sc->pos.z = oz - dif * 2;
+		}
 
+		ss->side = !ss->side;
 		/* c_spacial_set_rot(sc, up_dir.x, up_dir.y, up_dir.z, c_charlook(self->orientation)->yrot); */
 		/* c_charlook_toggle_side(c_charlook(&self->orientation)); */
 		/* c_spacial_scale(sc, vec3(1, -1, 1)); */
+		self->last_vel = vec3_mul(up_line, *vel);
 
 		c_rigid_body(self)->offset = -c_rigid_body(self)->offset;
 		if(self->targR == 0)
@@ -178,9 +203,10 @@ int c_character_update(c_character_t *self, float *dt)
 	if(!floored)
 	{
 		float tang_len = vec3_len(tang_speed);
-		if(tang_len < self->max_jump_vel && !self->forward)
+		if(tang_len < self->max_jump_vel &&
+				!self->forward && !self->right && !self->left)
 		{
-			self->max_jump_vel = fmax(tang_len, 0.3);
+			self->max_jump_vel = fmax(tang_len, 1.3);
 		}
 		else if(tang_len > self->max_jump_vel)
 		{

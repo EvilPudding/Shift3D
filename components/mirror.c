@@ -4,6 +4,7 @@
 #include <components/model.h>
 #include <components/light.h>
 #include <components/name.h>
+#include <components/camera.h>
 
 c_mirror_t *c_mirror_new(entity_t follow, entity_t door_in, entity_t door_out)
 {
@@ -50,6 +51,7 @@ static int c_mirror_update(c_mirror_t *self)
 		sc->modified = 1;
 		sc->update_id++;
 		c_spacial_unlock(sc);
+		c_camera_pre_draw(c_camera(self));
 	}
 	return CONTINUE;
 }
@@ -57,7 +59,7 @@ static int c_mirror_update(c_mirror_t *self)
 REG()
 {
 	ct_t *ct = ct_new("mirror", sizeof(c_mirror_t), NULL, NULL, 1, ref("node"));
-	ct_listener(ct, WORLD, sig("world_update"), c_mirror_update);
+	ct_listener(ct, WORLD | 49, sig("world_pre_draw"), c_mirror_update);
 }
 
 

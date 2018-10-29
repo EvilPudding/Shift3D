@@ -21,11 +21,11 @@ static int c_side_follow_update(c_side_follow_t *self, float *dt)
 	if(!self->active) return CONTINUE;
 	c_character_t *fc = (c_character_t*)ct_get_nth(ecm_get(ref("character")), 0);
 
-	int side = c_side(fc)->side;
+	int side = c_side(fc)->side & 1;
 	c_spacial_t *sc = c_spacial(self);
 	vec3_t pos = sc->pos;
 
-	vec3_t dest = vec3(pos.x, 2.0 + 6.0 * !side, pos.z);
+	vec3_t dest = vec3(pos.x, 2.0 + 7.0 * !side, pos.z);
 	vec3_t inc = vec3_sub(pos, dest);
 	float dist = vec3_len(inc);
 	if(dist > 0.01)

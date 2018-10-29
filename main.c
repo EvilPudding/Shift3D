@@ -49,7 +49,7 @@ renderer_t *shift_renderer(renderer_t *original)
 {
 	renderer_t *self = renderer_new(0.8f);
 
-	texture_t *gbuffer, *portal, *ssao, *rendered, *refr, *selectable,
+	texture_t *gbuffer, *portal, *ssao, *light, *refr, *refr2, *selectable,
 			  *final;
 
 	if(!original)
@@ -63,7 +63,7 @@ renderer_t *shift_renderer(renderer_t *original)
 			buffer_new("ignore", 1, 1),
 			buffer_new("depth",	 1, -1));
 
-		rendered = texture_new_2D(0, 0, 0,
+		light = texture_new_2D(0, 0, 0,
 			buffer_new("color",	1, 4));
 
 		selectable = texture_new_2D(0, 0, 0,
@@ -71,10 +71,19 @@ renderer_t *shift_renderer(renderer_t *original)
 			buffer_new("id",	 1, 2),
 			buffer_new("depth",	 1, -1));
 
+		refr = texture_new_2D(0, 0, TEX_MIPMAP,
+			buffer_new("color",	1, 4));
+
+		refr2 = texture_new_2D(0, 0, TEX_MIPMAP,
+			buffer_new("color",	1, 4));
+
+
 		renderer_add_tex(self, "portal",	 1.0f, portal);
 		renderer_add_tex(self, "gbuffer",	 1.0f, gbuffer);
-		renderer_add_tex(self, "rendered",	 1.0f, rendered);
+		renderer_add_tex(self, "light",	 1.0f, light);
 		renderer_add_tex(self, "selectable", 1.0f, selectable);
+		renderer_add_tex(self, "refr",		 1.0f, refr);
+		renderer_add_tex(self, "refr2",		 1.0f, refr2);
 		self->output = gbuffer;
 	}
 	else
@@ -84,27 +93,25 @@ renderer_t *shift_renderer(renderer_t *original)
 			buffer_new("albedo", 1, 4),
 			buffer_new("depth",	 1, -1)
 		);
-		final = texture_new_2D(0, 0, TEX_INTERPOLATE,
+		final = texture_new_2D(0, 0, TEX_INTERPOLATE | TEX_MIPMAP,
 			buffer_new("color",	1, 4));
 
 		ssao = texture_new_2D(0, 0, 0,
 			buffer_new("occlusion",	1, 1));
 
-		refr = texture_new_2D(0, 0, TEX_MIPMAP,
-			buffer_new("color",	1, 4));
-
-		rendered = texture_new_2D(0, 0, 0,
+		light = texture_new_2D(0, 0, 0,
 			buffer_new("color",	1, 4));
 
 		final->track_brightness = 1;
 
 		renderer_add_tex(self, "gbuffer",	 1.0f, gbuffer);
 		renderer_add_tex(self, "final",		 1.0f, final);
-		renderer_add_tex(self, "refr",		 1.0f, refr);
 		renderer_add_tex(self, "ssao",		 1.0f, ssao);
-		renderer_add_tex(self, "rendered",	 1.0f, rendered);
+		renderer_add_tex(self, "light",	 1.0f, light);
 
 		portal = renderer_tex(original, ref("portal"));
+		refr = renderer_tex(original, ref("refr"));
+		refr2 = renderer_tex(original, ref("refr2"));
 		selectable = renderer_tex(original, ref("selectable"));
 
 		self->output = final;
@@ -113,7 +120,7 @@ renderer_t *shift_renderer(renderer_t *original)
 	if(!original)
 	{
 		renderer_add_pass(self, "gbuffer", "gbuffer", ref("visible"), 0,
-				gbuffer, gbuffer,
+				gbuffer, gbuffer, 0,
 			(bind_t[]){
 				{CLEAR_DEPTH, .number = 1.0f},
 				{CLEAR_COLOR, .vec4 = vec4(0.0f)},
@@ -121,17 +128,8 @@ renderer_t *shift_renderer(renderer_t *original)
 			}
 		);
 
-		renderer_add_pass(self, "portal", "portal", ref("portal"),
-				DEPTH_DISABLE, portal, portal,
-			(bind_t[]){
-				{CLEAR_DEPTH, .number = 0.0f},
-				{CLEAR_COLOR, .vec4 = vec4(0.0f)},
-				{TEX, "gbuffer", .buffer = gbuffer},
-				{NONE}
-			}
-		);
 		renderer_add_pass(self, "selectable", "select", ref("selectable"),
-				0, selectable, selectable,
+				0, selectable, selectable, 0,
 			(bind_t[]){
 				{CLEAR_DEPTH, .number = 1.0f},
 				{CLEAR_COLOR, .vec4 = vec4(0.0f)},
@@ -142,7 +140,7 @@ renderer_t *shift_renderer(renderer_t *original)
 		/* DECAL PASS */
 		renderer_add_pass(self, "decals_pass", "decals", ref("decals"),
 				DEPTH_LOCK | DEPTH_EQUAL | DEPTH_GREATER,
-				gbuffer, gbuffer,
+				gbuffer, gbuffer, 0,
 			(bind_t[]){
 				{TEX, "gbuffer", .buffer = gbuffer},
 				{NONE}
@@ -153,7 +151,7 @@ renderer_t *shift_renderer(renderer_t *original)
 	else
 	{
 		renderer_add_pass(self, "gbuffer", "masked_gbuffer", ref("visible"), 0,
-				gbuffer, gbuffer,
+				gbuffer, gbuffer, 0,
 			(bind_t[]){
 				{CLEAR_DEPTH, .number = 1.0f},
 				{CLEAR_COLOR, .vec4 = vec4(0.0f)},
@@ -164,7 +162,7 @@ renderer_t *shift_renderer(renderer_t *original)
 	}
 
 	renderer_add_pass(self, "ambient_light_pass", "phong", ref("ambient"),
-			ADD, rendered, NULL,
+			ADD, light, NULL, 0,
 		(bind_t[]){
 			{CLEAR_COLOR, .vec4 = vec4(0.0f)},
 			{TEX, "gbuffer", .buffer = gbuffer},
@@ -173,67 +171,86 @@ renderer_t *shift_renderer(renderer_t *original)
 	);
 
 	renderer_add_pass(self, "render_pass", "phong", ref("light"),
-			DEPTH_LOCK | ADD | DEPTH_EQUAL | DEPTH_GREATER, rendered, gbuffer,
+			DEPTH_LOCK | ADD | DEPTH_EQUAL | DEPTH_GREATER, light, gbuffer, 0,
 		(bind_t[]){
 			{TEX, "gbuffer", .buffer = gbuffer},
 			{NONE}
 		}
 	);
 
-	if(original)
+	renderer_add_pass(self, "refraction", "copy", ref("quad"), MANUAL_MIP,
+			refr, NULL, 0,
+		(bind_t[]){
+			{TEX, "buf", .buffer = light},
+			{INT, "level", .integer = 0},
+			{NONE}
+		}
+	);
+
+	if(!original)
+	{
+		renderer_add_kawase(self, refr, refr2, 1);
+		renderer_add_kawase(self, refr, refr2, 2);
+		renderer_add_kawase(self, refr, refr2, 3);
+
+		renderer_add_pass(self, "transp", "transparency", ref("transparent"),
+				DEPTH_EQUAL, light, gbuffer, 0,
+			(bind_t[]){
+				{TEX, "refr", .buffer = refr},
+				{NONE}
+			}
+		);
+		renderer_add_pass(self, "transp_1", "gbuffer", ref("transparent"),
+				0, gbuffer, gbuffer, 0, (bind_t[]){ {NONE} });
+		renderer_add_pass(self, "portal", "portal", ref("portal"),
+				DEPTH_DISABLE, portal, portal, 0,
+			(bind_t[]){
+				{CLEAR_DEPTH, .number = 0.0f},
+				{CLEAR_COLOR, .vec4 = vec4(0.0f)},
+				{TEX, "gbuffer", .buffer = gbuffer},
+				{NONE}
+			}
+		);
+	}
+	else
 	{
 		texture_t *gb = renderer_tex(original, ref("gbuffer"));
-		texture_t *rn = renderer_tex(original, ref("rendered"));
+		texture_t *rn = renderer_tex(original, ref("light"));
 
 		renderer_add_pass(self, "copy_gbuffer", "copy_gbuffer", ref("quad"),
-				DEPTH_DISABLE, gb, gb,
+				DEPTH_DISABLE, gb, gb, 0,
 			(bind_t[]){
 				{TEX, "buf", .buffer = gbuffer},
 				{NONE}
 			}
 		);
 
-		renderer_add_pass(self, "copy_rendered", "copy", ref("quad"), 0,
-				rn, NULL,
+		renderer_add_pass(self, "copy_light", "copy", ref("quad"), 0,
+				rn, NULL, 0,
 			(bind_t[]){
-				{TEX, "buf", .buffer = rendered},
+				{TEX, "buf", .buffer = light},
+				{INT, "level", .integer = 0},
 				{NONE}
 			}
 		);
 
 		gbuffer = gb;
-		rendered = rn;
+		light = rn;
 
 		renderer_add_pass(self, "ssao_pass", "ssao", ref("quad"), 0,
-				ssao, NULL,
+				ssao, NULL, 0,
 			(bind_t[]){
 				{TEX, "gbuffer", .buffer = gbuffer},
 				{NONE}
 			}
 		);
 
-		renderer_add_pass(self, "refraction", "copy", ref("quad"), 0,
-				refr, NULL,
-			(bind_t[]){
-				{TEX, "buf", .buffer = rendered},
-				{NONE}
-			}
-		);
-
-		renderer_add_pass(self, "transp", "transparency", ref("transparent"),
-				DEPTH_EQUAL, rendered, gbuffer,
-			(bind_t[]){
-				{TEX, "refr", .buffer = refr},
-				{NONE}
-			}
-		);
-		/* renderer_add_pass(self, "transp_1", "gbuffer", ref("transparent"), */
-				/* 0, gbuffer, gbuffer, (bind_t[]){ {NONE} }); */
-		renderer_add_pass(self, "final", "ssr", ref("quad"), 0, final, NULL,
+		renderer_add_pass(self, "final", "ssr", ref("quad"), 0, final, NULL, 0,
 			(bind_t[]){
 				{CLEAR_COLOR, .vec4 = vec4(0.0f)},
 				{TEX, "gbuffer", .buffer = gbuffer},
-				{TEX, "rendered", .buffer = rendered},
+				{TEX, "light", .buffer = light},
+				{TEX, "refr", .buffer = refr},
 				{TEX, "ssao", .buffer = ssao},
 				{NONE}
 			}
@@ -266,7 +283,7 @@ int main(int argc, char **argv)
 
 	reg_custom_cmds();
 
-	g = entity_new(c_name_new("gravity"), c_force_new(0.0, -21, 0.0, 1));
+	g = entity_new(c_name_new("gravity"), c_force_new(0.0, -23, 0.0, 1));
 
 	body = entity_new(c_name_new("body"), c_node_new());
 
@@ -275,7 +292,7 @@ int main(int argc, char **argv)
 	
 	camera = entity_new(
 			c_name_new("camera"),
-			c_camera_new(70, 0.1, 100.0, 1, 1, 0, renderer),
+			c_camera_new(70, 0.1, 100.0, 0, 1, 0, renderer),
 			c_charlook_new(body, 1.9)
 	);
 
@@ -305,11 +322,34 @@ int main(int argc, char **argv)
 	/* mat->roughness.color = vec4(0); */
 	/* mat->albedo.blend = 1; */
 
-/* 	entity_t par = entity_new(c_node_new()); */
-/* 	for(int i = 0; i < 3000; i++) */
-/* 	{ */
-/* 		spawn_sprite(par); */
-/* 	} */
+	/* entity_t par = entity_new(c_node_new()); */
+	/* for(int i = 0; i < 3000; i++) */
+	/* { */
+	/* 	spawn_sprite(par); */
+	/* } */
+	mat_t *mat = mat_new("gl");
+	mat->roughness.texture = sauces("rough.png");
+	mat->roughness.blend = 0.4;
+	mat->transparency.color = vec4(0, 0, 0, 1);
+	mesh_t *glass = mesh_new();
+	mesh_quad(glass);
+	entity_t venus = entity_new(
+			c_name_new("venus"),
+			c_model_new(glass, mat, 1, 1)
+	);
+	c_spacial_set_pos(c_spacial(&venus), vec3(7.0, 6.5, -0.37));
+	c_spacial_set_scale(c_spacial(&venus), vec3(1.69, 1.0, 1));
+
+	mat_t *bok = mat_new("bk");
+	bok->albedo.texture = sauces("boku.png");
+	bok->albedo.blend = 1;
+
+	entity_t boku = entity_new(
+			c_name_new("venus"),
+			c_model_new(glass, bok, 1, 1)
+	);
+	c_spacial_set_pos(c_spacial(&boku), vec3(7.0, 6.5, -0.4));
+	c_spacial_set_scale(c_spacial(&boku), vec3(1.69, 1.0, 1));
 
 	//c_window_toggle_fullscreen(c_window(&candle->systems));
 

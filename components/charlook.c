@@ -104,7 +104,7 @@ int c_charlook_mouse_move(c_charlook_t *self, mouse_move_data *event)
 	c_side_t *sidec = c_side(fc);
 	if(!sidec) return CONTINUE;
 	int side = sidec->side;
-	inc_x = side ? -inc_x : inc_x;
+	inc_x = (side & 1) ? -inc_x : inc_x;
 
 	self->yrot += inc_x;
 	self->xrot += inc_y;

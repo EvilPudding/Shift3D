@@ -246,8 +246,10 @@ static entity_t cmd_door(entity_t root, int argc, const char **argv)
 	entity_t grid = c_node_get_by_name(c_node(&scene), ref("grid"));
 	side = c_grid_get(c_grid(&grid), x, y, z) & 1;
 
+	mesh_t *door_mesh = sauces("door.obj");
+	door_mesh->smooth_angle = 0;
 	entity_t door = entity_new(c_name_new("door"),
-			c_model_new(sauces("door.obj"), sauces("door.mat"), 1, 1),
+			c_model_new(door_mesh, sauces("door.mat"), 1, 1),
 			c_side_new(side, 0),
 			c_node_new(),
 			c_door_new(next));
@@ -287,7 +289,7 @@ static entity_t cmd_light(entity_t root, int argc, const char **argv)
 			c_side_new(side, 0),
 			c_node_new(),
 			c_side_follow_new(),
-			c_light_new(20.0f, color, 512));
+			c_light_new(20.0f, color, 1024));
 
 	/* c_light(light)->before_draw = (before_draw_cb)cmd_light_before_draw; */
 

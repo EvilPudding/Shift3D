@@ -42,7 +42,6 @@ static int c_side_changed(c_side_t *self, int *side)
 	c_light_t *lc = c_light(self);
 	if(lc)
 	{
-		printf("%d\n", visible);
 		c_light_visible(lc, visible);
 	}
 
