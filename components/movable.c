@@ -1,6 +1,6 @@
 #include <candle.h>
 #include "movable.h"
-#include "state.h"
+#include "level.h"
 #include "side.h"
 #include "grid.h"
 #include <stdlib.h>
@@ -15,11 +15,11 @@ c_movable_t *c_movable_new(int value)
 	return self;
 }
 
-void push_at(int x, int y, int z, int value, vec3_t from)
+void push_at(entity_t lvl, int x, int y, int z, int value, vec3_t from)
 {
 	khiter_t k;
-	c_state_t *state = c_state(&SYS);
-	c_grid_t *gc = c_grid(&state->grid);
+	c_level_t *level = c_level(&lvl);
+	c_grid_t *gc = c_grid(&level->grid);
 
 	ct_t *movables = ecm_get(ref("movable"));
 	vec3_t pos = vec3(x, y, z);
@@ -101,11 +101,12 @@ static int c_movable_update(c_movable_t *self, float *dt)
 	}
 	else
 	{
-		c_state_t *state = c_state(&SYS);
-		c_grid_t *gc = c_grid(&state->grid);
+		c_side_t *ss = c_side(self);
+		c_level_t *level = c_level(&ss->level);
+		c_grid_t *gc = c_grid(&level->grid);
 
-		int side = c_side(self)->side;
-		int dir = (side?side:-1);
+		int side = ss->side & 1;
+		int dir = side ? 1 : -1;
 		vec3_t rnd = vec3_round(sc->pos);
 
 		int ground = c_grid_get(gc, rnd.x, rnd.y + dir, rnd.z);
@@ -113,7 +114,7 @@ static int c_movable_update(c_movable_t *self, float *dt)
 		if((ground&1) != side || ground == -1)
 		{
 			c_spacial_set_pos(sc, rnd);
-			c_grid_set(gc, sc->pos.x, sc->pos.y, sc->pos.z, 2 | (!side));
+			c_grid_set(gc, sc->pos.x, sc->pos.y, sc->pos.z, 2 | !side);
 			self->moving = 0;
 			self->sy = 0;
 			/* entity_signal(c_entity(self), sig("grid_update"), NULL, NULL); */

@@ -3,7 +3,7 @@
 #include <components/node.h>
 #include <utils/nk.h>
 #include "side.h"
-#include "state.h"
+#include "level.h"
 #include "grid.h"
 #include "character.h"
 #include "side_follow.h"
@@ -19,9 +19,14 @@ c_side_follow_t *c_side_follow_new()
 static int c_side_follow_update(c_side_follow_t *self, float *dt)
 {
 	if(!self->active) return CONTINUE;
-	c_character_t *fc = (c_character_t*)ct_get_nth(ecm_get(ref("character")), 0);
+	c_side_t *ss = c_side(self);
+	if(!ss) return CONTINUE;
+	c_level_t *level = c_level(&ss->level);
 
-	int side = c_side(fc)->side & 1;
+	ss = c_side(&level->pov);
+	if(!ss) return CONTINUE;
+
+	int side = ss->side & 1;
 	c_spacial_t *sc = c_spacial(self);
 	vec3_t pos = sc->pos;
 

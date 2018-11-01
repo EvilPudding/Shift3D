@@ -7,7 +7,7 @@
 #include "components/door.h"
 #include "components/grid.h"
 #include "components/key.h"
-#include "components/state.h"
+#include "components/level.h"
 #include "components/movable.h"
 #include "components/side.h"
 #include "components/side_follow.h"
@@ -51,9 +51,11 @@ renderer_t *shift_renderer(renderer_t *original)
 
 	texture_t *gbuffer, *portal, *ssao, *light, *refr, *refr2, *selectable,
 			  *final;
+	uint32_t light_group;
 
 	if(!original)
 	{
+		light_group = ref("light");
 		gbuffer =	texture_new_2D(0, 0, 0, 0,
 			buffer_new("nmr",	 1, 4),
 			buffer_new("albedo", 1, 4),
@@ -71,54 +73,19 @@ renderer_t *shift_renderer(renderer_t *original)
 			buffer_new("id",	 1, 2),
 			buffer_new("depth",	 1, -1));
 
-		refr = texture_new_2D(0, 0, TEX_MIPMAP,
-			buffer_new("color",	1, 4));
+		refr = texture_new_2D(0, 0, TEX_MIPMAP, buffer_new("color", 1, 4));
 
-		refr2 = texture_new_2D(0, 0, TEX_MIPMAP,
-			buffer_new("color",	1, 4));
+		refr2 = texture_new_2D(0, 0, TEX_MIPMAP, buffer_new("color", 1, 4));
 
 
 		renderer_add_tex(self, "portal",	 1.0f, portal);
 		renderer_add_tex(self, "gbuffer",	 1.0f, gbuffer);
-		renderer_add_tex(self, "light",	 1.0f, light);
+		renderer_add_tex(self, "light",		 1.0f, light);
 		renderer_add_tex(self, "selectable", 1.0f, selectable);
 		renderer_add_tex(self, "refr",		 1.0f, refr);
 		renderer_add_tex(self, "refr2",		 1.0f, refr2);
 		self->output = gbuffer;
-	}
-	else
-	{
-		gbuffer =	texture_new_2D(0, 0, 0, 0,
-			buffer_new("nmr",	 1, 4),
-			buffer_new("albedo", 1, 4),
-			buffer_new("depth",	 1, -1)
-		);
-		final = texture_new_2D(0, 0, TEX_INTERPOLATE | TEX_MIPMAP,
-			buffer_new("color",	1, 4));
 
-		ssao = texture_new_2D(0, 0, 0,
-			buffer_new("occlusion",	1, 1));
-
-		light = texture_new_2D(0, 0, 0,
-			buffer_new("color",	1, 4));
-
-		final->track_brightness = 1;
-
-		renderer_add_tex(self, "gbuffer",	 1.0f, gbuffer);
-		renderer_add_tex(self, "final",		 1.0f, final);
-		renderer_add_tex(self, "ssao",		 1.0f, ssao);
-		renderer_add_tex(self, "light",	 1.0f, light);
-
-		portal = renderer_tex(original, ref("portal"));
-		refr = renderer_tex(original, ref("refr"));
-		refr2 = renderer_tex(original, ref("refr2"));
-		selectable = renderer_tex(original, ref("selectable"));
-
-		self->output = final;
-	}
-
-	if(!original)
-	{
 		renderer_add_pass(self, "gbuffer", "gbuffer", ref("visible"), 0,
 				gbuffer, gbuffer, 0,
 			(bind_t[]){
@@ -150,7 +117,34 @@ renderer_t *shift_renderer(renderer_t *original)
 	}
 	else
 	{
-		renderer_add_pass(self, "gbuffer", "masked_gbuffer", ref("visible"), 0,
+		light_group = ref("next_level_light");
+		gbuffer =	texture_new_2D(0, 0, 0, 0,
+			buffer_new("nmr",	 1, 4),
+			buffer_new("albedo", 1, 4),
+			buffer_new("depth",	 1, -1)
+		);
+		final = texture_new_2D(0, 0, TEX_INTERPOLATE | TEX_MIPMAP,
+			buffer_new("color",	1, 4));
+
+		ssao = texture_new_2D(0, 0, 0, buffer_new("occlusion",	1, 1));
+
+		light = texture_new_2D(0, 0, 0, buffer_new("color",	1, 4));
+
+		final->track_brightness = 1;
+
+		renderer_add_tex(self, "gbuffer",	 1.0f, gbuffer);
+		renderer_add_tex(self, "final",		 1.0f, final);
+		renderer_add_tex(self, "ssao",		 1.0f, ssao);
+		renderer_add_tex(self, "light",		 1.0f, light);
+
+		portal = renderer_tex(original, ref("portal"));
+		refr = renderer_tex(original, ref("refr"));
+		refr2 = renderer_tex(original, ref("refr2"));
+		selectable = renderer_tex(original, ref("selectable"));
+
+		self->output = final;
+
+		renderer_add_pass(self, "gbuffer", "masked_gbuffer", ref("next_level"), 0,
 				gbuffer, gbuffer, 0,
 			(bind_t[]){
 				{CLEAR_DEPTH, .number = 1.0f},
@@ -170,7 +164,7 @@ renderer_t *shift_renderer(renderer_t *original)
 		}
 	);
 
-	renderer_add_pass(self, "render_pass", "phong", ref("light"),
+	renderer_add_pass(self, "render_pass", "phong", light_group,
 			DEPTH_LOCK | ADD | DEPTH_EQUAL | DEPTH_GREATER, light, gbuffer, 0,
 		(bind_t[]){
 			{TEX, "gbuffer", .buffer = gbuffer},
@@ -189,9 +183,9 @@ renderer_t *shift_renderer(renderer_t *original)
 
 	if(!original)
 	{
-		renderer_add_kawase(self, refr, refr2, 1);
-		renderer_add_kawase(self, refr, refr2, 2);
-		renderer_add_kawase(self, refr, refr2, 3);
+		renderer_add_kawase(self, refr, refr2, 0, 1);
+		renderer_add_kawase(self, refr, refr2, 1, 2);
+		renderer_add_kawase(self, refr, refr2, 2, 3);
 
 		renderer_add_pass(self, "transp", "transparency", ref("transparent"),
 				DEPTH_EQUAL, light, gbuffer, 0,
@@ -272,8 +266,6 @@ int main(int argc, char **argv)
 	/* mesh_spherize(ico, 1.0f); */
 	/* mesh_unlock(ico); */
 
-	char open_map_name[256];
-	entity_t camera, g, body, character;
 
 	entity_add_component(SYS, c_physics_new());
 	entity_add_component(SYS, (c_t*)c_editmode_new());
@@ -283,34 +275,13 @@ int main(int argc, char **argv)
 
 	reg_custom_cmds();
 
-	g = entity_new(c_name_new("gravity"), c_force_new(0.0, -23, 0.0, 1));
-
-	body = entity_new(c_name_new("body"), c_node_new());
-
-
-	renderer_t *renderer = shift_renderer(NULL);
-	
-	camera = entity_new(
-			c_name_new("camera"),
-			c_camera_new(70, 0.1, 100.0, 0, 1, 0, renderer),
-			c_charlook_new(body, 1.9)
-	);
-
-	character = entity_new(
-			c_name_new("character"),
-			c_character_new(body, 1, g)
-	);
-
-	c_spacial_set_pos(c_spacial(&camera), vec3(0.0, 0.7, 0.0));
-	c_node_add(c_node(&character), 1, body);
-	c_node_add(c_node(&body), 1, camera);
-
-	sprintf(open_map_name, "resauces/maps/%s.xmap", argc > 1 ? argv[1] : "0");
-
-	entity_add_component(SYS, c_state_new(open_map_name));
+	const char *level = argc > 1 ? argv[1] : "0";
+	entity_t lvl = entity_new(c_name_new(level), c_level_new(level, 0));
+	/* entity_new(c_name_new(level), c_level_new(level, 1)); */
 
 	entity_new(c_name_new("ambient"), c_light_new(-1.0f,
-				vec4(1.0f, 1.0f, 1.0f, 0.1f), 0));
+				vec4(1.0f, 1.0f, 1.0f, 0.3f), 0));
+	c_level_set_active(c_level(&lvl), 1);
 
 	/* mat_t *mat = mat_new("tt"); */
 	/* entity_t decal = entity_new(c_decal_new(mat, 1)); */

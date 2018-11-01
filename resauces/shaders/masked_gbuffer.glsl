@@ -11,7 +11,8 @@ BUFFER {
 void main()
 {
 	float depth = textureLod(portal.depth, pixel_pos(), 0).r;
-	if(gl_FragCoord.z > depth) discard;
+	if(depth == 0.0) discard;
+	if(gl_FragCoord.z < depth) discard;
 
 	vec4 dif  = resolveProperty(mat(albedo), texcoord);
 	if(dif.a < 0.7f) discard;

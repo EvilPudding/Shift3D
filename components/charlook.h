@@ -11,7 +11,6 @@ typedef struct
 	float xrot;
 	float yrot;
 	float zrot;
-	int side;
 	entity_t x;
 } c_charlook_t;
 

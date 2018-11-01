@@ -1,8 +1,9 @@
-#include "state.h"
+#include "level.h"
 #include "character.h"
 #include "charlook.h"
 #include "door.h"
 #include "mirror.h"
+#include "side.h"
 #include "rigid_body.h"
 #include <components/node.h>
 #include <components/model.h>
@@ -12,9 +13,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+static int c_door_position_changed(c_door_t *self);
+
 static float c_rigid_body_door_collider(c_rigid_body_t *self, vec3_t pos)
 {
 	c_spacial_t *door = c_spacial(self);
+	c_door_t *dc = c_door(self);
+	if(dc->active != 1) return -1;
 	c_spacial_t *character = c_spacial(ct_get_nth(ecm_get(ref("character")), 0));
 	c_character_t *ch = c_character(character);
 
@@ -23,44 +28,85 @@ static float c_rigid_body_door_collider(c_rigid_body_t *self, vec3_t pos)
 	if(fabs(pos.x) < 0.05 && fabs(pos.y - 0.5) < 0.4 && fabs(pos.z) < 0.3f)
 	/* if(vec3_len(vec3_sub(pos, door->pos)) < 0.3) */
 	{
-		c_character_teleport(ch, c_entity(self), c_state(&SYS)->spawn);
+		c_character_teleport(ch, c_entity(self),
+				c_level(&dc->next_level)->spawn);
 		/* return 0; */
 	}
 	return -1;
 }
 renderer_t *shift_renderer(renderer_t *original);
+static mesh_t *g_portal_mesh;
 c_door_t *c_door_new(const char *next)
 {
 	c_door_t *self = component_new("door");
 
+	if(!g_portal_mesh)
+	{
+		g_portal_mesh = mesh_new();
+		mesh_add_regular_quad(g_portal_mesh,
+				vec3(0.0f, 0.0f, 0.3f), Z3, Z2, vec3(0.0f, 0.0f, -0.3f), Z3, Z2,
+				vec3(0.0f, 0.9f, -0.3f), Z3, Z2, vec3(0.0f, 0.9f, 0.3f), Z3, Z2);
+		g_portal_mesh->cull = 0;
+	}
+
+	drawable_init(&self->draw, 0, NULL);
+	drawable_set_vs(&self->draw, g_model_vs);
+	drawable_set_mesh(&self->draw, g_portal_mesh);
+
 	strcpy(self->next, next);
-
-	c_charlook_t *cl = (c_charlook_t*)ct_get_nth(ecm_get(ref("charlook")), 0);
-	c_camera_t *cam = c_camera(cl);
-
-	self->mirror = entity_new(
-			c_name_new("camera2"),
-			c_mirror_new(c_entity(cl), c_entity(self), c_state(&SYS)->spawn),
-			c_camera_new(70, 0.1, 100.0, 1, 1, 1,
-				shift_renderer(cam->renderer))
-	);
-
-	entity_add_component(c_entity(self),
-			(c_t*)c_rigid_body_new((collider_cb)c_rigid_body_door_collider));
 
 	return self;
 }
 
-int c_door_update(c_door_t *self, float *dt)
+
+void c_door_set_active(c_door_t *self, int active)
 {
-	c_spacial_t *sc = c_spacial(self);
-	c_spacial_rotate_Y(sc, *dt * 0.1);
+	self->active = active;
+	if(active == 1)
+	{
+		self->next_level = entity_new(c_name_new(self->next),
+				c_level_new(self->next, 2));
+
+		drawable_add_group(&self->draw, ref("portal"));
+
+		entity_add_component(c_entity(self),
+				(c_t*)c_rigid_body_new((collider_cb)c_rigid_body_door_collider));
+	}
+	else
+	{
+		drawable_remove_group(&self->draw, ref("portal"));
+	}
+	c_door_position_changed(self);
+
+}
+
+static int c_door_pre_draw(c_door_t *self)
+{
+	if(!self->modified) return CONTINUE;
+
+	c_node_t *node = c_node(self);
+	c_node_update_model(node);
+
+	drawable_set_transform(&self->draw, node->model);
+	self->modified = 0;
 	return CONTINUE;
+}
+
+static int c_door_position_changed(c_door_t *self)
+{
+	self->modified = 1;
+	return CONTINUE;
+}
+
+void c_door_destroy(c_door_t *self)
+{
+	drawable_set_mesh(&self->draw, NULL);
 }
 
 REG()
 {
-	ct_t *ct = ct_new("door", sizeof(c_door_t), NULL, NULL, 1, ref("node"));
-	ct_listener(ct, WORLD, sig("world_update"), c_door_update);
+	ct_t *ct = ct_new("door", sizeof(c_door_t), NULL, c_door_destroy, 1, ref("node"));
+	ct_listener(ct, ENTITY, sig("node_changed"), c_door_position_changed);
+	ct_listener(ct, WORLD, sig("world_pre_draw"), c_door_pre_draw);
 }
 

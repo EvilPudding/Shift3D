@@ -23,6 +23,7 @@ typedef struct
 	mat4_t inverse_model;
 	vec3_t rotate_to;
 
+	int32_t active;
 } c_bridge_t;
 
 DEF_CASTER("bridge", c_bridge, c_bridge_t);

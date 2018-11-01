@@ -13,6 +13,7 @@ typedef struct
 	entity_t blocks, cage, boxes,
 			 blocks_inv, cage_inv, boxes_inv;
 	int modified;
+	int active;
 } c_grid_t;
 
 DEF_CASTER("grid", c_grid, c_grid_t);

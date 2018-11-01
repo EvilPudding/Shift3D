@@ -6,7 +6,7 @@
 #include <components/spacial.h>
 #include <components/node.h>
 #include "grid.h"
-#include "state.h"
+#include "level.h"
 #include "side.h"
 #include "character.h"
 #include "movable.h"
@@ -33,10 +33,12 @@ int plane_to_side(mesh_t *mesh, int val0, int flag, c_grid_t *grid,
 
 float c_rigid_body_grid_collider(c_rigid_body_t *self, vec3_t pos)
 {
+	c_grid_t *g = c_grid(self);
+	if(g->active != 1) return -1;
+
 	c_character_t *fc = (c_character_t*)ct_get_nth(ecm_get(ref("character")), 0);
 	int side = c_side(fc)->side & 1;
 
-	c_grid_t *g = c_grid(self);
 	pos = vec3_round(pos);
 	int val = c_grid_get(g, _vec3(pos));
 
@@ -53,12 +55,13 @@ c_grid_t *c_grid_new(int mx, int my, int mz)
 	self->my = my;
 	self->mz = mz;
 	self->map = calloc(mx * my * mz, sizeof(*self->map));
+	c_side_t *ss = c_side(self);
 
-	self->blocks = entity_new(c_name_new("blocks"), c_side_new(0, 1),
+	self->blocks = entity_new(c_name_new("blocks"), c_side_new(ss->level, 0, 1),
 			/* c_model_new(NULL, candle_mat_get(candle, "white"), 1)); */
 			c_model_new(mesh_new(), sauces("white.mat"), 1, 1));
 
-	self->cage = entity_new(c_name_new("cage"), c_side_new(0, 1),
+	self->cage = entity_new(c_name_new("cage"), c_side_new(ss->level, 0, 1),
 			c_model_new(mesh_new(), sauces("piramids.mat"), 1, 1));
 
 	mat_t *stone3 = sauces("stone3.mat");
@@ -66,16 +69,16 @@ c_grid_t *c_grid_new(int mx, int my, int mz)
 	stone3->albedo.blend = 0.5;
 	stone3->normal.blend = 0.3;
 
-	self->boxes = entity_new(c_name_new("movable"), c_side_new(0, 1),
+	self->boxes = entity_new(c_name_new("movable"), c_side_new(ss->level, 0, 1),
 			c_model_new(mesh_new(), stone3, 1, 1), 0, 1);
 
-	self->blocks_inv = entity_new(c_name_new("bloc_i"), c_side_new(1, 1),
+	self->blocks_inv = entity_new(c_name_new("bloc_i"), c_side_new(ss->level, 1, 1),
 			c_model_new(mesh_new(), sauces("piramids.mat"), 1, 1));
 
-	self->cage_inv = entity_new(c_name_new("cage_i"), c_side_new(1, 1),
+	self->cage_inv = entity_new(c_name_new("cage_i"), c_side_new(ss->level, 1, 1),
 			c_model_new(mesh_new(), sauces("white.mat"), 1, 1));
 
-	self->boxes_inv = entity_new(c_name_new("movab_i"), c_side_new(1, 1),
+	self->boxes_inv = entity_new(c_name_new("movab_i"), c_side_new(ss->level, 1, 1),
 			c_model_new(mesh_new(), stone3, 1, 1));
 
 	/* c_model(&self->blocks_inv)->before_draw = */
@@ -87,11 +90,6 @@ c_grid_t *c_grid_new(int mx, int my, int mz)
 	/* 	c_model(&self->cage)->before_draw = */
 	/* 	c_model(&self->boxes)->before_draw = */
 	/* 	(before_draw_cb)cmd_model_before_draw; */
-
-	if(c_state(&SYS))
-	{
-		c_state(&SYS)->grid = c_entity(self);
-	}
 
 	return self;
 }

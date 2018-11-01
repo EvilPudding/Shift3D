@@ -46,6 +46,7 @@ static int c_bridge_spacial_changed(c_bridge_t *self)
 static float c_rigid_body_bridge_collider(c_rigid_body_t *self, vec3_t pos)
 {
 	c_bridge_t *b = c_bridge(self);
+	if(b->active != 1) return -1;
 	/* c_spacial_t *b = c_spacial(c_entity(self)); */
 
 	pos = mat4_mul_vec4(b->inverse_model, vec4(_vec3(pos), 1.0f)).xyz;

@@ -17,8 +17,7 @@ typedef struct
 DEF_CASTER("movable", c_movable, c_movable_t);
 
 c_movable_t *c_movable_new(int value);
-void c_movable_register(void);
 
-void push_at(int x, int y, int z, int value, vec3_t from);
+void push_at(entity_t lvl, int x, int y, int z, int value, vec3_t from);
 
 #endif /* !MOVABLE_H */

@@ -14,6 +14,7 @@ typedef struct
 
 	vec3_t rot;
     int key;
+	uint32_t active;
 } c_key_t;
 
 DEF_CASTER("key", c_key, c_key_t);

@@ -6,7 +6,6 @@
 typedef struct
 {
 	c_t super; /* extends c_t */
-
 	int forward, backward, left, right, jump, swap, pushing;
 	int control;
 	float max_jump_vel;
@@ -30,8 +29,8 @@ typedef struct
 
 DEF_CASTER("character", c_character, c_character_t);
 
-c_character_t *c_character_new(entity_t orientation, int plane_movement,
-		entity_t force_down);
+c_character_t *c_character_new(entity_t orientation,
+		int plane_movement, entity_t force_down);
 void c_character_teleport(c_character_t *self, entity_t in, entity_t out);
 void c_character_register(void);
 
