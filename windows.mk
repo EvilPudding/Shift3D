@@ -3,60 +3,64 @@ LD = gcc
 
 DIR = build
 
+PLUGINS = $(wildcard *.candle) candle
+
+DIR = build
+
+
 LIBS = \
-       -lm -lmingw32 -lSDL2main -lSDL2 \
-       /mingw/lib/libfreeglut.a \
-       /mingw/lib/libglew32.a \
-       /mingw/lib/libopengl32.a
+       -mwindows -lm -lmingw32 \
+       -lSDL2main \
+       ./glew32.dll -lopengl32 ./SDL2.dll \
 
 
-SRCS = $(wildcard *.c) $(wildcard components/*.c) $(wildcard systems/*.c)
+
+SRCS = $(wildcard *.c) $(wildcard components/*.c)
 
 OBJS_REL = $(patsubst %.c, $(DIR)/%.o, $(SRCS))
 OBJS_DEB = $(patsubst %.c, $(DIR)/%.debug.o, $(SRCS))
 
-LIBS_REL = candle/build/candle.a $(LIBS)
+PLUGINS_REL = $(patsubst %, %/build/export.a, $(PLUGINS))
+PLUGINS_DEB = $(patsubst %, %/build/export_debug.a, $(PLUGINS))
 
-LIBS_DEB = candle/build/candle_debug.a $(LIBS)
+LIBS_REL = $(PLUGINS_REL) $(LIBS) 
+LIBS_DEB = $(PLUGINS_DEB) $(LIBS) 
 
-CFLAGS = -Wall -Icandle -DUSE_VAO
+CFLAGS = -Wall -I. -Icandle -DUSE_VAO \
+		 $(shell sdl2-config --cflags)
 
-CFLAGS_REL = $(CFLAGS) -O2
+CFLAGS_REL = $(CFLAGS) -O3
 
 CFLAGS_DEB = $(CFLAGS) -g3
 
-##############################################################################
 
-all: update_lib init $(DIR)/shift
+all: init $(DIR)/shift
 	cp -rvu resauces $(DIR)
-	cp -rvu candle/SDL2.dll build
 
-update_lib:
-	rm -f candle/build/candle.a
-
-$(DIR)/shift: candle/build/candle.a $(OBJS_REL) 
+$(DIR)/shift: $(OBJS_REL) $(PLUGINS_REL)
 	$(LD) -o $@ $(OBJS_REL) $(LIBS_REL)
 
-candle/build/candle.a:
-	(cd candle && $(MAKE) -f windows.mk)
+%/build/export.a:
+	$(MAKE) -C $(patsubst %/build/export.a, %, $@)
+	echo " " >> $(DIR)/deps
+	-cat $(patsubst %/build/export.a, %/build/deps, $@) >> $(DIR)/deps
 
 $(DIR)/%.o: %.c
 	$(CC) -o $@ -c $< $(CFLAGS_REL)
 
 ##############################################################################
 
-debug: update_lib_deb init $(DIR)/shift_debug
+debug: init $(DIR)/shift_debug
+	rm $(PLUGINS_DEB)
 	cp -rvu resauces $(DIR)
-	cp -rvu candle/SDL2.dll $(DIR)
 
-update_lib_deb:
-	rm -f candle/build/candle_debug.a
+$(DIR)/shift_debug: $(OBJS_DEB) $(PLUGINS_DEB)
+	$(LD) -o $@ $(OBJS_DEB) $(LIBS_DEB) $(shell cat $(DIR)/deps)
 
-$(DIR)/shift_debug: candle/build/candle_debug.a $(OBJS_DEB)
-	$(LD) -o $@ $(OBJS_DEB) $(LIBS_DEB)
-
-candle/build/candle_debug.a:
-	(cd candle && $(MAKE) -f windows.mk debug)
+%/build/export_debug.a:
+	$(MAKE) -C $(patsubst %/build/export_debug.a, %, $@) debug
+	echo " " >> $(DIR)/deps
+	-cat $(patsubst %/build/export_debug.a, %/build/deps, $@) >> $(DIR)/deps
 
 $(DIR)/%.debug.o: %.c
 	$(CC) -o $@ -c $< $(CFLAGS_DEB)
@@ -66,24 +70,25 @@ $(DIR)/%.debug.o: %.c
 init:
 	mkdir -p $(DIR)
 	mkdir -p $(DIR)/components
+	rm -f $(DIR)/deps
+	touch $(DIR)/deps
+	rm -f $(PLUGINS_REL)
+	rm -f $(PLUGINS_DEB)
 
 ##############################################################################
 
 run: all
 	cp -rvu resauces $(DIR)
-	cp -rvu candle/SDL2.dll $(DIR)
-	$(DIR)/shift 6
+	$(DIR)/shift 0
 
 gdb: debug
 	cp -rvu resauces $(DIR)
-	cp -rvu candle/SDL2.dll $(DIR)
 	gdb $(DIR)/shift_debug
 
 valgrind: debug
 	cp -rvu resauces $(DIR)
-	cp -rvu candle/SDL2.dll $(DIR)
-	valgrind --suppressions=val_sup $(DIR)/shift_debug
-
+	valgrind --log-fd=1 --suppressions=val_sup $(DIR)/shift_debug 10 | tee val_log | less
+		
 clean:
 	rm -r $(DIR)
 	$(MAKE) -C candle clean

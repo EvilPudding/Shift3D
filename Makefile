@@ -5,7 +5,7 @@ PLUGINS = $(wildcard *.candle) candle
 
 DIR = build
 
-LIBS = -llua
+LIBS = 
 
 SRCS = $(wildcard *.c) $(wildcard components/*.c)
 
