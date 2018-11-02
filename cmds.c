@@ -161,7 +161,7 @@ static entity_t cmd_spawn(entity_t root, int argc, const char **argv)
 		entity_t camera = entity_new( c_name_new("camera"),
 				c_camera_new(70, 0.1, 100.0, 0, 1, 0, renderer),
 				c_charlook_new(body, 1.9),
-				c_side_new(root, -1, 0)
+				c_side_new(root, side, 0)
 		);
 
 		c_spacial_set_pos(c_spacial(&camera), vec3(0.0, 0.7, 0.0));
@@ -215,7 +215,9 @@ static entity_t cmd_bridge(entity_t root, int argc, const char **argv)
 	sscanf(argv[9], "%f", &cz);
 	sscanf(argv[10], "%d", &key);
 
-	entity_t bridge = entity_new(c_side_new(root, -1, 1),
+	entity_t bridge = entity_new(
+			c_name_new("bridge"),
+			c_side_new(root, -1, 1),
 			c_bridge_new(),
 			c_node_new());
 	c_bridge_t *p = c_bridge(&bridge);
@@ -243,9 +245,9 @@ static entity_t cmd_bridge(entity_t root, int argc, const char **argv)
 	/* mesh_t *mesh = mesh_cuboid(0.5, */
 			/* p->x1 - 0.01, p->y1 - 0.01, p->z1 - 0.01, */
 			/* p->x2 + 0.01, p->y2 + 0.01, p->z2 + 0.01); */
-	c_bridge_ready(p);
 
 	c_spacial_set_pos(c_spacial(&bridge), vec3(p->cx, p->cy, p->cz));
+	c_bridge_ready(p);
 
 	/* c_model(&bridge)->before_draw = (before_draw_cb)cmd_model_before_draw; */
 

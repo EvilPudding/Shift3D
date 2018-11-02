@@ -21,6 +21,7 @@ typedef struct
     int key;
 
 	mat4_t inverse_model;
+	mat4_t original_model;
 	vec3_t rotate_to;
 
 	int32_t active;
@@ -30,6 +31,6 @@ DEF_CASTER("bridge", c_bridge, c_bridge_t);
 
 c_bridge_t *c_bridge_new(void);
 void c_bridge_ready(c_bridge_t *self);
-void c_bridge_register(void);
+void c_bridge_set_active(c_bridge_t *self, int active);
 
 #endif /* !BRIDGE_H */

@@ -35,6 +35,15 @@ void c_bridge_ready(c_bridge_t *self)
 			c_model_new(mesh, sauces("bridge.mat"), 1, 1));
 }
 
+void c_bridge_set_active(c_bridge_t *self, int active)
+{
+	/* if(active) */
+	/* { */
+		/* c_spacial_set_model(c_spacial(self), self->original_model); */
+	/* } */
+	self->active = active;
+}
+
 static int c_bridge_spacial_changed(c_bridge_t *self)
 {
 	c_spacial_t *spacial = c_spacial(self);

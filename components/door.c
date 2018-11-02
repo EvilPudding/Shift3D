@@ -61,8 +61,7 @@ c_door_t *c_door_new(const char *next)
 
 void c_door_set_active(c_door_t *self, int active)
 {
-	self->active = active;
-	if(active == 1)
+	if(active == 1 && self->active != 1)
 	{
 		self->next_level = entity_new(c_name_new(self->next),
 				c_level_new(self->next, 2));
@@ -78,6 +77,7 @@ void c_door_set_active(c_door_t *self, int active)
 	}
 	c_door_position_changed(self);
 
+	self->active = active;
 }
 
 static int c_door_pre_draw(c_door_t *self)

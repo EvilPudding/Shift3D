@@ -21,5 +21,6 @@ DEF_CASTER("level", c_level, c_level_t);
 
 c_level_t *c_level_new(const char *filename, int32_t active);
 void c_level_set_active(c_level_t *self, int32_t active);
+void c_level_reset(c_level_t *self);
 
 #endif /* !LEVEL_H */

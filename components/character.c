@@ -10,7 +10,6 @@
 #include "movable.h"
 #include "charlook.h"
 #include "grid.h"
-#include "door.h"
 #include <systems/keyboard.h>
 #include <math.h>
 #include <stdlib.h>
@@ -41,8 +40,8 @@ void c_character_teleport(c_character_t *self, entity_t in, entity_t out)
 
 static void _c_character_teleport(c_character_t *self)
 {
-	/* c_charlook_t *charlook = (c_charlook_t*)ct_get_nth(ecm_get(ref("charlook")), 0); */
-	/* c_spacial_t *cam = c_spacial(charlook); */
+	c_charlook_t *charlook = (c_charlook_t*)ct_get_nth(ecm_get(ref("charlook")), 0);
+	c_spacial_t *cam = c_spacial(charlook);
 	c_spacial_t *in = c_spacial(&self->in);
 	c_spacial_t *out = c_spacial(&self->out);
 	c_spacial_t *body = c_spacial(&self->orientation);
@@ -50,7 +49,8 @@ static void _c_character_teleport(c_character_t *self)
 	c_velocity_t *vc = c_velocity(self);
 	c_side_t *ss = c_side(self);
 
-	int out_side = c_side(out)->side & 1;
+	c_side_t *spawn_side = c_side(out);
+	int out_side = spawn_side->side & 1;
 
 
 	mat4_t model = sc->model_matrix;
@@ -65,11 +65,17 @@ static void _c_character_teleport(c_character_t *self)
 		rot = quat_mul(out->rot_quat, rot);
 	}
 
+	c_level_t *level = c_level(&ss->level);
+	c_level_t *next_level = c_level(&spawn_side->level);
 
 	c_spacial_lock(body);
 	c_spacial_lock(sc);
+
 	vc->velocity = quat_mul_vec3(rot, vc->velocity);
-	body->rot_quat = quat_mul(body->rot_quat, rot);
+	if(level != next_level)
+	{
+		body->rot_quat = quat_mul(body->rot_quat, rot);
+	}
 
 	vec3_t npos = mat4_mul_vec4(model, vec4(0.0f, 0.0f, 0.0f, 1.0f)).xyz;
 	npos.y = roundf(npos.y) + 0.505 * (out_side ? -1 : 1);
@@ -81,8 +87,6 @@ static void _c_character_teleport(c_character_t *self)
 		c_force_t *force = c_force(&self->force_down);
 		force->force = vec3_inv(force->force);
 
-		/* c_rigid_body(self)->offset = -c_rigid_body(self)->offset; */
-
 		self->targR = self->targR == 0 ? M_PI : 0;
 		c_spacial_rotate_Z(sc, M_PI);
 
@@ -90,24 +94,22 @@ static void _c_character_teleport(c_character_t *self)
 		c_spacial_rotate_Y(body, M_PI);
 	}
 
+	ss->level = c_side(cam)->level = c_entity(next_level);
 
-	c_level_t *level = c_level(&ss->level);
-	c_level_t *next_level = c_level(&c_door(&level->door)->next_level);
-
-	ss->level = c_side(&level->pov)->level = c_entity(next_level);
 	next_level->pov = level->pov;
 	next_level->mirror = level->mirror;
-
-	candle_skip_frame(2);
+	candle_skip_frame(3);
 	c_level_set_active(next_level, 0);
+
+
 	c_level_set_active(next_level, 1);
 	entity_destroy(c_entity(level));
 
-	c_spacial_unlock(body);
-	c_spacial_unlock(sc);
-
 	self->in = entity_null;
 	self->out = entity_null;
+
+	c_spacial_unlock(body);
+	c_spacial_unlock(sc);
 }
 
 
@@ -126,7 +128,7 @@ int c_character_update(c_character_t *self, float *dt)
 
 	c_velocity_t *vc = c_velocity(self);
 	vec3_t *vel = &vc->velocity;
-	float accel = 79.5f * (*dt);
+	float accel = 72.5f * (*dt);
 
 	if(entity_exists(self->in)) _c_character_teleport(self);
 
@@ -154,7 +156,18 @@ int c_character_update(c_character_t *self, float *dt)
 	vec3_t next_vel = vec3_add(*vel, vec3_scale(gravity, *dt));
 	vec3_t f = vec3_round(vec3_add(sc->pos, vec3_scale(next_vel, *dt)));
 	/* vec3_t f = vec3_round(vec3_sub(sc->pos, vec3_scale(up_dir, 0.4))); */
-	int shiftable = (c_grid_get(gc, _vec3(f)) & 1) != (ss->side & 1);
+	int bellow_value = c_grid_get(gc, _vec3(f));
+	int shiftable = (bellow_value & 1) != (ss->side & 1);
+
+	vec3_t f2 = vec3_round(vec3_add(sc->pos, vec3_scale(up_dir, 0.5f)));
+	int bellow_value2 = c_grid_get(gc, _vec3(f2));
+	if(bellow_value2 & 4) // SPIKES
+	{
+		*vel = vec3(0.0f);
+		self->max_jump_vel = 0.0f;
+		c_level_reset(level);
+		goto end;
+	}
 
 	if(self->last_vel.x != 0 || self->last_vel.y != 0 || self->last_vel.z != 0)
 	{

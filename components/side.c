@@ -49,7 +49,7 @@ int c_side_changed(c_side_t *self, entity_t *pov)
 	if(!level) return CONTINUE;
 
 	if(*pov != c_entity(self) && *pov != level->pov) return CONTINUE;
-	int side = c_side(pov)->side;
+	int side = c_side(&level->pov)->side;
 
 	int none = side == -1;
 	int visible = !none && ((side & 1) == (self->side & 1) || self->side == -1);
