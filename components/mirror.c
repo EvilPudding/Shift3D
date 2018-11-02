@@ -30,8 +30,6 @@ static int c_mirror_update(c_mirror_t *self)
 	entity_t door_out = next_level->spawn;
 
 	mat4_t model = c_camera(&self->follow)->renderer->glvars[0].model;
-	/* c_node_update_model(node); */
-	/* mat4_t model = node->model; */
 
 	if(entity_exists(door_in))
 	{
@@ -42,29 +40,13 @@ static int c_mirror_update(c_mirror_t *self)
 	}
 	if(entity_exists(door_out))
 	{
-		/* printf("here\n"); */
 		c_spacial_t *sc2 = c_spacial(&door_out);
 
 		model = mat4_mul(sc2->model_matrix, model);
 	}
 
-	/* vec3_t pos = mat4_mul_vec4(model, vec4(0.0f, 0.0f, 0.0f, 1.0f)).xyz; */
-	/* c_spacial_t *sc = c_spacial(self); */
-	/* c_spacial_lock(sc); */
 	renderer_set_model(c_camera(self)->renderer, c_camera(self)->camid,
 			&model);
-
-	/* sc->rot_quat = rot; */
-	/* sc->pos = pos; */
-
-	/* sc->modified = 1; */
-	/* sc->update_id++; */
-	/* c_spacial_unlock(sc); */
-	/* { */
-		/* c_node_t *node = c_node(self); */
-		/* c_node_update_model(node); */
-	/* } */
-
 	return CONTINUE;
 }
 

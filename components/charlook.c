@@ -78,7 +78,6 @@ int c_charlook_mouse_move(c_charlook_t *self, mouse_move_data *event)
 	const float max_up = M_PI / 2.0 - 0.01;
 	const float max_down = -M_PI / 2.0 + 0.01;
 
-
 	c_spacial_t *sc = c_spacial(self);
 
 	if(self->xrot > max_up && inc_y > 0) inc_y = 0;
@@ -96,6 +95,7 @@ int c_charlook_mouse_move(c_charlook_t *self, mouse_move_data *event)
 	c_spacial_rotate_X(sc, inc_y);
 
 	sc = c_spacial(&self->x);
+	if(!sc) return CONTINUE;
 	float old_rot = sc->rot.z;
 
 	c_spacial_rotate_Z(sc, -old_rot);
