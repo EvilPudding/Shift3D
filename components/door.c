@@ -58,13 +58,35 @@ c_door_t *c_door_new(const char *next)
 	return self;
 }
 
+int level_loaded(const char *next)
+{
+	int i;
+	c_node_t *node = c_node(&SYS);
+	for(i = 0; i < node->children_size; i++)
+	{
+		c_name_t *name = c_name(&node->children[i]);
+		if(name && name->name)
+		{
+			if(!strcmp(next, name->name))
+			{
+				return 1;
+			}
+		}
+	}
+	return 0;
+}
+
 
 void c_door_set_active(c_door_t *self, int active)
 {
 	if(active == 1 && self->active != 1)
 	{
-		self->next_level = entity_new(c_name_new(self->next),
-				c_level_new(self->next, 2));
+		
+		if(!level_loaded(self->next))
+		{
+			self->next_level = entity_new(c_name_new(self->next),
+					c_level_new(self->next, 2));
+		}
 
 		drawable_add_group(&self->draw, ref("portal"));
 

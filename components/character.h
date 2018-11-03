@@ -25,6 +25,8 @@ typedef struct
 	/* TELEPORT */
 	entity_t in;
 	entity_t out;
+
+	int reset;
 } c_character_t;
 
 DEF_CASTER("character", c_character, c_character_t);

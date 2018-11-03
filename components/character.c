@@ -6,6 +6,7 @@
 #include <components/node.h>
 #include <components/rigid_body.h>
 #include <components/force.h>
+#include <systems/editmode.h>
 #include "level.h"
 #include "movable.h"
 #include "charlook.h"
@@ -110,11 +111,20 @@ static void _c_character_teleport(c_character_t *self)
 
 	c_spacial_unlock(body);
 	c_spacial_unlock(sc);
+
+	c_editmode_select(c_editmode(&SYS), c_entity(self));
+	c_editmode_select(c_editmode(&SYS), 0);
 }
 
 
 int c_character_update(c_character_t *self, float *dt)
 {
+	if(self->reset)
+	{
+		c_editmode_select(c_editmode(&SYS), c_entity(self));
+		c_editmode_select(c_editmode(&SYS), 0);
+		self->reset = 0;
+	}
 	c_side_t *ss = c_side(self);
 	c_level_t *level = c_level(&ss->level);
 
@@ -163,11 +173,14 @@ int c_character_update(c_character_t *self, float *dt)
 	int bellow_value2 = c_grid_get(gc, _vec3(f2));
 	if(bellow_value2 & 4) // SPIKES
 	{
-		printf("dead\n");
 		*vel = vec3(0.0f);
 		self->max_jump_vel = 0.0f;
 		c_level_reset(level);
-		goto end;
+
+		c_spacial_unlock(sc);
+
+		self->reset = 1;
+		return CONTINUE;
 	}
 
 	if(self->last_vel.x != 0 || self->last_vel.y != 0 || self->last_vel.z != 0)
@@ -304,8 +317,6 @@ end:
 		c_spacial_rotate_Z(sc, dif * 5 * (*dt));
 	}
 
-	entity_signal(c_entity(self), sig("spacial_changed"), &c_entity(self), NULL);
-
 	return CONTINUE;
 }
 
@@ -319,6 +330,7 @@ int c_character_key_up(c_character_t *self, char *key)
 		case 'S': case 's': self->backward = 0; break;
 		case 'Q': case 'q': self->swap = 0; break;
 		case 'E': case 'e': self->pushing = 0; break;
+		case 'R': case 'r': break;
 		case '`': control = !control; break;
 		case 32: self->jump = 0; break;
 	}

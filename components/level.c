@@ -3,12 +3,15 @@
 #include <components/name.h>
 #include <components/model.h>
 #include <components/light.h>
+#include <systems/editmode.h>
 #include "components/key.h"
 #include "components/movable.h"
 #include "components/grid.h"
 #include "components/bridge.h"
 #include "components/door.h"
 #include "character.h"
+#include "force.h"
+#include "rigid_body.h"
 #include "charlook.h"
 #include "mirror.h"
 #include "level.h"
@@ -34,6 +37,20 @@ c_level_t *c_level_new(const char *filename, int32_t active)
 	return self;
 }
 
+static void activate_lights(entity_t e, int32_t active)
+{
+	uint32_t i;
+	c_light_t *lc = c_light(&e);
+	c_node_t *nc = c_node(&e);
+	if(lc)
+	{
+		c_spacial_set_pos(c_spacial(lc), c_spacial(lc)->pos);
+	}
+	if(nc) for(i = 0; i < nc->children_size; i++)
+	{
+		activate_lights(nc->children[i], active);
+	}
+}
 static void activate_node(entity_t e, int32_t active)
 {
 	uint32_t i;
@@ -118,6 +135,7 @@ void c_level_set_active(c_level_t *self, int32_t active)
 		c_character_t *fc = (c_character_t*)ct_get_nth(ecm_get(ref("character")), 0);
 		c_mirror_t *mir = (c_mirror_t*)ct_get_nth(ecm_get(ref("mirror")), 0);
 
+		c_side_t *charside = c_side(fc);
 		self->mirror = c_entity(mir);
 		/* self->character = c_entity(fc); */
 		self->pov = c_entity(cam);
@@ -125,12 +143,37 @@ void c_level_set_active(c_level_t *self, int32_t active)
 		c_side(cam)->level = c_side(fc)->level = c_entity(self);
 
 		c_spacial_t *spawn = c_spacial(&self->spawn);
+		c_side_t *spawnside = c_side(spawn);
 		c_spacial_t *sc = c_spacial(fc);
+		c_spacial_t *body = c_spacial(&fc->orientation);
+
+		c_spacial_lock(body);
+		c_spacial_lock(sc);
+
+		c_spacial_set_model(body, mat4());
+		c_spacial_set_model(sc, mat4());
+
 		if(vec3_len(vec3_sub(sc->pos, spawn->pos)) > 1.0f)
 		{
 			c_spacial_set_pos(sc, spawn->pos);
 		}
+		if((charside->side & 1) != (spawnside->side & 1))
+		{
+			charside->side = spawnside->side;
+			c_force_t *force = c_force(&fc->force_down);
+			force->force = vec3_inv(force->force);
+
+			c_rigid_body(fc)->offset = -c_rigid_body(fc)->offset;
+
+			fc->targR = fc->targR == 0 ? M_PI : 0;
+			/* c_spacial_rotate_Z(sc, M_PI); */
+
+			c_spacial_rotate_Z(body, M_PI);
+		}
+		c_spacial_unlock(body);
+		c_spacial_unlock(sc);
 	}
+	activate_lights(c_entity(self), active);
 }
 
 REG()
