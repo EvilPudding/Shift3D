@@ -137,6 +137,7 @@ void c_level_set_active(c_level_t *self, int32_t active)
 
 		c_side_t *charside = c_side(fc);
 		self->mirror = c_entity(mir);
+		mir->follow = c_entity(cam);
 		/* self->character = c_entity(fc); */
 		self->pov = c_entity(cam);
 
@@ -150,25 +151,24 @@ void c_level_set_active(c_level_t *self, int32_t active)
 		c_spacial_lock(body);
 		c_spacial_lock(sc);
 
-		c_spacial_set_model(body, mat4());
-		c_spacial_set_model(sc, mat4());
-
 		if(vec3_len(vec3_sub(sc->pos, spawn->pos)) > 1.0f)
 		{
+			//c_spacial_set_model(body, mat4());
+			//c_spacial_set_model(sc, mat4());
 			c_spacial_set_pos(sc, spawn->pos);
-		}
-		if((charside->side & 1) != (spawnside->side & 1))
-		{
-			charside->side = spawnside->side;
-			c_force_t *force = c_force(&fc->force_down);
-			force->force = vec3_inv(force->force);
+			if((charside->side & 1) != (spawnside->side & 1))
+			{
+				charside->side = spawnside->side;
+				c_force_t *force = c_force(&fc->force_down);
+				force->force = vec3_inv(force->force);
 
-			c_rigid_body(fc)->offset = -c_rigid_body(fc)->offset;
+				c_rigid_body(fc)->offset = -c_rigid_body(fc)->offset;
 
-			fc->targR = fc->targR == 0 ? M_PI : 0;
-			/* c_spacial_rotate_Z(sc, M_PI); */
+				fc->targR = fc->targR == 0 ? M_PI : 0;
+				/* c_spacial_rotate_Z(sc, M_PI); */
 
-			c_spacial_rotate_Z(body, M_PI);
+				c_spacial_rotate_Z(body, M_PI);
+			}
 		}
 		c_spacial_unlock(body);
 		c_spacial_unlock(sc);

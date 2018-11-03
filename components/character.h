@@ -27,6 +27,7 @@ typedef struct
 	entity_t out;
 
 	int reset;
+	int kill_self;
 } c_character_t;
 
 DEF_CASTER("character", c_character, c_character_t);

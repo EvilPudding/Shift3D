@@ -9,7 +9,7 @@ DIR = build
 
 
 LIBS = \
-       -mwindows -lm -lmingw32 \
+       -lm -lmingw32 \
        -lSDL2main \
        ./glew32.dll -lopengl32 ./SDL2.dll \
 
@@ -34,10 +34,10 @@ CFLAGS_REL = $(CFLAGS) -O3
 CFLAGS_DEB = $(CFLAGS) -g3
 
 
-all: init $(DIR)/shift
+all: init $(DIR)/coolbutts
 	cp -rvu resauces $(DIR)
 
-$(DIR)/shift: $(OBJS_REL) $(PLUGINS_REL)
+$(DIR)/coolbutts: $(OBJS_REL) $(PLUGINS_REL)
 	$(LD) -o $@ $(OBJS_REL) $(LIBS_REL)
 
 %/build/export.a:
@@ -55,7 +55,7 @@ debug: init $(DIR)/shift_debug
 	cp -rvu resauces $(DIR)
 
 $(DIR)/shift_debug: $(OBJS_DEB) $(PLUGINS_DEB)
-	$(LD) -o $@ $(OBJS_DEB) $(LIBS_DEB) $(shell cat $(DIR)/deps)
+	$(LD) -o $@ $(OBJS_DEB) $(LIBS_DEB)
 
 %/build/export_debug.a:
 	$(MAKE) -C $(patsubst %/build/export_debug.a, %, $@) debug
@@ -79,7 +79,7 @@ init:
 
 run: all
 	cp -rvu resauces $(DIR)
-	$(DIR)/shift 0
+	$(DIR)/coolbutts 0
 
 gdb: debug
 	cp -rvu resauces $(DIR)

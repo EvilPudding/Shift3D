@@ -58,7 +58,7 @@ c_door_t *c_door_new(const char *next)
 	return self;
 }
 
-int level_loaded(const char *next)
+entity_t level_loaded(const char *next)
 {
 	int i;
 	c_node_t *node = c_node(&SYS);
@@ -69,11 +69,11 @@ int level_loaded(const char *next)
 		{
 			if(!strcmp(next, name->name))
 			{
-				return 1;
+				return node->children[i];
 			}
 		}
 	}
-	return 0;
+	return entity_null;
 }
 
 
@@ -82,7 +82,8 @@ void c_door_set_active(c_door_t *self, int active)
 	if(active == 1 && self->active != 1)
 	{
 		
-		if(!level_loaded(self->next))
+		self->next_level = level_loaded(self->next);
+		if(!entity_exists(self->next_level))
 		{
 			self->next_level = entity_new(c_name_new(self->next),
 					c_level_new(self->next, 2));

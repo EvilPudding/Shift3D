@@ -23,15 +23,20 @@ static int c_mirror_update(c_mirror_t *self)
 
 	c_level_t *level = c_level(&c_side(&self->follow)->level);
 	entity_t door_in = level->door;
-	if(!entity_exists(door_in)) return CONTINUE;
+	if(!entity_exists(door_in))
+	{
+		return CONTINUE;
+	}
 	c_level_t *next_level = c_level(&c_door(&door_in)->next_level);
-	if(!next_level) return CONTINUE;
+	if(!next_level)
+	{
+		return CONTINUE;
+	}
 
 	entity_t door_out = next_level->spawn;
 
 	mat4_t model = c_camera(&self->follow)->renderer->glvars[0].model;
 
-	if(entity_exists(door_in))
 	{
 		c_spacial_t *sc2 = c_spacial(&door_in);
 
@@ -43,6 +48,10 @@ static int c_mirror_update(c_mirror_t *self)
 		c_spacial_t *sc2 = c_spacial(&door_out);
 
 		model = mat4_mul(sc2->model_matrix, model);
+	}
+	else
+	{
+		printf("no door out\n");
 	}
 
 	renderer_set_model(c_camera(self)->renderer, c_camera(self)->camid,

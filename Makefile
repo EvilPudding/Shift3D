@@ -26,10 +26,10 @@ CFLAGS_REL = $(CFLAGS) -O3
 CFLAGS_DEB = $(CFLAGS) -g3
 
 
-all: init $(DIR)/shift
+all: init $(DIR)/coolbutts
 	cp -rvu resauces $(DIR)
 
-$(DIR)/shift: $(OBJS_REL) $(PLUGINS_REL)
+$(DIR)/coolbutts: $(OBJS_REL) $(PLUGINS_REL)
 	$(LD) -o $@ $(OBJS_REL) $(LIBS_REL) $(shell cat $(DIR)/deps)
 
 %/build/export.a:

@@ -171,8 +171,9 @@ int c_character_update(c_character_t *self, float *dt)
 
 	vec3_t f2 = vec3_round(vec3_add(sc->pos, vec3_scale(up_dir, 0.5f)));
 	int bellow_value2 = c_grid_get(gc, _vec3(f2));
-	if(bellow_value2 & 4) // SPIKES
+	if(bellow_value2 & 4 || self->kill_self) // SPIKES
 	{
+		self->kill_self = 0;
 		*vel = vec3(0.0f);
 		self->max_jump_vel = 0.0f;
 		c_level_reset(level);
@@ -330,7 +331,7 @@ int c_character_key_up(c_character_t *self, char *key)
 		case 'S': case 's': self->backward = 0; break;
 		case 'Q': case 'q': self->swap = 0; break;
 		case 'E': case 'e': self->pushing = 0; break;
-		case 'R': case 'r': break;
+		case 'R': case 'r': self->kill_self = 1; break;
 		case '`': control = !control; break;
 		case 32: self->jump = 0; break;
 	}
