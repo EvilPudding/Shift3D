@@ -99,10 +99,10 @@ static void _c_character_teleport(c_character_t *self)
 	next_level->pov = level->pov;
 	next_level->mirror = level->mirror;
 	candle_skip_frame(3);
-	c_level_set_active(next_level, 0);
 
-
+	c_level_set_active(level, 0);
 	c_level_set_active(next_level, 1);
+
 	entity_destroy(c_entity(level));
 
 	self->in = entity_null;
@@ -163,6 +163,7 @@ int c_character_update(c_character_t *self, float *dt)
 	int bellow_value2 = c_grid_get(gc, _vec3(f2));
 	if(bellow_value2 & 4) // SPIKES
 	{
+		printf("dead\n");
 		*vel = vec3(0.0f);
 		self->max_jump_vel = 0.0f;
 		c_level_reset(level);

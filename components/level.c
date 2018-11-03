@@ -80,7 +80,7 @@ static void activate_node(entity_t e, int32_t active)
 		c_light_set_groups(lc, visible_group, ref("ambient"), light_group);
 		if(active == 1)
 		{
-			c_light_set_shadow_cooldown(lc, 4);
+			c_light_set_shadow_cooldown(lc, 0);
 		}
 		else
 		{
