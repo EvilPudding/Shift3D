@@ -16,7 +16,7 @@ static float c_rigid_body_key_collider(c_rigid_body_t *self, vec3_t pos)
 	c_side_t *side = c_side(self);
 
 	c_model_t *model = c_model(self);
-	if(model->visible && vec3_len(vec3_sub(pos, kpos)) < 0.4)
+	if(model->visible && vec3_len(vec3_sub(pos, kpos)) < 0.6)
 	{
 		model->visible = 0;
 		/* entity_signal(ent, spacial_changed, &ent); */
