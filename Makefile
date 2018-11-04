@@ -23,7 +23,7 @@ CFLAGS = -Wall -I. -Icandle -DUSE_VAO \
 
 CFLAGS_REL = $(CFLAGS) -O3
 
-CFLAGS_DEB = $(CFLAGS) -g3
+CFLAGS_DEB = $(CFLAGS) -g3 -DDEBUG
 
 
 all: init $(DIR)/coolbutts
