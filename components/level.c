@@ -11,6 +11,7 @@
 #include "components/door.h"
 #include "character.h"
 #include "force.h"
+#include "velocity.h"
 #include "rigid_body.h"
 #include "charlook.h"
 #include "mirror.h"
@@ -121,29 +122,25 @@ void c_level_reset(c_level_t *self)
 	c_level_set_active(self, 0);
 
 	entity_t lvl = entity_new(c_name_new(self->file), c_level_new(self->file, 0));
-	c_level_set_active(c_level(&lvl), 1);
+	c_level_t *level = c_level(&lvl);
+	c_level_set_active(level, 1);
 
-	entity_destroy(c_entity(self));
-}
-
-void c_level_set_active(c_level_t *self, int32_t active)
-{
-	activate_node(c_entity(self), active);
-	if(active == 1)
-	{
 		c_charlook_t *cam = (c_charlook_t*)ct_get_nth(ecm_get(ref("charlook")), 0);
 		c_character_t *fc = (c_character_t*)ct_get_nth(ecm_get(ref("character")), 0);
 		c_mirror_t *mir = (c_mirror_t*)ct_get_nth(ecm_get(ref("mirror")), 0);
 
+		c_velocity(fc)->velocity = vec3(0.0f);
+		fc->max_jump_vel = 0.0f;
+
 		c_side_t *charside = c_side(fc);
-		self->mirror = c_entity(mir);
+		level->mirror = c_entity(mir);
 		mir->follow = c_entity(cam);
-		/* self->character = c_entity(fc); */
-		self->pov = c_entity(cam);
+		/* level->character = c_entity(fc); */
+		level->pov = c_entity(cam);
 
-		c_side(cam)->level = c_side(fc)->level = c_entity(self);
+		c_side(cam)->level = c_side(fc)->level = c_entity(level);
 
-		c_spacial_t *spawn = c_spacial(&self->spawn);
+		c_spacial_t *spawn = c_spacial(&level->spawn);
 		c_side_t *spawnside = c_side(spawn);
 		c_spacial_t *sc = c_spacial(fc);
 		c_spacial_t *body = c_spacial(&fc->orientation);
@@ -151,7 +148,6 @@ void c_level_set_active(c_level_t *self, int32_t active)
 		c_spacial_lock(body);
 		c_spacial_lock(sc);
 
-		if(vec3_len(vec3_sub(sc->pos, spawn->pos)) > 1.0f)
 		{
 			//c_spacial_set_model(body, mat4());
 			//c_spacial_set_model(sc, mat4());
@@ -172,6 +168,17 @@ void c_level_set_active(c_level_t *self, int32_t active)
 		}
 		c_spacial_unlock(body);
 		c_spacial_unlock(sc);
+
+	entity_destroy(c_entity(self));
+	entity_signal(level->pov, ref("side_changed"),
+			&level->pov, NULL);
+}
+
+void c_level_set_active(c_level_t *self, int32_t active)
+{
+	activate_node(c_entity(self), active);
+	if(active == 1)
+	{
 	}
 	activate_lights(c_entity(self), active);
 }

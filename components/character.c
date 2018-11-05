@@ -119,13 +119,13 @@ static void _c_character_teleport(c_character_t *self)
 
 int c_character_update(c_character_t *self, float *dt)
 {
+	c_side_t *ss = c_side(self);
 	if(self->reset)
 	{
 		c_editmode_select(c_editmode(&SYS), c_entity(self));
 		c_editmode_select(c_editmode(&SYS), 0);
 		self->reset = 0;
 	}
-	c_side_t *ss = c_side(self);
 	c_level_t *level = c_level(&ss->level);
 
 	if(!level) return CONTINUE;
@@ -174,11 +174,9 @@ int c_character_update(c_character_t *self, float *dt)
 	if(bellow_value2 & 4 || self->kill_self) // SPIKES
 	{
 		self->kill_self = 0;
-		*vel = vec3(0.0f);
-		self->max_jump_vel = 0.0f;
+		c_spacial_unlock(sc);
 		c_level_reset(level);
 
-		c_spacial_unlock(sc);
 
 		self->reset = 1;
 		return CONTINUE;

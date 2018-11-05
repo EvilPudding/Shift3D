@@ -15,10 +15,10 @@ void main()
 	if(gl_FragCoord.z < depth) discard;
 
 	vec4 dif  = resolveProperty(mat(albedo), texcoord);
-	if(dif.a < 0.7f) discard;
+	if(dif.a < 0.7) discard;
 
 	dif.rgb += poly_color;
-	/* dif.rgb = TM[2] / 2.0f + 0.5f; */
+	/* dif.rgb = TM[2] / 2.0 + 0.5; */
 	AlbedoColor = dif;
 
 	NMR.rg = encode_normal(get_normal());
