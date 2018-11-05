@@ -172,30 +172,32 @@ renderer_t *shift_renderer(renderer_t *original)
 		}
 	);
 
-	renderer_add_pass(self, "refraction", "copy", ref("quad"), MANUAL_MIP,
-			refr, NULL, 0,
-		(bind_t[]){
-			{TEX, "buf", .buffer = light},
-			{INT, "level", .integer = 0},
-			{NONE}
-		}
-	);
-
 	if(!original)
 	{
+		renderer_add_pass(self, "refraction", "copy", ref("quad"), MANUAL_MIP,
+				refr, NULL, 0,
+			(bind_t[]){
+				{TEX, "buf", .buffer = light},
+				{INT, "level", .integer = 0},
+				{NONE}
+			}
+		);
+
 		renderer_add_kawase(self, refr, refr2, 0, 1);
 		renderer_add_kawase(self, refr, refr2, 1, 2);
 		renderer_add_kawase(self, refr, refr2, 2, 3);
 
 		renderer_add_pass(self, "transp", "transparency", ref("transparent"),
-				DEPTH_EQUAL, light, gbuffer, 0,
+				0, light, gbuffer, 0,
 			(bind_t[]){
 				{TEX, "refr", .buffer = refr},
 				{NONE}
 			}
 		);
+
 		renderer_add_pass(self, "transp_1", "gbuffer", ref("transparent"),
-				0, gbuffer, gbuffer, 0, (bind_t[]){ {NONE} });
+				GL_EQUAL, gbuffer, gbuffer, 0, (bind_t[]){ {NONE} });
+
 		renderer_add_pass(self, "portal", "portal", ref("portal"),
 				DEPTH_DISABLE, portal, portal, 0,
 			(bind_t[]){
