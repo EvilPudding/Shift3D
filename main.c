@@ -49,7 +49,7 @@ renderer_t *shift_renderer(renderer_t *original)
 {
 	renderer_t *self = renderer_new(0.8f);
 
-	texture_t *gbuffer, *portal, *ssao, *light, *refr, *refr2, *selectable,
+	texture_t *gbuffer, *portal, *ssao, *light, *refr, *tmp, *selectable,
 			  *final;
 	uint32_t light_group;
 
@@ -75,15 +75,15 @@ renderer_t *shift_renderer(renderer_t *original)
 
 		refr = texture_new_2D(0, 0, TEX_MIPMAP, buffer_new("color", 1, 4));
 
-		refr2 = texture_new_2D(0, 0, TEX_MIPMAP, buffer_new("color", 1, 4));
+		tmp = texture_new_2D(0, 0, TEX_MIPMAP, buffer_new("color", 1, 4));
 
 
 		renderer_add_tex(self, "portal",	 1.0f, portal);
 		renderer_add_tex(self, "gbuffer",	 1.0f, gbuffer);
 		renderer_add_tex(self, "light",		 1.0f, light);
 		renderer_add_tex(self, "selectable", 1.0f, selectable);
+		renderer_add_tex(self, "tmp",		 1.0f, tmp);
 		renderer_add_tex(self, "refr",		 1.0f, refr);
-		renderer_add_tex(self, "refr2",		 1.0f, refr2);
 		self->output = gbuffer;
 
 		renderer_add_pass(self, "gbuffer", "gbuffer", ref("visible"), 0,
@@ -137,9 +137,9 @@ renderer_t *shift_renderer(renderer_t *original)
 		renderer_add_tex(self, "ssao",		 1.0f, ssao);
 		renderer_add_tex(self, "light",		 1.0f, light);
 
-		portal = renderer_tex(original, ref("portal"));
 		refr = renderer_tex(original, ref("refr"));
-		refr2 = renderer_tex(original, ref("refr2"));
+		tmp = renderer_tex(original, ref("tmp"));
+		portal = renderer_tex(original, ref("portal"));
 		selectable = renderer_tex(original, ref("selectable"));
 
 		self->output = final;
@@ -183,20 +183,20 @@ renderer_t *shift_renderer(renderer_t *original)
 			}
 		);
 
-		renderer_add_kawase(self, refr, refr2, 0, 1);
-		renderer_add_kawase(self, refr, refr2, 1, 2);
-		renderer_add_kawase(self, refr, refr2, 2, 3);
+		renderer_add_kawase(self, refr, tmp, 0, 1);
+		renderer_add_kawase(self, refr, tmp, 1, 2);
+		renderer_add_kawase(self, refr, tmp, 2, 3);
+
+		renderer_add_pass(self, "transp_1", "gbuffer", ref("transparent"),
+				0, gbuffer, gbuffer, 0, (bind_t[]){ {NONE} });
 
 		renderer_add_pass(self, "transp", "transparency", ref("transparent"),
-				0, light, gbuffer, 0,
+				DEPTH_EQUAL | DEPTH_LOCK, light, gbuffer, 0,
 			(bind_t[]){
 				{TEX, "refr", .buffer = refr},
 				{NONE}
 			}
 		);
-
-		renderer_add_pass(self, "transp_1", "gbuffer", ref("transparent"),
-				GL_EQUAL, gbuffer, gbuffer, 0, (bind_t[]){ {NONE} });
 
 		renderer_add_pass(self, "portal", "portal", ref("portal"),
 				DEPTH_DISABLE, portal, portal, 0,
@@ -212,6 +212,8 @@ renderer_t *shift_renderer(renderer_t *original)
 	{
 		texture_t *gb = renderer_tex(original, ref("gbuffer"));
 		texture_t *rn = renderer_tex(original, ref("light"));
+		refr = renderer_tex(original, ref("refr"));
+		tmp = renderer_tex(original, ref("tmp"));
 
 		renderer_add_pass(self, "copy_gbuffer", "copy_gbuffer", ref("quad"),
 				DEPTH_DISABLE, gb, gb, 0,
@@ -251,6 +253,28 @@ renderer_t *shift_renderer(renderer_t *original)
 				{NONE}
 			}
 		);
+
+		renderer_add_pass(self, "bloom_%d", "bright", ref("quad"), MANUAL_MIP,
+				refr, NULL, 0,
+			(bind_t[]){
+				{TEX, "buf", .buffer = final},
+				{NONE}
+			}
+		);
+		renderer_add_kawase(self, refr, tmp, 0, 1);
+		renderer_add_kawase(self, refr, tmp, 1, 2);
+		renderer_add_kawase(self, refr, tmp, 2, 3);
+
+		renderer_add_pass(self, "bloom", "upsample", ref("quad"), MANUAL_MIP | ADD,
+				final, NULL, 0,
+			(bind_t[]){
+				{TEX, "buf", .buffer = refr},
+				{INT, "level", .integer = 3},
+				{NUM, "alpha", .number = 0.5},
+				{NONE}
+			}
+		);
+
 	}
 
 
@@ -311,7 +335,7 @@ int main(int argc, char **argv)
 			c_model_new(glass, mat, 1, 1)
 	);
 	c_spacial_set_pos(c_spacial(&venus), vec3(7.0, 6.5, -0.37));
-	c_spacial_set_scale(c_spacial(&venus), vec3(1.69, 1.0, 1));
+	c_spacial_set_scale(c_spacial(&venus), vec3(1.69 * 0.3, 1.0 * 0.3, 1));
 
 	mat_t *bok = mat_new("bk");
 	bok->albedo.texture = sauces("boku.png");
@@ -322,7 +346,7 @@ int main(int argc, char **argv)
 			c_model_new(glass, bok, 1, 1)
 	);
 	c_spacial_set_pos(c_spacial(&boku), vec3(7.0, 6.5, -0.4));
-	c_spacial_set_scale(c_spacial(&boku), vec3(1.69, 1.0, 1));
+	c_spacial_set_scale(c_spacial(&boku), vec3(1.69 * 0.3, 1.0 * 0.3, 1));
 
 	//c_window_toggle_fullscreen(c_window(&candle->systems));
 

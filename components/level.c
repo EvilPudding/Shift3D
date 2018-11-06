@@ -56,6 +56,7 @@ static void activate_node(entity_t e, int32_t active)
 {
 	uint32_t i;
 	uint32_t visible_group;
+	uint32_t shadow_group;
 	uint32_t light_group;
 	uint32_t selectable_group;
 	uint32_t transparent_group;
@@ -63,12 +64,14 @@ static void activate_node(entity_t e, int32_t active)
 	{
 		visible_group = 0;
 		light_group = 0;
+		shadow_group = 0;
 		selectable_group = 0;
 		transparent_group = 0;
 	}
 	else if(active == 1)
 	{
 		visible_group = ref("visible");
+		shadow_group = ref("shadow");
 		light_group = ref("light");
 		selectable_group = ref("selectable");
 		transparent_group = ref("transparent");
@@ -76,6 +79,7 @@ static void activate_node(entity_t e, int32_t active)
 	else
 	{
 		visible_group = ref("next_level");
+		shadow_group = ref("next_level_shadow");
 		light_group = ref("next_level_light");
 		selectable_group = 0;
 		transparent_group = 0;
@@ -90,12 +94,12 @@ static void activate_node(entity_t e, int32_t active)
 	c_side_t *sc = c_side(&e);
 	if(mc)
 	{
-		c_model_set_groups(mc, visible_group, transparent_group,
-				selectable_group);
+		c_model_set_groups(mc, visible_group, shadow_group,
+				transparent_group, selectable_group);
 	}
 	if(lc)
 	{
-		c_light_set_groups(lc, visible_group, ref("ambient"), light_group);
+		c_light_set_groups(lc, shadow_group, ref("ambient"), light_group);
 		if(active == 1)
 		{
 			c_light_set_shadow_cooldown(lc, 0);

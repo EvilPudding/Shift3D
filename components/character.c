@@ -177,7 +177,6 @@ int c_character_update(c_character_t *self, float *dt)
 		c_spacial_unlock(sc);
 		c_level_reset(level);
 
-
 		self->reset = 1;
 		return CONTINUE;
 	}
@@ -279,7 +278,7 @@ int c_character_update(c_character_t *self, float *dt)
 	{
 		if(self->pushing)
 		{
-			vec3_t t = vec3_add(sc->pos, vec3_scale(vec3_norm(*vel), 0.45));
+			vec3_t t = vec3_add(sc->pos, vec3_scale(vec3_norm(*vel), 0.6));
 			t = vec3_round(t);
 
 			int val = c_grid_get(gc, t.x, t.y, t.z);

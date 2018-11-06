@@ -50,7 +50,7 @@ c_door_t *c_door_new(const char *next)
 	}
 
 	drawable_init(&self->draw, 0, NULL);
-	drawable_set_vs(&self->draw, g_model_vs);
+	drawable_set_vs(&self->draw, model_vs());
 	drawable_set_mesh(&self->draw, g_portal_mesh);
 
 	strcpy(self->next, next);
