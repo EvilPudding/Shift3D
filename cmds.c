@@ -125,24 +125,26 @@ c_t *get_char(void)
 renderer_t *shift_renderer(renderer_t *original);
 static entity_t cmd_spawn(entity_t root, int argc, const char **argv)
 {
-	float x, y, z;
+	vec3_t pos;
 	int dir, side;
 
-	sscanf(argv[1], "%f", &x);
-	sscanf(argv[2], "%f", &y);
-	sscanf(argv[3], "%f", &z);
+	sscanf(argv[1], "%f", &pos.x);
+	sscanf(argv[2], "%f", &pos.y);
+	sscanf(argv[3], "%f", &pos.z);
 	sscanf(argv[4], "%d", &dir);
 
 	c_level_t *level = c_level(&root);
 
-	side = c_grid_get(c_grid(&level->grid), x, y, z);
+	side = c_grid_get(c_grid(&level->grid), _vec3(pos));
 
 	int side_dir = (side & 1) ? 1 : -1;
 	level->spawn = entity_new(c_node_new(),
 			c_side_new(root, side, 0),
 			c_spacial_new(),
 			c_name_new("spawn"));
-	c_spacial_set_pos(c_spacial(&level->spawn), vec3(x, y + 0.5 * side_dir, z));
+	pos = vec3(pos.x, pos.y + 0.48 * side_dir, pos.z);
+	c_spacial_t *spawnsc = c_spacial(&level->spawn);
+	c_spacial_set_pos(spawnsc, pos);
 
 	if(!get_char())
 	{
@@ -151,34 +153,38 @@ static entity_t cmd_spawn(entity_t root, int argc, const char **argv)
 
 		entity_t body = entity_new(c_name_new("body"), c_node_new());
 
-		renderer_t *renderer = shift_renderer(NULL);
-		
+		renderer_t *renderer = shift_renderer(NULL);	
+	
 		entity_t character = entity_new( c_name_new("character"),
 				c_character_new(body, 1, g),
 				c_side_new(root, side, 1)
 		);
+		c_spacial_t *sc = c_spacial(&character);
+		c_spacial_lock(sc);
 
 		entity_t camera = entity_new( c_name_new("camera"),
 				c_camera_new(70, 0.1, 100.0, 0, 1, 0, renderer),
 				c_charlook_new(body, 1.9),
 				c_side_new(root, side, 0)
 		);
-
 		c_spacial_set_pos(c_spacial(&camera), vec3(0.0, 0.7, 0.0));
+
 		c_node_add(c_node(&character), 1, body);
 		c_node_add(c_node(&body), 1, camera);
-		/* c_node_add(c_node(&root), 1, character); */
+
 
 		level->pov = camera;
 
 		dir++;
 		while(dir > 0)
 		{
-			c_spacial_rotate_Y(c_spacial(&character), -M_PI / 2);
+			c_spacial_rotate_Y(sc, -M_PI / 2.0f);
+			c_spacial_rotate_Y(spawnsc, -M_PI / 2.0f);
 			dir--;
 		}
-		c_spacial_set_pos(c_spacial(&character), vec3(x, y + 0.4 * side_dir, z));
+		c_spacial_set_pos(sc, pos);
 
+		c_spacial_unlock(sc);
 		level->mirror = entity_new( c_name_new("mirror"),
 				c_mirror_new(camera),
 				c_camera_new(70, 0.1, 100.0, 1, 1, 1,

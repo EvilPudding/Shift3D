@@ -79,7 +79,6 @@ static void _c_character_teleport(c_character_t *self)
 	}
 
 	vec3_t npos = mat4_mul_vec4(model, vec4(0.0f, 0.0f, 0.0f, 1.0f)).xyz;
-	npos.y = roundf(npos.y) + 0.505 * (out_side ? -1 : 1);
 	c_spacial_set_pos(sc, npos);
 
 	if(out_side != (ss->side & 1))
@@ -128,7 +127,7 @@ int c_character_update(c_character_t *self, float *dt)
 	}
 	c_level_t *level = c_level(&ss->level);
 
-	if(!level) return CONTINUE;
+	if(!level || !level->active) return CONTINUE;
 	c_grid_t *gc = c_grid(&level->grid);
 	if(!gc) return CONTINUE;
 
