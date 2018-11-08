@@ -308,11 +308,11 @@ end:
 	c_spacial_unlock(sc);
 
 
-
 	sc = c_spacial(&self->orientation);
 	if(fabs(dif = self->targR - sc->rot.z) > 0.01)
 	{
-		c_spacial_rotate_Z(sc, dif * 5 * (*dt));
+		float scale = fmin(5.0f * (*dt), 1.0f);
+		c_spacial_rotate_Z(sc, dif * scale);
 	}
 
 	return CONTINUE;
