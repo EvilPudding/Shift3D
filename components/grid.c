@@ -55,42 +55,6 @@ c_grid_t *c_grid_new(int mx, int my, int mz)
 	self->my = my;
 	self->mz = mz;
 	self->map = calloc(mx * my * mz, sizeof(*self->map));
-	c_side_t *ss = c_side(self);
-
-	self->blocks = entity_new(c_name_new("blocks"), c_side_new(ss->level, 0, 1),
-			/* c_model_new(NULL, candle_mat_get(candle, "white"), 1)); */
-			c_model_new(mesh_new(), sauces("white.mat"), 1, 1));
-
-	self->cage = entity_new(c_name_new("cage"), c_side_new(ss->level, 0, 1),
-			c_model_new(mesh_new(), sauces("piramids.mat"), 1, 1));
-
-	mat_t *stone3 = sauces("stone3.mat");
-	stone3->albedo.color = vec4(0.6f, 0.1f, 0.14f, 1.0f);
-	stone3->albedo.blend = 0.5;
-	stone3->normal.blend = 0.3;
-
-	self->boxes = entity_new(c_name_new("movable"), c_side_new(ss->level, 0, 1),
-			c_model_new(mesh_new(), stone3, 1, 1), 0, 1);
-
-	self->blocks_inv = entity_new(c_name_new("bloc_i"), c_side_new(ss->level, 1, 1),
-			c_model_new(mesh_new(), sauces("piramids.mat"), 1, 1));
-
-	self->cage_inv = entity_new(c_name_new("cage_i"), c_side_new(ss->level, 1, 1),
-			c_model_new(mesh_new(), sauces("white.mat"), 1, 1));
-
-	self->boxes_inv = entity_new(c_name_new("movab_i"), c_side_new(ss->level, 1, 1),
-			c_model_new(mesh_new(), stone3, 1, 1));
-
-	/* c_model(&self->blocks_inv)->before_draw = */
-	/* 	c_model(&self->cage_inv)->before_draw = */
-	/* 	c_model(&self->boxes_inv)->before_draw = */
-	/* 	(before_draw_cb)cmd_model_before_draw; */
-
-	/* c_model(&self->blocks)->before_draw = */
-	/* 	c_model(&self->cage)->before_draw = */
-	/* 	c_model(&self->boxes)->before_draw = */
-	/* 	(before_draw_cb)cmd_model_before_draw; */
-
 	return self;
 }
 
@@ -252,6 +216,42 @@ void mesh_add_plane(mesh_t *self, float s, vec3_t v, vec3_t dir, int invert_norm
 
 static int c_grid_created(c_grid_t *self)
 {
+	c_side_t *ss = c_side(self);
+
+	self->blocks = entity_new(c_name_new("blocks"), c_side_new(ss->level, 0, 1),
+			/* c_model_new(NULL, candle_mat_get(candle, "white"), 1)); */
+			c_model_new(mesh_new(), sauces("white.mat"), 1, 1));
+
+	self->cage = entity_new(c_name_new("cage"), c_side_new(ss->level, 0, 1),
+			c_model_new(mesh_new(), sauces("piramids.mat"), 1, 1));
+
+	mat_t *stone3 = sauces("stone3.mat");
+	stone3->albedo.color = vec4(0.6f, 0.1f, 0.14f, 1.0f);
+	stone3->albedo.blend = 0.5;
+	stone3->normal.blend = 0.3;
+
+	self->boxes = entity_new(c_name_new("movable"), c_side_new(ss->level, 0, 1),
+			c_model_new(mesh_new(), stone3, 1, 1), 0, 1);
+
+	self->blocks_inv = entity_new(c_name_new("bloc_i"), c_side_new(ss->level, 1, 1),
+			c_model_new(mesh_new(), sauces("piramids.mat"), 1, 1));
+
+	self->cage_inv = entity_new(c_name_new("cage_i"), c_side_new(ss->level, 1, 1),
+			c_model_new(mesh_new(), sauces("white.mat"), 1, 1));
+
+	self->boxes_inv = entity_new(c_name_new("movab_i"), c_side_new(ss->level, 1, 1),
+			c_model_new(mesh_new(), stone3, 1, 1));
+
+	/* c_model(&self->blocks_inv)->before_draw = */
+	/* 	c_model(&self->cage_inv)->before_draw = */
+	/* 	c_model(&self->boxes_inv)->before_draw = */
+	/* 	(before_draw_cb)cmd_model_before_draw; */
+
+	/* c_model(&self->blocks)->before_draw = */
+	/* 	c_model(&self->cage)->before_draw = */
+	/* 	c_model(&self->boxes)->before_draw = */
+	/* 	(before_draw_cb)cmd_model_before_draw; */
+
 	c_grid_update(self);
 
 	c_node_add(c_node(self), 6, self->boxes_inv, self->cage_inv,

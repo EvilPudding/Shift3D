@@ -42,7 +42,8 @@ static entity_t cmd_shift_grid(entity_t root, int argc, const char **argv)
 	c_level_t *level = c_level(&root);
 	level->grid = entity_new(c_name_new("grid"),
 			c_grid_new(mx, my, mz),
-			c_side_new(root, -1, 1));
+			c_side_new(root, -1, 1)
+			);
 	c_grid_t *grid = c_grid(&level->grid);
 
 	l = mx * my * mz;
