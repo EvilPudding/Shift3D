@@ -181,10 +181,8 @@ void c_level_reset(c_level_t *self)
 void c_level_set_active(c_level_t *self, int32_t active)
 {
 	activate_node(c_entity(self), active);
-	if(active == 1)
-	{
-	}
 	activate_lights(c_entity(self), active);
+	self->active = active;
 }
 
 REG()

@@ -293,7 +293,6 @@ int main(int argc, char **argv)
 	/* mesh_unlock(ico); */
 
 
-	entity_add_component(SYS, c_physics_new());
 	entity_add_component(SYS, (c_t*)c_editmode_new());
 	/* c_editmode_activate(c_editmode(&SYS)); */
 
@@ -308,6 +307,7 @@ int main(int argc, char **argv)
 	entity_new(c_name_new("ambient"), c_light_new(-1.0f,
 				vec4(1.0f, 1.0f, 1.0f, 0.3f), 0));
 	c_level_set_active(c_level(&lvl), 1);
+	entity_add_component(SYS, c_physics_new());
 
 	/* mat_t *mat = mat_new("tt"); */
 	/* entity_t decal = entity_new(c_decal_new(mat, 1)); */
