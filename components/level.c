@@ -153,25 +153,15 @@ void c_level_reset(c_level_t *self)
 		c_spacial_lock(sc);
 
 		c_spacial_set_model(body, mat4());
+		c_spacial_set_model(sc, spawn->model_matrix);
 		c_charlook_reset(cam);
-		{
-			//c_spacial_set_model(body, mat4());
-			//c_spacial_set_model(sc, mat4());
-			c_spacial_set_pos(sc, spawn->pos);
-			if((charside->side & 1) != (spawnside->side & 1))
-			{
-				charside->side = spawnside->side;
-				c_force_t *force = c_force(&fc->force_down);
-				force->force = vec3_inv(force->force);
+		fc->targR = 0;
+		int side_dir = (spawnside->side & 1) ? 1 : -1;
+		c_rigid_body(fc)->offset =  -0.8f * side_dir;
 
-				c_rigid_body(fc)->offset = -c_rigid_body(fc)->offset;
+		c_force(&fc->force_down)->force = vec3(0.0, 23 * side_dir, 0.0);
 
-				fc->targR = fc->targR == 0 ? M_PI : 0;
-				/* c_spacial_rotate_Z(sc, M_PI); */
-
-				c_spacial_rotate_Z(body, M_PI);
-			}
-		}
+		charside->side = spawnside->side;
 		c_spacial_unlock(body);
 		c_spacial_unlock(sc);
 

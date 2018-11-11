@@ -25,7 +25,7 @@ static float c_rigid_body_door_collider(c_rigid_body_t *self, vec3_t pos)
 
 	pos = mat4_mul_vec4(mat4_invert(door->model_matrix), vec4(_vec3(pos), 1.0f)).xyz;
 
-	if(fabs(pos.x) < 0.01 && fabs(pos.y - 0.5) < 0.6 && fabs(pos.z) < 0.3f)
+	if(fabs(pos.x) < 0.1 && fabs(pos.y) < 0.7 && fabs(pos.z) < 0.3f)
 	/* if(vec3_len(vec3_sub(pos, door->pos)) < 0.3) */
 	{
 		c_character_teleport(ch, c_entity(self),

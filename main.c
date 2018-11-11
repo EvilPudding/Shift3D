@@ -12,6 +12,7 @@
 #include "components/side.h"
 #include "components/side_follow.h"
 #include "components/mirror.h"
+#include "components/rigid_body.h"
 
 #include <components/node.h>
 #include <components/model.h>
@@ -47,7 +48,7 @@
 
 renderer_t *shift_renderer()
 {
-	renderer_t *self = renderer_new(0.66f);
+	renderer_t *self = renderer_new(0.8f);
 
 	texture_t *gbuffer, *gbuffer2, *portal, *ssao, *light, *refr,
 			  *tmp, *selectable, *final;

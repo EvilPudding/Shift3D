@@ -8,6 +8,7 @@
 #include "components/level.h"
 #include "components/character.h"
 #include "components/charlook.h"
+#include "components/rigid_body.h"
 #include "components/side_follow.h"
 #include "components/mirror.h"
 
@@ -145,7 +146,16 @@ static entity_t cmd_spawn(entity_t root, int argc, const char **argv)
 			c_name_new("spawn"));
 	pos = vec3(pos.x, pos.y + 0.48 * side_dir, pos.z);
 	c_spacial_t *spawnsc = c_spacial(&level->spawn);
+	c_spacial_lock(spawnsc);
 	c_spacial_set_pos(spawnsc, pos);
+
+	dir++;
+	while(dir > 0)
+	{
+		c_spacial_rotate_Y(spawnsc, -M_PI / 2.0f);
+		dir--;
+	}
+	c_spacial_unlock(spawnsc);
 
 	if(!get_char())
 	{
@@ -163,6 +173,8 @@ static entity_t cmd_spawn(entity_t root, int argc, const char **argv)
 		c_spacial_t *sc = c_spacial(&character);
 		c_spacial_lock(sc);
 
+		c_rigid_body(&character)->offset = -0.8f * side_dir;
+
 		entity_t camera = entity_new( c_name_new("camera"),
 				c_camera_new(70, 0.1, 100.0, 1, 1, 1, renderer),
 				c_charlook_new(body, 1.9),
@@ -176,14 +188,7 @@ static entity_t cmd_spawn(entity_t root, int argc, const char **argv)
 
 		level->pov = camera;
 
-		dir++;
-		while(dir > 0)
-		{
-			c_spacial_rotate_Y(sc, -M_PI / 2.0f);
-			c_spacial_rotate_Y(spawnsc, -M_PI / 2.0f);
-			dir--;
-		}
-		c_spacial_set_pos(sc, pos);
+		c_spacial_set_model(sc, spawnsc->model_matrix);
 
 		c_spacial_unlock(sc);
 		level->mirror = entity_new( c_name_new("mirror"),

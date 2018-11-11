@@ -27,8 +27,6 @@ c_character_t *c_character_new(entity_t orientation,
 
 	self->orientation = orientation;
 
-	c_rigid_body(self)->offset = 0.8;
-
 	return self;
 }
 
