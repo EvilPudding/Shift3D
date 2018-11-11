@@ -34,8 +34,9 @@ static int c_mirror_update(c_mirror_t *self)
 	}
 
 	entity_t door_out = next_level->spawn;
+	renderer_t *renderer = c_camera(self)->renderer;
 
-	mat4_t model = c_camera(&self->follow)->renderer->glvars[0].model;
+	mat4_t model = renderer->glvars[0].model;
 
 	{
 		c_spacial_t *sc2 = c_spacial(&door_in);
@@ -54,15 +55,14 @@ static int c_mirror_update(c_mirror_t *self)
 		printf("no door out\n");
 	}
 
-	renderer_set_model(c_camera(self)->renderer, c_camera(self)->camid,
-			&model);
+	renderer_set_model(renderer, 1, &model);
 	return CONTINUE;
 }
 
 REG()
 {
 	ct_t *ct = ct_new("mirror", sizeof(c_mirror_t), NULL, NULL, 1, ref("node"));
-	ct_listener(ct, WORLD | 51, sig("world_pre_draw"), c_mirror_update);
+	ct_listener(ct, WORLD | 49, sig("world_pre_draw"), c_mirror_update);
 }
 
 

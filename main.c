@@ -45,239 +45,209 @@
 /* 	c_node_add(c_node(&par), 1, sprite); */
 /* } */
 
-renderer_t *shift_renderer(renderer_t *original)
+renderer_t *shift_renderer()
 {
-	renderer_t *self = renderer_new(0.8f);
+	renderer_t *self = renderer_new(0.66f);
 
-	texture_t *gbuffer, *portal, *ssao, *light, *refr, *tmp, *selectable,
-			  *final;
-	uint32_t light_group;
+	texture_t *gbuffer, *gbuffer2, *portal, *ssao, *light, *refr,
+			  *tmp, *selectable, *final;
 
-	if(!original)
-	{
-		light_group = ref("light");
-		gbuffer =	texture_new_2D(0, 0, 0, 0,
-			buffer_new("nmr",	 1, 4),
-			buffer_new("albedo", 1, 4),
-			buffer_new("depth",	 1, -1));
+	gbuffer =	texture_new_2D(0, 0, 0, 0,
+		buffer_new("nmr",	 1, 4),
+		buffer_new("albedo", 1, 4),
+		buffer_new("depth",	 1, -1));
+	gbuffer2 =	texture_new_2D(0, 0, 0, 0,
+		buffer_new("nmr",	 1, 4),
+		buffer_new("albedo", 1, 4),
+		buffer_new("depth",	 1, -1)
+	);
 
-		portal = texture_new_2D(0, 0, 0,
-			buffer_new("ignore", 1, 1),
-			buffer_new("depth",	 1, -1));
+	portal = texture_new_2D(0, 0, 0,
+		buffer_new("ignore", 1, 1),
+		buffer_new("depth",	 1, -1));
 
-		light = texture_new_2D(0, 0, 0,
+	light = texture_new_2D(0, 0, TEX_INTERPOLATE,
 			buffer_new("color",	1, 4));
 
-		selectable = texture_new_2D(0, 0, 0,
-			buffer_new("geomid", 1, 2),
-			buffer_new("id",	 1, 2),
-			buffer_new("depth",	 1, -1));
+	selectable = texture_new_2D(0, 0, 0,
+		buffer_new("geomid", 1, 2),
+		buffer_new("id",	 1, 2),
+		buffer_new("depth",	 1, -1));
 
-		refr = texture_new_2D(0, 0, TEX_MIPMAP, buffer_new("color", 1, 4));
+	refr = texture_new_2D(0, 0, TEX_MIPMAP | TEX_INTERPOLATE,
+			buffer_new("color", 1, 4));
 
-		tmp = texture_new_2D(0, 0, TEX_MIPMAP, buffer_new("color", 1, 4));
+	tmp = texture_new_2D(0, 0, TEX_MIPMAP | TEX_INTERPOLATE,
+			buffer_new("color", 1, 4));
 
+	final = texture_new_2D(0, 0, TEX_INTERPOLATE | TEX_MIPMAP,
+		buffer_new("color",	1, 4));
 
-		renderer_add_tex(self, "portal",	 1.0f, portal);
-		renderer_add_tex(self, "gbuffer",	 1.0f, gbuffer);
-		renderer_add_tex(self, "light",		 1.0f, light);
-		renderer_add_tex(self, "selectable", 1.0f, selectable);
-		renderer_add_tex(self, "tmp",		 1.0f, tmp);
-		renderer_add_tex(self, "refr",		 1.0f, refr);
-		self->output = gbuffer;
+	ssao = texture_new_2D(0, 0, 0, buffer_new("occlusion",	1, 1));
 
-		renderer_add_pass(self, "gbuffer", "gbuffer", ref("visible"), 0,
-				gbuffer, gbuffer, 0,
-			(bind_t[]){
-				{CLEAR_DEPTH, .number = 1.0f},
-				{CLEAR_COLOR, .vec4 = vec4(0.0f)},
-				{NONE}
-			}
-		);
+	renderer_add_tex(self, "portal",	 1.0f, portal);
+	renderer_add_tex(self, "selectable", 1.0f, selectable);
+	renderer_add_tex(self, "tmp",		 1.0f, tmp);
+	renderer_add_tex(self, "refr",		 1.0f, refr);
+	renderer_add_tex(self, "final",		 1.0f, final);
+	renderer_add_tex(self, "ssao",		 1.0f, ssao);
+	renderer_add_tex(self, "light",		 1.0f, light);
+	renderer_add_tex(self, "gbuffer",	 1.0f, gbuffer);
+	renderer_add_tex(self, "gbuffer2",	 1.0f, gbuffer2);
 
-		renderer_add_pass(self, "selectable", "select", ref("selectable"),
-				0, selectable, selectable, 0,
-			(bind_t[]){
-				{CLEAR_DEPTH, .number = 1.0f},
-				{CLEAR_COLOR, .vec4 = vec4(0.0f)},
-				{NONE}
-			}
-		);
-
-		/* DECAL PASS */
-		renderer_add_pass(self, "decals_pass", "decals", ref("decals"),
-				DEPTH_LOCK | DEPTH_EQUAL | DEPTH_GREATER,
-				gbuffer, gbuffer, 0,
-			(bind_t[]){
-				{TEX, "gbuffer", .buffer = gbuffer},
-				{NONE}
-			}
-		);
-
-	}
-	else
-	{
-		light_group = ref("next_level_light");
-		gbuffer =	texture_new_2D(0, 0, 0, 0,
-			buffer_new("nmr",	 1, 4),
-			buffer_new("albedo", 1, 4),
-			buffer_new("depth",	 1, -1)
-		);
-		final = texture_new_2D(0, 0, TEX_INTERPOLATE | TEX_MIPMAP,
-			buffer_new("color",	1, 4));
-
-		ssao = texture_new_2D(0, 0, 0, buffer_new("occlusion",	1, 1));
-
-		light = texture_new_2D(0, 0, 0, buffer_new("color",	1, 4));
-
-		final->track_brightness = 1;
-
-		renderer_add_tex(self, "gbuffer",	 1.0f, gbuffer);
-		renderer_add_tex(self, "final",		 1.0f, final);
-		renderer_add_tex(self, "ssao",		 1.0f, ssao);
-		renderer_add_tex(self, "light",		 1.0f, light);
-
-		refr = renderer_tex(original, ref("refr"));
-		tmp = renderer_tex(original, ref("tmp"));
-		portal = renderer_tex(original, ref("portal"));
-		selectable = renderer_tex(original, ref("selectable"));
-
-		self->output = final;
-
-		renderer_add_pass(self, "gbuffer", "masked_gbuffer", ref("next_level"), 0,
-				gbuffer, gbuffer, 0,
-			(bind_t[]){
-				{CLEAR_DEPTH, .number = 1.0f},
-				{CLEAR_COLOR, .vec4 = vec4(0.0f)},
-				{TEX, "portal", .buffer = portal},
-				{NONE}
-			}
-		);
-	}
-
-	renderer_add_pass(self, "ambient_light_pass", "phong", ref("ambient"),
-			ADD, light, NULL, 0,
+	renderer_add_pass(self, "gbuffer", "gbuffer", ref("visible"), 0,
+			gbuffer, gbuffer, 0,
 		(bind_t[]){
+			{CLEAR_DEPTH, .number = 1.0f},
+			{CLEAR_COLOR, .vec4 = vec4(0.0f)},
+			{NONE}
+		}
+	);
+
+	renderer_add_pass(self, "selectable", "select", ref("selectable"),
+			0, selectable, selectable, 0,
+		(bind_t[]){
+			{CLEAR_DEPTH, .number = 1.0f},
+			{CLEAR_COLOR, .vec4 = vec4(0.0f)},
+			{NONE}
+		}
+	);
+
+	/* DECAL PASS */
+	renderer_add_pass(self, "decals_pass", "decals", ref("decals"),
+			DEPTH_LOCK | DEPTH_EQUAL | DEPTH_GREATER,
+			gbuffer, gbuffer, 0,
+		(bind_t[]){
+			{TEX, "gbuffer", .buffer = gbuffer},
+			{NONE}
+		}
+	);
+
+	renderer_add_pass(self, "portal", "portal", ref("portal"),
+			DEPTH_DISABLE, portal, portal, 0,
+		(bind_t[]){
+			{CLEAR_DEPTH, .number = 0.0f},
 			{CLEAR_COLOR, .vec4 = vec4(0.0f)},
 			{TEX, "gbuffer", .buffer = gbuffer},
 			{NONE}
 		}
 	);
 
-	renderer_add_pass(self, "render_pass", "phong", light_group,
-			DEPTH_LOCK | ADD | DEPTH_EQUAL | DEPTH_GREATER, light, gbuffer, 0,
+	renderer_add_pass(self, "gbuffer2", "masked_gbuffer", ref("next_level"), 0,
+			gbuffer2, gbuffer2, 0,
+		(bind_t[]){
+			{CLEAR_DEPTH, .number = 1.0f},
+			{CLEAR_COLOR, .vec4 = vec4(0.0f)},
+			{CAM, .integer = 1},
+			{TEX, "portal", .buffer = portal},
+			{NONE}
+		}
+	);
+	renderer_add_pass(self, "copy_gbuffer", "copy_gbuffer", ref("quad"),
+			DEPTH_DISABLE, gbuffer, gbuffer, 0,
+		(bind_t[]){
+			{TEX, "buf", .buffer = gbuffer2},
+			{NONE}
+		}
+	);
+
+	renderer_add_pass(self, "render_pass", "phong", ref("light"),
+			ADD | DEPTH_LOCK | DEPTH_GREATER, light, gbuffer, 0,
+		(bind_t[]){
+			{CLEAR_COLOR, .vec4 = vec4(0.0f)},
+			{TEX, "gbuffer", .buffer = gbuffer},
+			{NONE}
+		}
+	);
+	renderer_add_pass(self, "render_pass2", "phong", ref("next_level_light"),
+			ADD | DEPTH_LOCK | DEPTH_EQUAL | DEPTH_GREATER, light, gbuffer2, 0,
+		(bind_t[]){
+			{TEX, "gbuffer", .buffer = gbuffer2},
+			{CAM, .integer = 1},
+			{NONE}
+		}
+	);
+	renderer_add_pass(self, "ambient_light_pass", "phong", ref("ambient"),
+			ADD, light, NULL, 0,
 		(bind_t[]){
 			{TEX, "gbuffer", .buffer = gbuffer},
 			{NONE}
 		}
 	);
 
-	if(!original)
-	{
-		renderer_add_pass(self, "refraction", "copy", ref("quad"), MANUAL_MIP,
-				refr, NULL, 0,
-			(bind_t[]){
-				{TEX, "buf", .buffer = light},
-				{INT, "level", .integer = 0},
-				{NONE}
-			}
-		);
+	renderer_add_pass(self, "refraction", "copy", ref("quad"), 0,
+			refr, NULL, 0,
+		(bind_t[]){
+			{TEX, "buf", .buffer = light},
+			{INT, "level", .integer = 0},
+			{NONE}
+		}
+	);
+	renderer_add_kawase(self, refr, tmp, 0, 1);
+	renderer_add_kawase(self, refr, tmp, 1, 2);
+	renderer_add_kawase(self, refr, tmp, 2, 3);
 
-		renderer_add_kawase(self, refr, tmp, 0, 1);
-		renderer_add_kawase(self, refr, tmp, 1, 2);
-		renderer_add_kawase(self, refr, tmp, 2, 3);
+	renderer_add_pass(self, "transp_1", "gbuffer", ref("transparent"),
+			0, gbuffer, gbuffer, 0, (bind_t[]){ {NONE} });
 
-		renderer_add_pass(self, "transp_1", "gbuffer", ref("transparent"),
-				0, gbuffer, gbuffer, 0, (bind_t[]){ {NONE} });
+	renderer_add_pass(self, "transp", "transparency", ref("transparent"),
+			DEPTH_EQUAL | DEPTH_LOCK, light, gbuffer, 0,
+		(bind_t[]){
+			{TEX, "refr", .buffer = refr},
+			{NONE}
+		}
+	);
 
-		renderer_add_pass(self, "transp", "transparency", ref("transparent"),
-				DEPTH_EQUAL | DEPTH_LOCK, light, gbuffer, 0,
-			(bind_t[]){
-				{TEX, "refr", .buffer = refr},
-				{NONE}
-			}
-		);
+	renderer_add_pass(self, "ssao_pass", "ssao", ref("quad"), 0,
+			ssao, NULL, 0,
+		(bind_t[]){
+			{TEX, "gbuffer", .buffer = gbuffer},
+			{NONE}
+		}
+	);
 
-		renderer_add_pass(self, "portal", "portal", ref("portal"),
-				DEPTH_DISABLE, portal, portal, 0,
-			(bind_t[]){
-				{CLEAR_DEPTH, .number = 0.0f},
-				{CLEAR_COLOR, .vec4 = vec4(0.0f)},
-				{TEX, "gbuffer", .buffer = gbuffer},
-				{NONE}
-			}
-		);
-	}
-	else
-	{
-		texture_t *gb = renderer_tex(original, ref("gbuffer"));
-		texture_t *rn = renderer_tex(original, ref("light"));
-		refr = renderer_tex(original, ref("refr"));
-		tmp = renderer_tex(original, ref("tmp"));
+	renderer_add_pass(self, "final", "ssr", ref("quad"), 0, final,
+			NULL, 0,
+		(bind_t[]){
+			{TEX, "gbuffer", .buffer = gbuffer},
+			{TEX, "light", .buffer = light},
+			{TEX, "refr", .buffer = refr},
+			{TEX, "ssao", .buffer = ssao},
+			{NONE}
+		}
+	);
 
-		renderer_add_pass(self, "copy_gbuffer", "copy_gbuffer", ref("quad"),
-				DEPTH_DISABLE, gb, gb, 0,
-			(bind_t[]){
-				{TEX, "buf", .buffer = gbuffer},
-				{NONE}
-			}
-		);
+	renderer_add_pass(self, "bloom_0", "bright", ref("quad"), 0,
+			refr, NULL, 0,
+		(bind_t[]){
+			{TEX, "buf", .buffer = final},
+			{NONE}
+		}
+	);
+	renderer_add_kawase(self, refr, tmp, 0, 1);
+	renderer_add_kawase(self, refr, tmp, 1, 2);
+	renderer_add_kawase(self, refr, tmp, 2, 3);
 
-		renderer_add_pass(self, "copy_light", "copy", ref("quad"), 0,
-				rn, NULL, 0,
-			(bind_t[]){
-				{TEX, "buf", .buffer = light},
-				{INT, "level", .integer = 0},
-				{NONE}
-			}
-		);
+	renderer_add_pass(self, "bloom_1", "upsample", ref("quad"), ADD,
+			final, NULL, 0,
+		(bind_t[]){
+			{TEX, "buf", .buffer = refr},
+			{INT, "level", .integer = 3},
+			{NUM, "alpha", .number = 0.5},
+			{NONE}
+		}
+	);
 
-		gbuffer = gb;
-		light = rn;
+	renderer_add_pass(self, "motion blur", "motion", ref("quad"), TRACK_BRIGHT,
+			refr, NULL, 0,
+		(bind_t[]){
+			{TEX, "gbuffer", .buffer = gbuffer},
+			{TEX, "buf", .buffer = final},
+			{NONE}
+		}
+	);
 
-		renderer_add_pass(self, "ssao_pass", "ssao", ref("quad"), 0,
-				ssao, NULL, 0,
-			(bind_t[]){
-				{TEX, "gbuffer", .buffer = gbuffer},
-				{NONE}
-			}
-		);
-
-		renderer_add_pass(self, "final", "ssr", ref("quad"), 0, final, NULL, 0,
-			(bind_t[]){
-				{CLEAR_COLOR, .vec4 = vec4(0.0f)},
-				{TEX, "gbuffer", .buffer = gbuffer},
-				{TEX, "light", .buffer = light},
-				{TEX, "refr", .buffer = refr},
-				{TEX, "ssao", .buffer = ssao},
-				{NONE}
-			}
-		);
-
-		renderer_add_pass(self, "bloom_%d", "bright", ref("quad"), MANUAL_MIP,
-				refr, NULL, 0,
-			(bind_t[]){
-				{TEX, "buf", .buffer = final},
-				{NONE}
-			}
-		);
-		renderer_add_kawase(self, refr, tmp, 0, 1);
-		renderer_add_kawase(self, refr, tmp, 1, 2);
-		renderer_add_kawase(self, refr, tmp, 2, 3);
-
-		renderer_add_pass(self, "bloom", "upsample", ref("quad"), MANUAL_MIP | ADD,
-				final, NULL, 0,
-			(bind_t[]){
-				{TEX, "buf", .buffer = refr},
-				{INT, "level", .integer = 3},
-				{NUM, "alpha", .number = 0.5},
-				{NONE}
-			}
-		);
-
-	}
-
-
+	self->output = refr;
 
 	return self;
 }

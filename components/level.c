@@ -152,6 +152,8 @@ void c_level_reset(c_level_t *self)
 		c_spacial_lock(body);
 		c_spacial_lock(sc);
 
+		c_spacial_set_model(body, mat4());
+		c_charlook_reset(cam);
 		{
 			//c_spacial_set_model(body, mat4());
 			//c_spacial_set_model(sc, mat4());

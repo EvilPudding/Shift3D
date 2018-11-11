@@ -21,5 +21,6 @@ c_charlook_t *c_charlook_new(entity_t x, float sensitivity);
 void c_charlook_register(void);
 
 vec3_t c_charlook_up(c_charlook_t *self);
+void c_charlook_reset(c_charlook_t *self);
 
 #endif /* !CHARLOOK_H */

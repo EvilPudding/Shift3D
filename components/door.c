@@ -20,12 +20,12 @@ static float c_rigid_body_door_collider(c_rigid_body_t *self, vec3_t pos)
 	c_spacial_t *door = c_spacial(self);
 	c_door_t *dc = c_door(self);
 	if(dc->active != 1) return -1;
-	c_spacial_t *character = c_spacial(ct_get_nth(ecm_get(ref("character")), 0));
-	c_character_t *ch = c_character(character);
+	c_character_t *ch = (c_character_t*)ct_get_nth(ecm_get(ref("character")), 0);
+	if((c_side(dc)->side & 1) != (c_side(ch)->side & 1)) return -1;
 
 	pos = mat4_mul_vec4(mat4_invert(door->model_matrix), vec4(_vec3(pos), 1.0f)).xyz;
 
-	if(fabs(pos.x) < 0.05 && fabs(pos.y - 0.5) < 0.4 && fabs(pos.z) < 0.3f)
+	if(fabs(pos.x) < 0.01 && fabs(pos.y - 0.5) < 0.6 && fabs(pos.z) < 0.3f)
 	/* if(vec3_len(vec3_sub(pos, door->pos)) < 0.3) */
 	{
 		c_character_teleport(ch, c_entity(self),

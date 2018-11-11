@@ -69,6 +69,15 @@ int c_charlook_update(c_charlook_t *self, float *dt)
 	return CONTINUE;
 }
 
+void c_charlook_reset(c_charlook_t *self)
+{
+	c_spacial_set_model(c_spacial(self), mat4());
+	c_spacial_set_pos(c_spacial(self), vec3(0.0, 0.7, 0.0));
+	self->xrot = 0;
+	self->yrot = 0;
+	self->zrot = 0;
+}
+
 int c_charlook_mouse_move(c_charlook_t *self, mouse_move_data *event)
 {
 	float frac = self->sensitivity / self->win_min_side;

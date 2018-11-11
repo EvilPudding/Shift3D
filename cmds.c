@@ -164,11 +164,11 @@ static entity_t cmd_spawn(entity_t root, int argc, const char **argv)
 		c_spacial_lock(sc);
 
 		entity_t camera = entity_new( c_name_new("camera"),
-				c_camera_new(70, 0.1, 100.0, 0, 1, 0, renderer),
+				c_camera_new(70, 0.1, 100.0, 1, 1, 1, renderer),
 				c_charlook_new(body, 1.9),
 				c_side_new(root, side, 0)
 		);
-		c_spacial_set_pos(c_spacial(&camera), vec3(0.0, 0.7, 0.0));
+		c_charlook_reset(c_charlook(&camera));
 
 		c_node_add(c_node(&character), 1, body);
 		c_node_add(c_node(&body), 1, camera);
@@ -188,8 +188,7 @@ static entity_t cmd_spawn(entity_t root, int argc, const char **argv)
 		c_spacial_unlock(sc);
 		level->mirror = entity_new( c_name_new("mirror"),
 				c_mirror_new(camera),
-				c_camera_new(70, 0.1, 100.0, 1, 1, 1,
-					shift_renderer(c_camera(&camera)->renderer))
+				c_camera_new(70, 0.1, 100.0, 0, 0, 0, renderer)
 		);
 		c_camera(&level->mirror)->auto_transform = 0;
 
