@@ -33,11 +33,11 @@ void main()
 	uv.y = 0.5 - asin(wpos.y) / M_PI;
 	if(pos.a > 0)
 	{
-		FragColor = vec4(textureLod(spheremap.color, uv, 0).rgb, 1.0);
+		FragColor = vec4(textureLod(spheremap.color, uv, 0.0).rgb, 1.0);
 	}
 	else
 	{
-		FragColor = vec4(textureLod(spheremap2.color, uv, 0).rgb, 1.0);
+		FragColor = vec4(textureLod(spheremap2.color, uv, 0.0).rgb, 1.0);
 	}
 }  
 

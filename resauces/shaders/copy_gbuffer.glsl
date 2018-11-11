@@ -14,12 +14,12 @@ BUFFER {
 
 void main()
 {
-	vec4 alb = texture(buf.albedo, pixel_pos(), 0);
-	if(alb.a == 0) discard;
+	vec4 alb = textureLod(buf.albedo, pixel_pos(), 0.0);
+	if(alb.a == 0.0) discard;
 
 	AlbedoColor = alb;
-	NMR = texture(buf.nmr, pixel_pos(), 0);
-	gl_FragDepth = texture(buf.depth, pixel_pos(), 0).r;
+	NMR = textureLod(buf.nmr, pixel_pos(), 0.0);
+	gl_FragDepth = textureLod(buf.depth, pixel_pos(), 0.0).r;
 }
 
 // vim: set ft=c:

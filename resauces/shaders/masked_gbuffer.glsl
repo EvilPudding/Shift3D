@@ -10,7 +10,7 @@ BUFFER {
 
 void main()
 {
-	float depth = textureLod(portal.depth, pixel_pos(), 0).r;
+	float depth = textureLod(portal.depth, pixel_pos(), 0.0).r;
 	if(depth == 0.0) discard;
 	if(gl_FragCoord.z < depth) discard;
 
