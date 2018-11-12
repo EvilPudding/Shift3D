@@ -27,6 +27,17 @@ void c_bridge_ready(c_bridge_t *self)
 			vec3(self->max.x + 0.005f, self->max.y + 0.005f, self->max.z + 0.005f));
 
 	mat_t *mat = sauces("bridge.mat");
+	mat->albedo.texture = 0;
+	mat->albedo.blend = 0;
+	mat->metalness.texture = sauces("rough.png");
+	mat->metalness.color = vec4(1,1,1,1);
+	mat->metalness.blend = 0;
+	mat->roughness.texture = sauces("rough.png");
+	mat->roughness.blend = 0.8;
+	mat->roughness.scale = 0.2;
+	mat->normal.scale = 2.0;
+	mat->normal.texture = sauces("stone3_normal.tga");
+	mat->normal.blend = 1;
 	mat->transparency.color = vec4(0.3f, 0.3f, 0.0f, 1.0);
 
 	entity_add_component(c_entity(self),

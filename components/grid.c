@@ -234,10 +234,10 @@ static int c_grid_created(c_grid_t *self)
 			c_model_new(mesh_new(), stone3, 1, 1), 0, 1);
 
 	self->blocks_inv = entity_new(c_name_new("bloc_i"), c_side_new(ss->level, 1, 1),
-			c_model_new(mesh_new(), sauces("piramids.mat"), 1, 1));
+			c_model_new(mesh_new(), sauces("black.mat"), 1, 1));
 
 	self->cage_inv = entity_new(c_name_new("cage_i"), c_side_new(ss->level, 1, 1),
-			c_model_new(mesh_new(), sauces("white.mat"), 1, 1));
+			c_model_new(mesh_new(), sauces("piramidsi.mat"), 1, 1));
 
 	self->boxes_inv = entity_new(c_name_new("movab_i"), c_side_new(ss->level, 1, 1),
 			c_model_new(mesh_new(), stone3, 1, 1));
@@ -411,7 +411,7 @@ mesh_t *mesh_from_grid(mesh_t *self, c_grid_t *grid, int side, int flags, ...)
 		va_end(list);
 	}
 	mesh_translate_uv(self, vec2(0.5, 0.5));
-	/* mesh_scale_uv(self, 2); */
+	/* mesh_scale_uv(self, 0.8); */
 	/* mesh_scale_uv(self, 0.5); */
 
 	mesh_unlock(self);

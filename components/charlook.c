@@ -48,7 +48,6 @@ void c_charlook_reset(c_charlook_t *self)
 
 static int c_charlook_update(c_charlook_t *self)
 {
-	c_spacial_t *sc = c_spacial(self);
 	c_charlook_mouse_move(self, &(mouse_move_data){0});
 	return CONTINUE;
 }
@@ -63,6 +62,7 @@ static int c_charlook_mouse_move(c_charlook_t *self, mouse_move_data *event)
 	const float max_down = -M_PI / 2.0 + 0.01;
 
 	c_spacial_t *sc = c_spacial(self);
+	if(!sc) return CONTINUE;
 
 	if(self->xrot >= max_up && inc_y > 0)
 	{
@@ -90,6 +90,7 @@ static int c_charlook_mouse_move(c_charlook_t *self, mouse_move_data *event)
 	}
 
 	sc = c_spacial(&self->x);
+	if(!sc) return CONTINUE;
 	c_spacial_lock(sc);
 	float old_rot = sc->rot.z;
 

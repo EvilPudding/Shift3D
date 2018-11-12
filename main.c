@@ -48,7 +48,7 @@
 
 renderer_t *shift_renderer()
 {
-	renderer_t *self = renderer_new(0.8f);
+	renderer_t *self = renderer_new(0.66f);
 
 	texture_t *gbuffer, *gbuffer2, *portal, *ssao, *light, *refr,
 			  *tmp, *selectable, *final;
