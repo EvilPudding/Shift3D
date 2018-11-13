@@ -71,7 +71,7 @@ init:
 
 run: all
 	cp -rvu resauces $(DIR)
-	$(DIR)/coolbutts 11
+	$(DIR)/coolbutts 7
 
 gdb: debug
 	cp -rvu resauces $(DIR)
