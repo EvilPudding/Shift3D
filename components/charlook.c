@@ -64,17 +64,15 @@ static int c_charlook_mouse_move(c_charlook_t *self, mouse_move_data *event)
 	c_spacial_t *sc = c_spacial(self);
 	if(!sc) return CONTINUE;
 
-	if(self->xrot >= max_up && inc_y > 0)
+	if(self->xrot + inc_y >= max_up && inc_y > 0)
 	{
 		printf("%f\n", self->xrot);
-		self->xrot = max_up;
-		inc_y = 0;
+		inc_y = max_up - self->xrot;
 	}
-	if(self->xrot <= max_down && inc_y < 0)
+	if(self->xrot + inc_y <= max_down && inc_y < 0)
 	{
 		printf("%f\n", self->xrot);
-		self->xrot = max_down;
-		inc_y = 0;
+		inc_y = max_down - self->xrot;
 	}
 
 	c_side_t *sidec = c_side(self);
@@ -91,13 +89,16 @@ static int c_charlook_mouse_move(c_charlook_t *self, mouse_move_data *event)
 
 	sc = c_spacial(&self->x);
 	if(!sc) return CONTINUE;
-	c_spacial_lock(sc);
-	float old_rot = sc->rot.z;
 
-	c_spacial_rotate_Z(sc, -old_rot);
-	c_spacial_rotate_Y(sc, inc_x);
-	c_spacial_rotate_Z(sc, old_rot);
-	c_spacial_unlock(sc);
+	if(inc_x)
+	{
+		float old_rot = sc->rot.z;
+		c_spacial_lock(sc);
+		c_spacial_rotate_Z(sc, -old_rot);
+		c_spacial_rotate_Y(sc, inc_x);
+		c_spacial_rotate_Z(sc, old_rot);
+		c_spacial_unlock(sc);
+	}
 	/* vec4_print(sc->rot_quat); */
 
 	return CONTINUE;
