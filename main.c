@@ -303,9 +303,9 @@ int main(int argc, char **argv)
 	mesh_quad(glass);
 	entity_t venus = entity_new(
 			c_name_new("venus"),
-			c_model_new(glass, mat, 1, 1)
+			c_model_new(glass, mat, 0, 1)
 	);
-	c_spacial_set_pos(c_spacial(&venus), vec3(7.0, 6.5, -0.37));
+	c_spacial_set_pos(c_spacial(&venus), vec3(7.0, 6.2, -0.37));
 	c_spacial_set_scale(c_spacial(&venus), vec3(1.69 * 0.3, 1.0 * 0.3, 1));
 
 	mat_t *bok = mat_new("bk");
@@ -314,9 +314,9 @@ int main(int argc, char **argv)
 
 	entity_t boku = entity_new(
 			c_name_new("venus"),
-			c_model_new(glass, bok, 1, 1)
+			c_model_new(glass, bok, 0, 1)
 	);
-	c_spacial_set_pos(c_spacial(&boku), vec3(7.0, 6.5, -0.4));
+	c_spacial_set_pos(c_spacial(&boku), vec3(7.0, 6.2, -0.4));
 	c_spacial_set_scale(c_spacial(&boku), vec3(1.69 * 0.3, 1.0 * 0.3, 1));
 
 	//c_window_toggle_fullscreen(c_window(&candle->systems));
