@@ -6,11 +6,13 @@
 #include <stdlib.h>
 #include <components/spacial.h>
 #include <components/model.h>
+#include "../openal.candle/speaker.h"
 
 c_movable_t *c_movable_new(int value)
 {
 	c_movable_t *self = component_new("movable");
 	self->value = value;
+	entity_add_component(c_entity(self), c_speaker_new());
 
 	return self;
 }
@@ -61,6 +63,8 @@ void push_at(entity_t lvl, int x, int y, int z, int value, vec3_t from)
 			m->x = x;
 			m->y = y;
 			m->z = z;
+			c_speaker_t *speaker = c_speaker(m);
+			c_speaker_play(speaker, sauces("drag.wav"), 0);
 		}
 	}
 }
@@ -115,6 +119,11 @@ static int c_movable_update(c_movable_t *self, float *dt)
 		{
 			c_spacial_set_pos(sc, rnd);
 			c_grid_set(gc, sc->pos.x, sc->pos.y, sc->pos.z, 2 | !side);
+			if(self->sy)
+			{
+				c_speaker_t *speaker = c_speaker(self);
+				c_speaker_play(speaker, sauces("thump.wav"), 0);
+			}
 			self->moving = 0;
 			self->sy = 0;
 			/* entity_signal(c_entity(self), sig("grid_update"), NULL, NULL); */

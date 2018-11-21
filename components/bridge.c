@@ -4,6 +4,7 @@
 #include <components/model.h>
 #include <stdlib.h>
 #include <candle.h>
+#include "../openal.candle/speaker.h"
 
 
 static float c_rigid_body_bridge_collider(c_rigid_body_t *self, vec3_t pos);
@@ -15,33 +16,35 @@ c_bridge_t *c_bridge_new()
 	entity_add_component(c_entity(self),
 			(c_t*)c_rigid_body_new((collider_cb)c_rigid_body_bridge_collider));
 
+	entity_add_component(c_entity(self), c_speaker_new());
 	return self;
 }
 
+static mat_t *g_bridge_mat;
 void c_bridge_ready(c_bridge_t *self)
 {
-
 	mesh_t *mesh = mesh_new();
 	mesh_cuboid(mesh, 0.5,
 			vec3(self->min.x - 0.005f, self->min.y - 0.005f, self->min.z - 0.005f),
 			vec3(self->max.x + 0.005f, self->max.y + 0.005f, self->max.z + 0.005f));
 
-	mat_t *mat = sauces("bridge.mat");
-	mat->albedo.texture = 0;
-	mat->albedo.blend = 0;
-	mat->metalness.texture = sauces("rough.png");
-	mat->metalness.color = vec4(1,1,1,1);
-	mat->metalness.blend = 0;
-	mat->roughness.texture = sauces("rough.png");
-	mat->roughness.blend = 0.8;
-	mat->roughness.scale = 0.2;
-	mat->normal.scale = 2.0;
-	mat->normal.texture = sauces("stone3_normal.tga");
-	mat->normal.blend = 1;
-	mat->transparency.color = vec4(0.3f, 0.3f, 0.0f, 1.0);
+	if(!g_bridge_mat)
+	{
+		g_bridge_mat = mat_new("bridge");
+		g_bridge_mat->metalness.texture = sauces("rough.png");
+		g_bridge_mat->metalness.color = vec4(1, 1, 1, 1);
+		g_bridge_mat->metalness.blend = 0;
+		g_bridge_mat->roughness.texture = sauces("rough.png");
+		g_bridge_mat->roughness.blend = 0.8;
+		g_bridge_mat->roughness.scale = 0.2;
+		g_bridge_mat->normal.scale = 2.0;
+		g_bridge_mat->normal.texture = sauces("stone3_normal.tga");
+		g_bridge_mat->normal.blend = 1;
+		g_bridge_mat->transparency.color = vec4(0.3f, 0.3f, 0.0f, 1.0);
+	}
 
 	entity_add_component(c_entity(self),
-			c_model_new(mesh, sauces("bridge.mat"), 1, 1));
+			c_model_new(mesh, g_bridge_mat, 1, 1));
 }
 
 void c_bridge_set_active(c_bridge_t *self, int active)
@@ -91,7 +94,7 @@ static int c_bridge_update(c_bridge_t *self, float *dt)
 		}
 		else
 		{
-			inc = vec3_scale(self->rotate_to, (*dt) * 3.0f);
+			inc = vec3_scale(self->rotate_to, (*dt) * 7.0f);
 		}
 		c_spacial_rotate_X(s, inc.x);
 		c_spacial_rotate_Y(s, inc.y);

@@ -66,12 +66,10 @@ static int c_charlook_mouse_move(c_charlook_t *self, mouse_move_data *event)
 
 	if(self->xrot + inc_y >= max_up && inc_y > 0)
 	{
-		printf("%f\n", self->xrot);
 		inc_y = max_up - self->xrot;
 	}
 	if(self->xrot + inc_y <= max_down && inc_y < 0)
 	{
-		printf("%f\n", self->xrot);
 		inc_y = max_down - self->xrot;
 	}
 

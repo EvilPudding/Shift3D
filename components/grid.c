@@ -229,9 +229,14 @@ static int c_grid_created(c_grid_t *self)
 	stone3->albedo.color = vec4(0.6f, 0.1f, 0.14f, 1.0f);
 	stone3->albedo.blend = 0.5;
 	stone3->normal.blend = 0.3;
+	mat_t *stone4 = sauces("stone4.mat");
+	stone4->albedo.color = vec4(0.14f, 0.6f, 0.1f, 1.0f);
+	stone4->albedo.blend = 0.5;
+	stone4->normal.blend = 0.3;
+
 
 	self->boxes = entity_new(c_name_new("movable"), c_side_new(ss->level, 0, 1),
-			c_model_new(mesh_new(), stone3, 1, 1), 0, 1);
+			c_model_new(mesh_new(), stone4, 1, 1), 0, 1);
 
 	self->blocks_inv = entity_new(c_name_new("bloc_i"), c_side_new(ss->level, 1, 1),
 			c_model_new(mesh_new(), sauces("black.mat"), 1, 1));

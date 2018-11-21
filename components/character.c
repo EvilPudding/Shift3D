@@ -14,6 +14,7 @@
 #include <systems/keyboard.h>
 #include <math.h>
 #include <stdlib.h>
+#include "../openal.candle/speaker.h"
 
 extern int window_width, window_height;
 int control = 1;
@@ -74,6 +75,8 @@ static void _c_character_teleport(c_character_t *self)
 	if(level != next_level)
 	{
 		body->rot_quat = quat_mul(body->rot_quat, rot);
+		body->modified = 1;
+		body->update_id++;
 	}
 
 	vec3_t npos = mat4_mul_vec4(model, vec4(0.0f, 0.0f, 0.0f, 1.0f)).xyz;
@@ -249,6 +252,7 @@ int c_character_update(c_character_t *self, float *dt)
 		self->last_vel = vec3_mul(up_line, *vel);
 
 		c_rigid_body(self)->offset = -c_rigid_body(self)->offset;
+		c_speaker_play(c_speaker(self), sauces("mag.wav"), 0);
 
 		self->targR = self->targR == 0 ? M_PI : 0;
 		goto end;
@@ -279,7 +283,7 @@ int c_character_update(c_character_t *self, float *dt)
 			t = vec3_round(t);
 
 			int val = c_grid_get(gc, t.x, t.y, t.z);
-			if(val & 0x2)
+			if(val & 0x2 && (val & 1) != (ss->side & 1))
 			{
 				push_at(ss->level, t.x, t.y, t.z, val, sc->pos);
 				*vel = vec3(0);
@@ -306,9 +310,9 @@ end:
 
 
 	sc = c_spacial(&self->orientation);
-	if(fabs(dif = self->targR - sc->rot.z) > 0.01)
+	if(fabs(dif = self->targR - sc->rot.z) > 0.001)
 	{
-		float scale = fmin(5.0f * (*dt), 1.0f);
+		float scale = 5.0f * (*dt);
 		c_spacial_rotate_Z(sc, dif * scale);
 	}
 

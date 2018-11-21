@@ -18,6 +18,8 @@
 #include <components/force.h>
 #include <components/light.h>
 #include <components/camera.h>
+#include "openal.candle/openal.h"
+#include "openal.candle/speaker.h"
 #include <utils/renderer.h>
 
 #include <stdio.h>
@@ -74,7 +76,8 @@ static entity_t cmd_shift_grid(entity_t root, int argc, const char **argv)
 					c_movable_new(val),
 					c_side_new(root, !(val&1), 1),
 					c_node_new(),
-					c_model_new(mesh, sauces("stone3.mat"), 1, 1));
+					c_model_new(mesh,
+						(val&1) ? sauces("stone3.mat") : sauces("stone4.mat"), 1, 1));
 			/* c_model(&box)->before_draw = (before_draw_cb)cmd_model_before_draw; */
 			c_spacial_set_pos(c_spacial(&box), vec3(x, y, z));
 			c_node_add(c_node(&root), 1, box);
@@ -168,7 +171,8 @@ static entity_t cmd_spawn(entity_t root, int argc, const char **argv)
 	
 		entity_t character = entity_new( c_name_new("character"),
 				c_character_new(body, 1, g),
-				c_side_new(root, side, 1)
+				c_side_new(root, side, 1),
+				c_speaker_new()
 		);
 		c_spacial_t *sc = c_spacial(&character);
 		c_spacial_lock(sc);
@@ -181,6 +185,7 @@ static entity_t cmd_spawn(entity_t root, int argc, const char **argv)
 				c_side_new(root, side, 0)
 		);
 		c_charlook_reset(c_charlook(&camera));
+		c_openal_set_listener(c_openal(&SYS), camera);
 
 		c_node_add(c_node(&character), 1, body);
 		c_node_add(c_node(&body), 1, camera);

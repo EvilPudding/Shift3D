@@ -5,6 +5,8 @@
 #include <components/model.h>
 #include <components/rigid_body.h>
 #include <stdlib.h>
+#include <candle.h>
+#include "../openal.candle/speaker.h"
 
 static float c_rigid_body_key_collider(c_rigid_body_t *self, vec3_t pos)
 {
@@ -32,6 +34,8 @@ static float c_rigid_body_key_collider(c_rigid_body_t *self, vec3_t pos)
 			if(b->key == key->key && s->level == side->level)
 			{
 				b->rotate_to = key->rot;
+				c_speaker_t *speaker = c_speaker(b);
+				c_speaker_play(speaker, sauces("soundo.wav"), 0);
 			}
 		}
 		entity_destroy(ent);

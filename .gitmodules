@@ -1,3 +1,6 @@
 [submodule "candle"]
 	path = candle
 	url = https://github.com/EvilPudding/candle.git
+[submodule "openal.candle"]
+	path = openal.candle
+	url = https://github.com/EvilPudding/openal.candle

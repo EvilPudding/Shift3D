@@ -25,6 +25,9 @@
 #include <components/light.h>
 #include <systems/editmode.h>
 
+#include "openal.candle/openal.h"
+#include "openal.candle/speaker.h"
+
 #include "cmds.h"
 
 #include <stdio.h>
@@ -48,10 +51,11 @@
 
 renderer_t *shift_renderer()
 {
+	/* renderer_t *self = renderer_new(1.0f); */
 	renderer_t *self = renderer_new(0.66f);
 
 	texture_t *gbuffer, *gbuffer2, *portal, *ssao, *light, *refr,
-			  *tmp, *selectable, *final;
+			  *tmp, *final;
 
 	gbuffer =	texture_new_2D(0, 0, 0, 0,
 		buffer_new("nmr",	 1, 4),
@@ -70,11 +74,6 @@ renderer_t *shift_renderer()
 	light = texture_new_2D(0, 0, TEX_INTERPOLATE,
 			buffer_new("color",	1, 4));
 
-	selectable = texture_new_2D(0, 0, 0,
-		buffer_new("geomid", 1, 2),
-		buffer_new("id",	 1, 2),
-		buffer_new("depth",	 1, -1));
-
 	refr = texture_new_2D(0, 0, TEX_MIPMAP | TEX_INTERPOLATE,
 			buffer_new("color", 1, 4));
 
@@ -87,7 +86,6 @@ renderer_t *shift_renderer()
 	ssao = texture_new_2D(0, 0, 0, buffer_new("occlusion",	1, 1));
 
 	renderer_add_tex(self, "portal",	 1.0f, portal);
-	renderer_add_tex(self, "selectable", 1.0f, selectable);
 	renderer_add_tex(self, "tmp",		 1.0f, tmp);
 	renderer_add_tex(self, "refr",		 1.0f, refr);
 	renderer_add_tex(self, "final",		 1.0f, final);
@@ -98,15 +96,6 @@ renderer_t *shift_renderer()
 
 	renderer_add_pass(self, "gbuffer", "gbuffer", ref("visible"), 0,
 			gbuffer, gbuffer, 0,
-		(bind_t[]){
-			{CLEAR_DEPTH, .number = 1.0f},
-			{CLEAR_COLOR, .vec4 = vec4(0.0f)},
-			{NONE}
-		}
-	);
-
-	renderer_add_pass(self, "selectable", "select", ref("selectable"),
-			0, selectable, selectable, 0,
 		(bind_t[]){
 			{CLEAR_DEPTH, .number = 1.0f},
 			{CLEAR_COLOR, .vec4 = vec4(0.0f)},
@@ -240,7 +229,7 @@ renderer_t *shift_renderer()
 	);
 
 	renderer_add_pass(self, "motion blur", "motion", ref("quad"), TRACK_BRIGHT,
-			refr, NULL, 0,
+			tmp, NULL, 0,
 		(bind_t[]){
 			{TEX, "gbuffer", .buffer = gbuffer},
 			{TEX, "buf", .buffer = final},
@@ -248,7 +237,7 @@ renderer_t *shift_renderer()
 		}
 	);
 
-	self->output = refr;
+	self->output = tmp;
 
 	return self;
 }
@@ -265,6 +254,7 @@ int main(int argc, char **argv)
 
 
 	entity_add_component(SYS, (c_t*)c_editmode_new());
+	entity_add_component(SYS, (c_t*)c_openal_new());
 	/* c_editmode_activate(c_editmode(&SYS)); */
 
 	c_sauces_index_dir(c_sauces(&SYS), "resauces");
