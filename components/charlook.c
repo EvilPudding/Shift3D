@@ -41,9 +41,12 @@ static int c_charlook_window_resize(c_charlook_t *self,
 
 void c_charlook_reset(c_charlook_t *self)
 {
-	c_spacial_set_model(c_spacial(self), mat4());
+	c_spacial_t *sc = c_spacial(self);
+	c_spacial_lock(sc);
+	c_spacial_set_model(sc, mat4());
 	c_spacial_set_pos(c_spacial(self), vec3(0.0, 0.7, 0.0));
 	self->xrot = 0;
+	c_spacial_unlock(sc);
 }
 
 static int c_charlook_update(c_charlook_t *self)
@@ -96,8 +99,8 @@ static int c_charlook_mouse_move(c_charlook_t *self, mouse_move_data *event)
 		c_spacial_rotate_Y(sc, inc_x);
 		c_spacial_rotate_Z(sc, old_rot);
 		c_spacial_unlock(sc);
+		/* printf("%f %f\n", old_rot, vec4_len(sc->rot_quat)); */
 	}
-	/* vec4_print(sc->rot_quat); */
 
 	return CONTINUE;
 }

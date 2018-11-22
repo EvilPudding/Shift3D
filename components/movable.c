@@ -126,7 +126,10 @@ static int c_movable_update(c_movable_t *self, float *dt)
 			}
 			self->moving = 0;
 			self->sy = 0;
-			/* entity_signal(c_entity(self), sig("grid_update"), NULL, NULL); */
+			if((side&1) != (c_side(&level->pov)->side&1))
+			{
+				entity_signal(c_entity(self), sig("grid_update"), NULL, NULL);
+			}
 		}
 		else
 		{

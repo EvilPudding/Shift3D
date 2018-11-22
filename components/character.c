@@ -138,7 +138,7 @@ int c_character_update(c_character_t *self, float *dt)
 
 	c_velocity_t *vc = c_velocity(self);
 	vec3_t *vel = &vc->velocity;
-	float accel = 72.5f * (*dt);
+	float accel = 67.5f * (*dt);
 
 	if(entity_exists(self->in)) _c_character_teleport(self);
 
