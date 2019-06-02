@@ -9,7 +9,7 @@
 #include <components/model.h>
 #include <components/name.h>
 #include <components/camera.h>
-#include <components/spacial.h>
+#include <components/spatial.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -17,7 +17,7 @@ static int c_door_position_changed(c_door_t *self);
 
 static float c_rigid_body_door_collider(c_rigid_body_t *self, vec3_t pos)
 {
-	c_spacial_t *door = c_spacial(self);
+	c_spatial_t *door = c_spatial(self);
 	c_door_t *dc = c_door(self);
 	if(dc->active != 1) return -1;
 	c_character_t *ch = (c_character_t*)ct_get_nth(ecm_get(ref("character")), 0);
@@ -35,7 +35,6 @@ static float c_rigid_body_door_collider(c_rigid_body_t *self, vec3_t pos)
 	}
 	return -1;
 }
-renderer_t *shift_renderer(renderer_t *original);
 static mesh_t *g_portal_mesh;
 c_door_t *c_door_new(const char *next)
 {
@@ -50,7 +49,7 @@ c_door_t *c_door_new(const char *next)
 		g_portal_mesh->cull = 0;
 	}
 
-	drawable_init(&self->draw, 0, NULL);
+	drawable_init(&self->draw, 0);
 	drawable_set_vs(&self->draw, model_vs());
 	drawable_set_mesh(&self->draw, g_portal_mesh);
 
@@ -66,7 +65,7 @@ entity_t level_loaded(const char *next)
 	for(i = 0; i < node->children_size; i++)
 	{
 		c_name_t *name = c_name(&node->children[i]);
-		if(name && name->name)
+		if(name && name->name[0])
 		{
 			if(!strcmp(next, name->name))
 			{

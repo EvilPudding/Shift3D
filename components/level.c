@@ -45,7 +45,7 @@ static void activate_lights(entity_t e, int32_t active)
 	c_node_t *nc = c_node(&e);
 	if(lc)
 	{
-		c_spacial_set_pos(c_spacial(lc), c_spacial(lc)->pos);
+		c_spatial_set_pos(c_spatial(lc), c_spatial(lc)->pos);
 	}
 	if(nc) for(i = 0; i < nc->children_size; i++)
 	{
@@ -102,11 +102,11 @@ static void activate_node(entity_t e, int32_t active)
 		c_light_set_groups(lc, shadow_group, ref("ambient"), light_group);
 		if(active == 1)
 		{
-			c_light_set_shadow_cooldown(lc, 0);
+			c_light_set_shadow_cooldown(lc, 1);
 		}
 		else
 		{
-			c_light_set_shadow_cooldown(lc, 20);
+			c_light_set_shadow_cooldown(lc, 4);
 		}
 	}
 	if(dc) c_door_set_active(dc, active);
@@ -144,16 +144,16 @@ void c_level_reset(c_level_t *self)
 
 		c_side(cam)->level = c_side(fc)->level = c_entity(level);
 
-		c_spacial_t *spawn = c_spacial(&level->spawn);
+		c_spatial_t *spawn = c_spatial(&level->spawn);
 		c_side_t *spawnside = c_side(spawn);
-		c_spacial_t *sc = c_spacial(fc);
-		c_spacial_t *body = c_spacial(&fc->orientation);
+		c_spatial_t *sc = c_spatial(fc);
+		c_spatial_t *body = c_spatial(&fc->orientation);
 
-		c_spacial_lock(body);
-		c_spacial_lock(sc);
+		c_spatial_lock(body);
+		c_spatial_lock(sc);
 
-		c_spacial_set_model(body, mat4());
-		c_spacial_set_model(sc, spawn->model_matrix);
+		c_spatial_set_model(body, mat4());
+		c_spatial_set_model(sc, spawn->model_matrix);
 		c_charlook_reset(cam);
 		fc->targR = 0;
 		int side_dir = (spawnside->side & 1) ? 1 : -1;
@@ -162,8 +162,8 @@ void c_level_reset(c_level_t *self)
 		c_force(&fc->force_down)->force = vec3(0.0, 23 * side_dir, 0.0);
 
 		charside->side = spawnside->side;
-		c_spacial_unlock(body);
-		c_spacial_unlock(sc);
+		c_spatial_unlock(body);
+		c_spatial_unlock(sc);
 
 	entity_destroy(c_entity(self));
 	entity_signal(level->pov, ref("side_changed"),

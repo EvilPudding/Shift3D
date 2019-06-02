@@ -1,6 +1,6 @@
 #include "rigid_body.h"
 #include <components/model.h>
-#include <components/spacial.h>
+#include <components/spatial.h>
 #include "aabb.h"
 #include <float.h>
 
@@ -47,7 +47,7 @@ int c_rigid_body_intersects(c_rigid_body_t *self, c_rigid_body_t *other,
 REG()
 {
 	ct_new("rigid_body", sizeof(c_rigid_body_t), NULL, NULL,
-			1, ref("spacial"));
+			1, ref("spatial"));
 }
 
 /* GJK */
@@ -325,8 +325,8 @@ int gjk_intersects_bak(c_rigid_body_t *self, c_rigid_body_t *other)
 	mesh_t *mesh1 = c_model(self)->mesh;
 	mesh_t *mesh2 = c_model(other)->mesh;
 
-	c_spacial_t *sc1 = c_spacial(self);
-	c_spacial_t *sc2 = c_spacial(other);
+	c_spatial_t *sc1 = c_spatial(self);
+	c_spatial_t *sc2 = c_spatial(other);
 
 	mat4_t other_to_self;
 	mat4_t rotate_to_other;
@@ -739,8 +739,8 @@ int gjk_intersects(c_rigid_body_t *self, c_rigid_body_t *other,
 	mesh_t *mesh1 = c_model(self)->mesh;
 	mesh_t *mesh2 = c_model(other)->mesh;
 
-	c_spacial_t *sc1 = c_spacial(self);
-	c_spacial_t *sc2 = c_spacial(other);
+	c_spatial_t *sc1 = c_spatial(self);
+	c_spatial_t *sc2 = c_spatial(other);
 
 	mat4_t other_to_self;
 	mat4_t rotate_to_other;

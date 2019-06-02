@@ -1,6 +1,6 @@
 #include "bridge.h"
 #include <components/rigid_body.h>
-#include <components/spacial.h>
+#include <components/spatial.h>
 #include <components/model.h>
 #include <stdlib.h>
 #include <candle.h>
@@ -30,36 +30,35 @@ void c_bridge_ready(c_bridge_t *self)
 
 	if(!g_bridge_mat)
 	{
-		g_bridge_mat = mat_new("bridge");
-		g_bridge_mat->metalness.texture = sauces("rough.png");
-		g_bridge_mat->metalness.color = vec4(1, 1, 1, 1);
-		g_bridge_mat->metalness.blend = 0;
-		g_bridge_mat->roughness.texture = sauces("rough.png");
-		g_bridge_mat->roughness.blend = 0.8;
-		g_bridge_mat->roughness.scale = 0.2;
-		g_bridge_mat->normal.scale = 2.0;
-		g_bridge_mat->normal.texture = sauces("stone3_normal.tga");
-		g_bridge_mat->normal.blend = 1;
-		g_bridge_mat->transparency.color = vec4(0.3f, 0.3f, 0.0f, 1.0);
+		g_bridge_mat = mat_new("bridge", "transparent");
+		mat1f(g_bridge_mat, ref("metalness.value"), 1.0f);
+		mat1f(g_bridge_mat, ref("metalness.blend"), 0.0f);
+		mat1t(g_bridge_mat, ref("roughness.texture"), sauces("rough.png"));
+		mat1f(g_bridge_mat, ref("roughness.blend"), 0.8);
+		/* mat1f(g_bridge_mat, ref("roughness.scale"), 0.2); */
+		/* mat1f(g_bridge_mat, ref("normal.scale"), 2.0); */
+		mat1t(g_bridge_mat, ref("normal.texture"), sauces("stone3_normal.png"));
+		mat1f(g_bridge_mat, ref("normal.blend"), 1.0f);
+		mat4f(g_bridge_mat, ref("absorve.color"), vec4(0.3f, 0.3f, 0.0f, 1.0));
 	}
 
 	entity_add_component(c_entity(self),
-			c_model_new(mesh, g_bridge_mat, 1, 1));
+			c_model_new(mesh, g_bridge_mat, true, true));
 }
 
 void c_bridge_set_active(c_bridge_t *self, int active)
 {
 	/* if(active) */
 	/* { */
-		/* c_spacial_set_model(c_spacial(self), self->original_model); */
+		/* c_spatial_set_model(c_spatial(self), self->original_model); */
 	/* } */
 	self->active = active;
 }
 
-static int c_bridge_spacial_changed(c_bridge_t *self)
+static int c_bridge_spatial_changed(c_bridge_t *self)
 {
-	c_spacial_t *spacial = c_spacial(self);
-	self->inverse_model = mat4_invert(spacial->model_matrix);
+	c_spatial_t *spatial = c_spatial(self);
+	self->inverse_model = mat4_invert(spatial->model_matrix);
 
 	return CONTINUE;
 }
@@ -68,7 +67,7 @@ static float c_rigid_body_bridge_collider(c_rigid_body_t *self, vec3_t pos)
 {
 	c_bridge_t *b = c_bridge(self);
 	if(b->active != 1) return -1;
-	/* c_spacial_t *b = c_spacial(c_entity(self)); */
+	/* c_spatial_t *b = c_spatial(c_entity(self)); */
 
 	pos = mat4_mul_vec4(b->inverse_model, vec4(_vec3(pos), 1.0f)).xyz;
 
@@ -83,8 +82,8 @@ static int c_bridge_update(c_bridge_t *self, float *dt)
 {
 	if(!vec3_null(self->rotate_to))
 	{
-		c_spacial_t *s = c_spacial(self);
-		c_spacial_lock(s);
+		c_spatial_t *s = c_spatial(self);
+		c_spatial_lock(s);
 		vec3_t inc;
 		if(fabs(self->rotate_to.x) < 0.01 &&
 				fabs(self->rotate_to.y) < 0.01 &&
@@ -96,10 +95,10 @@ static int c_bridge_update(c_bridge_t *self, float *dt)
 		{
 			inc = vec3_scale(self->rotate_to, (*dt) * 7.0f);
 		}
-		c_spacial_rotate_X(s, inc.x);
-		c_spacial_rotate_Y(s, inc.y);
-		c_spacial_rotate_Z(s, inc.z);
-		c_spacial_unlock(s);
+		c_spatial_rotate_X(s, inc.x);
+		c_spatial_rotate_Y(s, inc.y);
+		c_spatial_rotate_Z(s, inc.z);
+		c_spatial_unlock(s);
 
 		self->rotate_to = vec3_sub(self->rotate_to, inc);
 	}
@@ -109,9 +108,9 @@ static int c_bridge_update(c_bridge_t *self, float *dt)
 REG()
 {
 	ct_t *ct = ct_new("bridge", sizeof(c_bridge_t), NULL, NULL,
-			1, ref("spacial"));
+			1, ref("node"));
 
-	ct_listener(ct, ENTITY, sig("spacial_changed"), c_bridge_spacial_changed);
+	ct_listener(ct, ENTITY, sig("spatial_changed"), c_bridge_spatial_changed);
 
 	ct_listener(ct, WORLD, sig("world_update"), c_bridge_update);
 }

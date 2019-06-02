@@ -1,6 +1,5 @@
 #include "force.h"
 #include "velocity.h"
-#include <components/spacial.h>
 
 
 void c_force_init(c_force_t *self)

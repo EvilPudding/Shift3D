@@ -1,7 +1,7 @@
 #include "character.h"
 #include "side.h"
 #include <candle.h>
-#include <components/spacial.h>
+#include <components/spatial.h>
 #include <components/velocity.h>
 #include <components/node.h>
 #include <components/rigid_body.h>
@@ -41,11 +41,11 @@ void c_character_teleport(c_character_t *self, entity_t in, entity_t out)
 static void _c_character_teleport(c_character_t *self)
 {
 	c_charlook_t *charlook = (c_charlook_t*)ct_get_nth(ecm_get(ref("charlook")), 0);
-	c_spacial_t *cam = c_spacial(charlook);
-	c_spacial_t *in = c_spacial(&self->in);
-	c_spacial_t *out = c_spacial(&self->out);
-	c_spacial_t *body = c_spacial(&self->orientation);
-	c_spacial_t *sc = c_spacial(self);
+	c_spatial_t *cam = c_spatial(charlook);
+	c_spatial_t *in = c_spatial(&self->in);
+	c_spatial_t *out = c_spatial(&self->out);
+	c_spatial_t *body = c_spatial(&self->orientation);
+	c_spatial_t *sc = c_spatial(self);
 	c_velocity_t *vc = c_velocity(self);
 	c_side_t *ss = c_side(self);
 
@@ -68,8 +68,8 @@ static void _c_character_teleport(c_character_t *self)
 	c_level_t *level = c_level(&ss->level);
 	c_level_t *next_level = c_level(&spawn_side->level);
 
-	c_spacial_lock(body);
-	c_spacial_lock(sc);
+	c_spatial_lock(body);
+	c_spatial_lock(sc);
 
 	vc->velocity = quat_mul_vec3(rot, vc->velocity);
 	if(level != next_level)
@@ -80,7 +80,7 @@ static void _c_character_teleport(c_character_t *self)
 	}
 
 	vec3_t npos = mat4_mul_vec4(model, vec4(0.0f, 0.0f, 0.0f, 1.0f)).xyz;
-	c_spacial_set_pos(sc, npos);
+	c_spatial_set_pos(sc, npos);
 
 	if(out_side != (ss->side & 1))
 	{
@@ -89,10 +89,10 @@ static void _c_character_teleport(c_character_t *self)
 		force->force = vec3_inv(force->force);
 
 		self->targR = self->targR == 0 ? M_PI : 0;
-		c_spacial_rotate_Z(sc, M_PI);
+		c_spatial_rotate_Z(sc, M_PI);
 
-		c_spacial_rotate_Z(body, -M_PI);
-		c_spacial_rotate_Y(body, M_PI);
+		c_spatial_rotate_Z(body, -M_PI);
+		c_spatial_rotate_Y(body, M_PI);
 	}
 
 	ss->level = c_side(cam)->level = c_entity(next_level);
@@ -109,8 +109,8 @@ static void _c_character_teleport(c_character_t *self)
 	self->in = entity_null;
 	self->out = entity_null;
 
-	c_spacial_unlock(body);
-	c_spacial_unlock(sc);
+	c_spatial_unlock(body);
+	c_spatial_unlock(sc);
 
 	c_editmode_select(c_editmode(&SYS), c_entity(self));
 	c_editmode_select(c_editmode(&SYS), 0);
@@ -133,7 +133,7 @@ int c_character_update(c_character_t *self, float *dt)
 	if(!gc) return CONTINUE;
 
 	const float corner = 1.0f / sqrtf(2.0f);
-	c_spacial_t *ori = c_spacial(&self->orientation);
+	c_spatial_t *ori = c_spatial(&self->orientation);
 	float dif;
 
 	c_velocity_t *vc = c_velocity(self);
@@ -142,8 +142,8 @@ int c_character_update(c_character_t *self, float *dt)
 
 	if(entity_exists(self->in)) _c_character_teleport(self);
 
-	c_spacial_t *sc = c_spacial(self);
-	c_spacial_lock(sc);
+	c_spatial_t *sc = c_spatial(self);
+	c_spatial_lock(sc);
 
 	vec3_t front;
 	vec3_t sideways;
@@ -174,7 +174,7 @@ int c_character_update(c_character_t *self, float *dt)
 	if(bellow_value2 & 4 || self->kill_self) // SPIKES
 	{
 		self->kill_self = 0;
-		c_spacial_unlock(sc);
+		c_spatial_unlock(sc);
 		c_level_reset(level);
 
 		self->reset = 1;
@@ -246,9 +246,9 @@ int c_character_update(c_character_t *self, float *dt)
 		}
 
 		ss->side = !(ss->side & 1);
-		/* c_spacial_set_rot(sc, up_dir.x, up_dir.y, up_dir.z, c_charlook(self->orientation)->yrot); */
+		/* c_spatial_set_rot(sc, up_dir.x, up_dir.y, up_dir.z, c_charlook(self->orientation)->yrot); */
 		/* c_charlook_toggle_side(c_charlook(&self->orientation)); */
-		/* c_spacial_scale(sc, vec3(1, -1, 1)); */
+		/* c_spatial_scale(sc, vec3(1, -1, 1)); */
 		self->last_vel = vec3_mul(up_line, *vel);
 
 		c_rigid_body(self)->offset = -c_rigid_body(self)->offset;
@@ -306,14 +306,14 @@ int c_character_update(c_character_t *self, float *dt)
 
 end:
 
-	c_spacial_unlock(sc);
+	c_spatial_unlock(sc);
 
 
-	sc = c_spacial(&self->orientation);
+	sc = c_spatial(&self->orientation);
 	if(fabs(dif = self->targR - sc->rot.z) > 0.001)
 	{
 		float scale = 5.0f * (*dt);
-		c_spacial_rotate_Z(sc, dif * scale);
+		c_spatial_rotate_Z(sc, dif * scale);
 	}
 
 	return CONTINUE;

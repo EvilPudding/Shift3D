@@ -1,7 +1,7 @@
 #include "charlook.h"
 #include "side.h"
 #include <systems/window.h>
-#include <components/spacial.h>
+#include <components/spatial.h>
 #include <components/force.h>
 #include <components/node.h>
 #include "level.h"
@@ -41,12 +41,12 @@ static int c_charlook_window_resize(c_charlook_t *self,
 
 void c_charlook_reset(c_charlook_t *self)
 {
-	c_spacial_t *sc = c_spacial(self);
-	c_spacial_lock(sc);
-	c_spacial_set_model(sc, mat4());
-	c_spacial_set_pos(c_spacial(self), vec3(0.0, 0.7, 0.0));
+	c_spatial_t *sc = c_spatial(self);
+	c_spatial_lock(sc);
+	c_spatial_set_model(sc, mat4());
+	c_spatial_set_pos(c_spatial(self), vec3(0.0, 0.7, 0.0));
 	self->xrot = 0;
-	c_spacial_unlock(sc);
+	c_spatial_unlock(sc);
 }
 
 static int c_charlook_update(c_charlook_t *self)
@@ -64,7 +64,7 @@ static int c_charlook_mouse_move(c_charlook_t *self, mouse_move_data *event)
 	const float max_up = M_PI / 2.0 - 0.01;
 	const float max_down = -M_PI / 2.0 + 0.01;
 
-	c_spacial_t *sc = c_spacial(self);
+	c_spatial_t *sc = c_spatial(self);
 	if(!sc) return CONTINUE;
 
 	if(self->xrot + inc_y >= max_up && inc_y > 0)
@@ -82,23 +82,23 @@ static int c_charlook_mouse_move(c_charlook_t *self, mouse_move_data *event)
 
 	if(inc_y)
 	{
-		c_spacial_lock(sc);
+		c_spatial_lock(sc);
 		self->xrot += inc_y;
-		c_spacial_rotate_X(sc, inc_y);
-		c_spacial_unlock(sc);
+		c_spatial_rotate_X(sc, inc_y);
+		c_spatial_unlock(sc);
 	}
 
-	sc = c_spacial(&self->x);
+	sc = c_spatial(&self->x);
 	if(!sc) return CONTINUE;
 
 	if(inc_x)
 	{
 		float old_rot = sc->rot.z;
-		c_spacial_lock(sc);
-		c_spacial_rotate_Z(sc, -old_rot);
-		c_spacial_rotate_Y(sc, inc_x);
-		c_spacial_rotate_Z(sc, old_rot);
-		c_spacial_unlock(sc);
+		c_spatial_lock(sc);
+		c_spatial_rotate_Z(sc, -old_rot);
+		c_spatial_rotate_Y(sc, inc_x);
+		c_spatial_rotate_Z(sc, old_rot);
+		c_spatial_unlock(sc);
 		/* printf("%f %f\n", old_rot, vec4_len(sc->rot_quat)); */
 	}
 

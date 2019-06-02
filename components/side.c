@@ -78,7 +78,7 @@ static int c_side_position_changed(c_side_t *self)
 
 	if(level)
 	{
-		vec3_t pos = vec3_round(c_node_local_to_global(c_node(self), vec3(0.0f)));
+		vec3_t pos = vec3_round(c_node_pos_to_global(c_node(self), vec3(0.0f)));
 
 		c_grid_t *gc = c_grid(&level->grid);
 		if(gc)

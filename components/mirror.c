@@ -39,14 +39,14 @@ static int c_mirror_update(c_mirror_t *self)
 	mat4_t model = renderer->glvars[0].model;
 
 	{
-		c_spacial_t *sc2 = c_spacial(&door_in);
+		c_spatial_t *sc2 = c_spatial(&door_in);
 
 		mat4_t m = mat4_invert(sc2->model_matrix);
 		model = mat4_mul(m, model);
 	}
 	if(entity_exists(door_out))
 	{
-		c_spacial_t *sc2 = c_spacial(&door_out);
+		c_spatial_t *sc2 = c_spatial(&door_out);
 
 		model = mat4_mul(sc2->model_matrix, model);
 	}

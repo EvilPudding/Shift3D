@@ -79,7 +79,7 @@ static entity_t cmd_shift_grid(entity_t root, int argc, const char **argv)
 					c_model_new(mesh,
 						(val&1) ? sauces("stone3.mat") : sauces("stone4.mat"), 1, 1));
 			/* c_model(&box)->before_draw = (before_draw_cb)cmd_model_before_draw; */
-			c_spacial_set_pos(c_spacial(&box), vec3(x, y, z));
+			c_spatial_set_pos(c_spatial(&box), vec3(x, y, z));
 			c_node_add(c_node(&root), 1, box);
 		}
 	}
@@ -118,7 +118,7 @@ static entity_t cmd_key(entity_t root, int argc, const char **argv)
 	/* sauces_mat("key")->transparency.color = vec4(1.0f, 1.0f, 1.0f, 0.4f); */
 	/* c_model(&key)->before_draw = (before_draw_cb)cmd_model_before_draw; */
 
-	c_spacial_set_pos(c_spacial(&key), vec3(x, y, z));
+	c_spatial_set_pos(c_spatial(&key), vec3(x, y, z));
 
 	return key;
 }
@@ -127,7 +127,9 @@ c_t *get_char(void)
 {
 	return ct_get_nth(ecm_get(ref("character")), 0);
 }
-renderer_t *shift_renderer(renderer_t *original);
+
+renderer_t *shift_renderer();
+renderer_t *debug_renderer();
 static entity_t cmd_spawn(entity_t root, int argc, const char **argv)
 {
 	vec3_t pos;
@@ -145,20 +147,20 @@ static entity_t cmd_spawn(entity_t root, int argc, const char **argv)
 	int side_dir = (side & 1) ? 1 : -1;
 	level->spawn = entity_new(c_node_new(),
 			c_side_new(root, side, 0),
-			c_spacial_new(),
+			c_spatial_new(),
 			c_name_new("spawn"));
 	pos = vec3(pos.x, pos.y + 0.48 * side_dir, pos.z);
-	c_spacial_t *spawnsc = c_spacial(&level->spawn);
-	c_spacial_lock(spawnsc);
-	c_spacial_set_pos(spawnsc, pos);
+	c_spatial_t *spawnsc = c_spatial(&level->spawn);
+	c_spatial_lock(spawnsc);
+	c_spatial_set_pos(spawnsc, pos);
 
 	dir++;
 	while(dir > 0)
 	{
-		c_spacial_rotate_Y(spawnsc, -M_PI / 2.0f);
+		c_spatial_rotate_Y(spawnsc, -M_PI / 2.0f);
 		dir--;
 	}
-	c_spacial_unlock(spawnsc);
+	c_spatial_unlock(spawnsc);
 
 	if(!get_char())
 	{
@@ -167,15 +169,16 @@ static entity_t cmd_spawn(entity_t root, int argc, const char **argv)
 
 		entity_t body = entity_new(c_name_new("body"), c_node_new());
 
-		renderer_t *renderer = shift_renderer(NULL);	
+		renderer_t *renderer = shift_renderer();	
+		/* renderer_t *renderer = debug_renderer(); */	
 	
 		entity_t character = entity_new( c_name_new("character"),
 				c_character_new(body, 1, g),
 				c_side_new(root, side, 1),
 				c_speaker_new()
 		);
-		c_spacial_t *sc = c_spacial(&character);
-		c_spacial_lock(sc);
+		c_spatial_t *sc = c_spatial(&character);
+		c_spatial_lock(sc);
 
 		c_rigid_body(&character)->offset = -0.8f * side_dir;
 
@@ -193,9 +196,9 @@ static entity_t cmd_spawn(entity_t root, int argc, const char **argv)
 
 		level->pov = camera;
 
-		c_spacial_set_model(sc, spawnsc->model_matrix);
+		c_spatial_set_model(sc, spawnsc->model_matrix);
 
-		c_spacial_unlock(sc);
+		c_spatial_unlock(sc);
 		level->mirror = entity_new( c_name_new("mirror"),
 				c_mirror_new(camera),
 				c_camera_new(70, 0.1, 100.0, 0, 0, 0, renderer)
@@ -213,6 +216,7 @@ static entity_t cmd_spawn(entity_t root, int argc, const char **argv)
 
 static entity_t cmd_bridge(entity_t root, int argc, const char **argv)
 {
+	printf("HERE %d\n", __LINE__);
 #define order(N1, N2, n1, n2) ((n1 < n2) ? \
 		(N1 = n1, N2 = n2) : \
 		(N1 = n2, N2 = n1))
@@ -231,6 +235,7 @@ static entity_t cmd_bridge(entity_t root, int argc, const char **argv)
 	sscanf(argv[9], "%f", &cz);
 	sscanf(argv[10], "%d", &key);
 
+	printf("HERE %d\n", __LINE__);
 	entity_t bridge = entity_new(
 			c_name_new("bridge"),
 			c_side_new(root, -1, 1),
@@ -262,7 +267,7 @@ static entity_t cmd_bridge(entity_t root, int argc, const char **argv)
 			/* p->x1 - 0.01, p->y1 - 0.01, p->z1 - 0.01, */
 			/* p->x2 + 0.01, p->y2 + 0.01, p->z2 + 0.01); */
 
-	c_spacial_set_pos(c_spacial(&bridge), vec3(p->cx, p->cy, p->cz));
+	c_spatial_set_pos(c_spatial(&bridge), vec3(p->cx, p->cy, p->cz));
 	c_bridge_ready(p);
 
 	/* c_model(&bridge)->before_draw = (before_draw_cb)cmd_model_before_draw; */
@@ -300,9 +305,9 @@ static entity_t cmd_door(entity_t root, int argc, const char **argv)
 
 	/* c_model(&level->door)->before_draw = (before_draw_cb)cmd_model_before_draw; */
 
-	c_spacial_set_pos(c_spacial(&level->door), vec3(x, y - 0.49 * (side ? -1:1), z));
-	c_spacial_rotate_Y(c_spacial(&level->door), dir * M_PI / 2);
-	c_spacial_rotate_X(c_spacial(&level->door), side ? -M_PI : 0);
+	c_spatial_set_pos(c_spatial(&level->door), vec3(x, y - 0.49 * (side ? -1:1), z));
+	c_spatial_rotate_Y(c_spatial(&level->door), dir * M_PI / 2);
+	c_spatial_rotate_X(c_spatial(&level->door), side ? -M_PI : 0);
 
 	return level->door;
 }
@@ -332,7 +337,7 @@ static entity_t cmd_light(entity_t root, int argc, const char **argv)
 			c_side_follow_new(),
 			c_light_new(20.0f, color, 1024));
 
-	c_spacial_set_pos(c_spacial(&light), vec3(x, y, z));
+	c_spatial_set_pos(c_spatial(&light), vec3(x, y, z));
 
 	return light;
 }

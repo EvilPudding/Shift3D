@@ -4,7 +4,7 @@
 #include "side.h"
 #include "grid.h"
 #include <stdlib.h>
-#include <components/spacial.h>
+#include <components/spatial.h>
 #include <components/model.h>
 #include "../openal.candle/speaker.h"
 
@@ -54,7 +54,7 @@ void push_at(entity_t lvl, int x, int y, int z, int value, vec3_t from)
 	{
 		if(!kh_exist(movables->cs, k)) continue;
 		c_movable_t *m = (c_movable_t*)kh_value(movables->cs, k);
-		if(m->value == value) if(vec3_dist(c_spacial(m)->pos, pos) < 0.4)
+		if(m->value == value) if(vec3_dist(c_spatial(m)->pos, pos) < 0.4)
 		{
 			m->mx = -dif.x;
 			m->my = -dif.y;
@@ -73,35 +73,35 @@ static int c_movable_update(c_movable_t *self, float *dt)
 {
 	if(!self->moving) return CONTINUE;
 	float inc = (*dt) * 6;
-	c_spacial_t *sc = c_spacial(self);
+	c_spatial_t *sc = c_spatial(self);
 
 	if(self->mx > 0)	
 	{
 		inc = fmin(inc, self->mx);
 		sc->pos.x += inc;
 		self->mx -= inc;
-		c_spacial_set_pos(sc, sc->pos);
+		c_spatial_set_pos(sc, sc->pos);
 	}
 	else if(self->mx < 0)	
 	{
 		inc = fmin(inc, -self->mx);
 		sc->pos.x -= inc;
 		self->mx += inc;
-		c_spacial_set_pos(sc, sc->pos);
+		c_spatial_set_pos(sc, sc->pos);
 	}
 	else if(self->mz > 0)	
 	{
 		inc = fmin(inc, self->mz);
 		sc->pos.z += inc;
 		self->mz -= inc;
-		c_spacial_set_pos(sc, sc->pos);
+		c_spatial_set_pos(sc, sc->pos);
 	}
 	else if(self->mz < 0)	
 	{
 		inc = fmin(inc, -self->mz);
 		sc->pos.z -= inc;
 		self->mz += inc;
-		c_spacial_set_pos(sc, sc->pos);
+		c_spatial_set_pos(sc, sc->pos);
 	}
 	else
 	{
@@ -117,7 +117,7 @@ static int c_movable_update(c_movable_t *self, float *dt)
 
 		if((ground&1) != side || ground == -1)
 		{
-			c_spacial_set_pos(sc, rnd);
+			c_spatial_set_pos(sc, rnd);
 			c_grid_set(gc, sc->pos.x, sc->pos.y, sc->pos.z, 2 | !side);
 			if(self->sy)
 			{
@@ -135,7 +135,7 @@ static int c_movable_update(c_movable_t *self, float *dt)
 		{
 			self->sy += dir * 0.4 * *dt;
 			sc->pos.y += self->sy;
-			c_spacial_set_pos(sc, sc->pos);
+			c_spatial_set_pos(sc, sc->pos);
 		}
 	}
 

@@ -3,7 +3,7 @@
 #include <string.h>
 #include <candle.h>
 #include "physics.h"
-#include <components/spacial.h>
+#include <components/spatial.h>
 #include <components/force.h>
 #include <components/velocity.h>
 #include <components/rigid_body.h>
@@ -186,7 +186,7 @@ static int c_physics_update(c_physics_t *self, float *dt)
 		if(!kh_exist(vels->cs, k)) continue;
 		c_velocity_t *vc = (c_velocity_t*)kh_value(vels->cs, k);
 
-		c_spacial_t *sc = c_spacial(vc);
+		c_spatial_t *sc = c_spatial(vc);
 
 		vc->pre_movement_pos = sc->pos;
 		vc->velocity = c_physics_handle_forces(self, vc->velocity, dt);
@@ -221,12 +221,12 @@ static int c_physics_update(c_physics_t *self, float *dt)
 		if(!kh_exist(vels->cs, k)) continue;
 		c_velocity_t *vc = (c_velocity_t*)kh_value(vels->cs, k);
 
-		c_spacial_t *sc = c_spacial(vc);
+		c_spatial_t *sc = c_spatial(vc);
 
 		vc->normal = vec3_sub(vc->computed_pos, vc->pre_collision_pos);
 		if(vc->normal.x != vc->normal.x) c_velocity_set_normal(vc, vec3(0.0f));
 
-		c_spacial_set_pos(sc, vc->computed_pos);
+		c_spatial_set_pos(sc, vc->computed_pos);
 	}
 
 	return CONTINUE;

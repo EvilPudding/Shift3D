@@ -1,6 +1,6 @@
 #include "aabb.h"
 #include <components/model.h>
-#include <components/spacial.h>
+#include <components/spatial.h>
 #include <components/node.h>
 
 
@@ -26,7 +26,7 @@ void c_aabb_update(c_aabb_t *self)
 
 	c_model_t *mc = c_model(self);
 
-	c_spacial_t *sc = c_spacial(self);
+	c_spatial_t *sc = c_spatial(self);
 	if(vec3_equals(sc->rot, self->rot) &&
 			vec3_equals(sc->scale, self->sca)) return;
 	/* c_node_update_model(nc); */
@@ -71,7 +71,7 @@ int c_aabb_on_mesh_change(c_aabb_t *self)
 	return CONTINUE;
 }
 
-int c_aabb_spacial_changed(c_aabb_t *self)
+int c_aabb_spatial_changed(c_aabb_t *self)
 {
 	c_aabb_update(self);
 	return CONTINUE;
@@ -79,8 +79,8 @@ int c_aabb_spacial_changed(c_aabb_t *self)
 
 int c_aabb_intersects(c_aabb_t *self, c_aabb_t *other)
 {
-	c_spacial_t *sc1 = c_spacial(self);
-	c_spacial_t *sc2 = c_spacial(other);
+	c_spatial_t *sc1 = c_spatial(self);
+	c_spatial_t *sc2 = c_spatial(other);
 
 	vec3_t min1 = vec3_add(self->min, sc1->pos);
 	vec3_t max1 = vec3_add(self->max, sc1->pos);
@@ -95,10 +95,10 @@ int c_aabb_intersects(c_aabb_t *self, c_aabb_t *other)
 REG()
 {
 	ct_t *ct = ct_new("aabb", sizeof(c_aabb_t),
-			c_aabb_init, NULL, 1, ref("spacial"));
+			c_aabb_init, NULL, 1, ref("spatial"));
 
 	ct_listener(ct, WORLD, sig("mesh_changed"), c_aabb_on_mesh_change);
-	ct_listener(ct, ENTITY, sig("spacial_changed"), c_aabb_spacial_changed);
+	ct_listener(ct, ENTITY, sig("spatial_changed"), c_aabb_spatial_changed);
 
 	/* ct_listener(ct, WORLD, collider_callback, c_grid_collider); */
 }

@@ -1,5 +1,5 @@
 #include <candle.h>
-#include <components/spacial.h>
+#include <components/spatial.h>
 #include <components/node.h>
 #include <utils/nk.h>
 #include "side.h"
@@ -27,7 +27,7 @@ static int c_side_follow_update(c_side_follow_t *self, float *dt)
 	if(!ss) return CONTINUE;
 
 	int side = ss->side & 1;
-	c_spacial_t *sc = c_spacial(self);
+	c_spatial_t *sc = c_spatial(self);
 	vec3_t pos = sc->pos;
 
 	vec3_t dest = vec3(pos.x, 2.0 + 7.0 * !side, pos.z);
@@ -36,7 +36,7 @@ static int c_side_follow_update(c_side_follow_t *self, float *dt)
 	if(dist > 0.1)
 	{
 		pos = vec3_sub(pos, vec3_scale(inc, *dt));
-		c_spacial_set_pos(sc, pos);
+		c_spatial_set_pos(sc, pos);
 	}
 	
 	return CONTINUE;
@@ -53,7 +53,7 @@ int c_side_follow_menu(c_side_follow_t *self, void *ctx)
 REG()
 {
 	ct_t *ct = ct_new("side_follow", sizeof(c_side_follow_t),
-			NULL, NULL, 1, ref("spacial"));
+			NULL, NULL, 1, ref("spatial"));
 
 	ct_listener(ct, WORLD, sig("world_update"), c_side_follow_update);
 	ct_listener(ct, WORLD, sig("component_menu"), c_side_follow_menu);

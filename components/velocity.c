@@ -1,7 +1,6 @@
 #include <ecs/ecm.h>
 #include <stdlib.h>
 #include "velocity.h"
-#include <components/spacial.h>
 
 c_velocity_t *c_velocity_new(float x, float y, float z)
 {
@@ -26,6 +25,6 @@ void c_velocity_set_vel(c_velocity_t *self, float x, float y, float z)
 
 REG()
 {
-	ct_new("velocity", sizeof(c_velocity_t), NULL, NULL, 1, ref("spacial"));
+	ct_new("velocity", sizeof(c_velocity_t), NULL, NULL, 1, ref("spatial"));
 }
 

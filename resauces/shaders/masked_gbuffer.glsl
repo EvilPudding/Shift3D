@@ -14,7 +14,7 @@ void main()
 	if(depth == 0.0) discard;
 	if(gl_FragCoord.z < depth) discard;
 
-	vec4 dif  = resolveProperty(mat(albedo), texcoord);
+	vec4 dif  = resolveProperty(mat(albedo), texcoord, false);
 	if(dif.a < 0.7) discard;
 
 	dif.rgb += poly_color;
@@ -23,8 +23,8 @@ void main()
 
 	NMR.rg = encode_normal(get_normal());
 
-	NMR.b = resolveProperty(mat(metalness), texcoord).r;
-	NMR.a = resolveProperty(mat(roughness), texcoord).r;
+	NMR.b = resolveProperty(mat(metalness), texcoord, false).r;
+	NMR.a = resolveProperty(mat(roughness), texcoord, false).r;
 
 	/* AlbedoColor = scene.test_color; */
 }

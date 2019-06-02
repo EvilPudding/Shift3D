@@ -1,7 +1,7 @@
 #include "key.h"
 #include "bridge.h"
 #include "side.h"
-#include <components/spacial.h>
+#include <components/spatial.h>
 #include <components/model.h>
 #include <components/rigid_body.h>
 #include <stdlib.h>
@@ -14,14 +14,14 @@ static float c_rigid_body_key_collider(c_rigid_body_t *self, vec3_t pos)
 	if(key->active != 1) return -1;
 	entity_t ent = c_entity(self);
 
-	const vec3_t kpos = c_spacial(self)->pos;
+	const vec3_t kpos = c_spatial(self)->pos;
 	c_side_t *side = c_side(self);
 
 	c_model_t *model = c_model(self);
 	if(model->visible && vec3_len(vec3_sub(pos, kpos)) < 0.6)
 	{
 		model->visible = 0;
-		/* entity_signal(ent, spacial_changed, &ent); */
+		/* entity_signal(ent, spatial_changed, &ent); */
 
 		ct_t *bridges = ecm_get(ref("bridge"));
 
@@ -65,7 +65,7 @@ c_key_t *c_key_new(int rotX, int rotY, int rotZ, int key)
 
 REG()
 {
-	ct_t *ct = ct_new("key", sizeof(c_key_t), NULL, NULL, 1, ref("spacial"));
+	ct_t *ct = ct_new("key", sizeof(c_key_t), NULL, NULL, 1, ref("spatial"));
 
 	signal_init(sig("key_activated"), sizeof(key_activated_data));
 

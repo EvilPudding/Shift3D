@@ -3,7 +3,9 @@
 
 #include <ecs/ecm.h>
 
-typedef struct
+typedef struct c_grid_t c_grid_t;
+
+typedef struct c_grid_t
 {
 	c_t super; /* extends c_t */
 
@@ -14,6 +16,7 @@ typedef struct
 			 blocks_inv, cage_inv, boxes_inv;
 	int modified;
 	int active;
+	entity_t edit_target, remove_target;
 } c_grid_t;
 
 DEF_CASTER("grid", c_grid, c_grid_t);
