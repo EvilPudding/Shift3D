@@ -79,8 +79,8 @@ static float handle_cols_for_offset(c_t *c, c_t *projectile, collider_cb cb,
 	if(node)
 	{
 		c_node_update_model(node);
-		offset = mat4_mul_vec4(node->model,
-				vec4(_vec3(offset), 0.0)).xyz;
+		offset = vec4_xyz(mat4_mul_vec4(node->model,
+				vec4(_vec3(offset), 0.0)));
 		/* offset = vec3_sub(offset, old_pos); */
 		/* vec3_print(offset); */
 	}
@@ -162,12 +162,12 @@ static void c_physics_handle_collisions(c_rigid_body_t *c1,
 			c_velocity_t *v;
 			if((v = c_velocity(c1)))
 			{
-				v->velocity = vec3(0.0);
+				v->velocity = vec3(0.0f, 0.0f, 0.0f);
 				v->computed_pos = v->pre_movement_pos;
 			}
 			if((v = c_velocity(c2)))
 			{
-				v->velocity = vec3(0.0);
+				v->velocity = vec3(0.0f, 0.0f, 0.0f);
 				v->computed_pos = v->pre_movement_pos;
 			}
 		}
@@ -224,7 +224,7 @@ static int c_physics_update(c_physics_t *self, float *dt)
 		c_spatial_t *sc = c_spatial(vc);
 
 		vc->normal = vec3_sub(vc->computed_pos, vc->pre_collision_pos);
-		if(vc->normal.x != vc->normal.x) c_velocity_set_normal(vc, vec3(0.0f));
+		if(vc->normal.x != vc->normal.x) c_velocity_set_normal(vc, vec3(0.0f, 0.0f, 0.0f));
 
 		c_spatial_set_pos(sc, vc->computed_pos);
 	}
@@ -243,8 +243,8 @@ REG()
 {
 	ct_t *ct = ct_new("physics", sizeof(c_physics_t), NULL, NULL, 0);
 
-	ct_listener(ct, WORLD, sig("world_update"), c_physics_update);
+	ct_listener(ct, WORLD, 0, ref("world_update"), c_physics_update);
 
-	signal_init(sig("collider_callback"), 0);
+	signal_init(ref("collider_callback"), 0);
 }
 

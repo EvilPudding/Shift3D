@@ -62,7 +62,7 @@ static int c_mirror_update(c_mirror_t *self)
 REG()
 {
 	ct_t *ct = ct_new("mirror", sizeof(c_mirror_t), NULL, NULL, 1, ref("node"));
-	ct_listener(ct, WORLD | 49, sig("world_pre_draw"), c_mirror_update);
+	ct_listener(ct, WORLD, 49, ref("world_pre_draw"), c_mirror_update);
 }
 
 

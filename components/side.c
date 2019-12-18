@@ -78,7 +78,7 @@ static int c_side_position_changed(c_side_t *self)
 
 	if(level)
 	{
-		vec3_t pos = vec3_round(c_node_pos_to_global(c_node(self), vec3(0.0f)));
+		vec3_t pos = vec3_round(c_node_pos_to_global(c_node(self), vec3(0.0f, 0.0f, 0.0f)));
 
 		c_grid_t *gc = c_grid(&level->grid);
 		if(gc)
@@ -107,11 +107,11 @@ static int c_side_level_changed(c_side_t *self, entity_t *level)
 
 REG()
 {
-	ct_t *ct = ct_new("side", sizeof(c_side_t), c_side_init, NULL, 1, ref("node"));
-	ct_listener(ct, WORLD, sig("side_changed"), c_side_changed);
-	ct_listener(ct, WORLD, sig("level_changed"), c_side_level_changed);
-	ct_listener(ct, ENTITY, sig("node_changed"), c_side_position_changed);
-	ct_listener(ct, WORLD, sig("component_menu"), c_side_menu);
+	ct_t *ct = ct_new("side", sizeof(c_side_t), (init_cb)c_side_init, NULL, 1, ref("node"));
+	ct_listener(ct, WORLD,  0, ref("side_changed"), c_side_changed);
+	ct_listener(ct, WORLD,  0, ref("level_changed"), c_side_level_changed);
+	ct_listener(ct, ENTITY, 0, ref("node_changed"), c_side_position_changed);
+	ct_listener(ct, WORLD,  0, ref("component_menu"), c_side_menu);
 
 	signal_init(ref("side_changed"), 0);
 	signal_init(ref("level_changed"), 0);

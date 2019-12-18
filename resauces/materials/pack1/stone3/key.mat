@@ -1,0 +1,10 @@
+material _default 100.000000 10.000000 ff323232 1 1 0 0 0 -1
+material.albedo.texture = stone3_diffuse
+material.albedo.color.x = 0.600000
+material.albedo.color.y = 0.650000
+material.albedo.color.z = 0.250000
+material.albedo.blend = 0.200000
+material.roughness.value = 0.000000
+material.metalness.value = 1.0
+material.normal.texture = stone3_normal
+material.normal.blend = 0.300000

@@ -308,13 +308,13 @@ int gjk_contains_origin(struct simplex *simp, vec3_t *dir)
 static inline vec3_t gjk_support(mesh_t *self, mesh_t *other,
 		mat4_t other_to_self, mat4_t rotate_to_other, const vec3_t dir)
 {
-	vec3_t dir2 = mat4_mul_vec4(rotate_to_other, vec4(_vec3(dir), 0.0)).xyz;
+	vec3_t dir2 = vec4_xyz(mat4_mul_vec4(rotate_to_other, vec4(_vec3(dir), 0.0)));
 
 	// Compute the support points for original objects (without margins) A and B
 	vec3_t supportA = self->support(self, vec3_inv(dir));
 	vec3_t supportB = other->support(other, dir2);
 
-	supportB = mat4_mul_vec4(other_to_self, vec4(_vec3(supportB), 1.0)).xyz;
+	supportB = vec4_xyz(mat4_mul_vec4(other_to_self, vec4(_vec3(supportB), 1.0)));
 
 	// Compute the support point for the Minkowski difference A-B
 	return vec3_sub(supportA, supportB);
@@ -341,7 +341,7 @@ int gjk_intersects_bak(c_rigid_body_t *self, c_rigid_body_t *other)
 	rotate_to_other = mat4_mul(rotate_to_other, rm1);
 
 	vec3_t dir = vec3_sub(sc2->pos, sc1->pos);
-	if(vec3_null(dir)) dir = vec3(1.0);
+	if(vec3_null(dir)) dir = vec3(1.0f, 1.0f, 1.0f);
 
 	struct simplex simp;
 
@@ -395,9 +395,9 @@ int simplex_has_point(struct simplex *self, const vec3_t point)
 
 void simplex_closest_of_A_B(struct simplex *self, vec3_t *pA, vec3_t *pB)
 {
-    float deltaX = 0.0;
-    *pA = vec3(0.0);
-    *pB = vec3(0.0);
+    float deltaX = 0.0f;
+    *pA = vec3(0.0f, 0.0f, 0.0f);
+    *pB = vec3(0.0f, 0.0f, 0.0f);
     int i;
     int bit;
 
@@ -553,9 +553,9 @@ static inline int is_subset(int a, int b)
 
 vec3_t simplex_compute_closest_for_subset(struct simplex *self, int subset)
 {
-    vec3_t v = vec3(0.0);      // Closet point v = sum(lambda_i * points[i])
-    self->max_length_square = 0.0;
-    float deltaX = 0.0;            // deltaX = sum of all det[subset][i]
+    vec3_t v = vec3(0.0f, 0.0f, 0.0f);      // Closet point v = sum(lambda_i * points[i])
+    self->max_length_square = 0.0f;
+    float deltaX = 0.0f;            // deltaX = sum of all det[subset][i]
     int i;
     int bit;
 
@@ -778,12 +778,12 @@ int gjk_intersects(c_rigid_body_t *self, c_rigid_body_t *other,
 	do
 	{
 
-		vec3_t v2 = mat4_mul_vec4(rotate_to_other, vec4(_vec3(v), 0.0)).xyz;
+		vec3_t v2 = vec4_xyz(mat4_mul_vec4(rotate_to_other, vec4(_vec3(v), 0.0)));
 
 		// Compute the support points for original objects (without margins) A and B
-		suppA = XYZ(mesh_farthest(mesh1, vec3_inv(v))->pos);
-		suppB = XYZ(mesh_farthest(mesh2, v2)->pos);
-		suppB = mat4_mul_vec4(other_to_self, vec4(_vec3(suppB), 1.0)).xyz;
+		suppA = vecN_xyz(mesh_farthest(mesh1, vec3_inv(v))->pos);
+		suppB = vecN_xyz(mesh_farthest(mesh2, v2)->pos);
+		suppB = vec4_xyz(mat4_mul_vec4(other_to_self, vec4(_vec3(suppB), 1.0)));
 
 		// Compute the support point for the Minkowski difference A-B
 		w = vec3_sub(suppA, suppB);
@@ -845,7 +845,7 @@ contact_info:
 		/* assert(dist > 0.0); */
 		pA = vec3_sub(pA, vec3_mul_number(v, mesh_get_margin(mesh1) / dist));
 		pB = vec3_add(pB, vec3_mul_number(v, mesh_get_margin(mesh2) / dist));
-		pB = mat4_mul_vec4(inv_rotate_to_other, vec4(_vec3(pB), 0.0)).xyz;
+		pB = vec4_xyz(mat4_mul_vec4(inv_rotate_to_other, vec4(_vec3(pB), 0.0)));
 
 		// Compute the contact info
 		contact->normal = quat_mul_vec3(sc1->rot_quat, vec3_inv(vec3_get_unit(v)));

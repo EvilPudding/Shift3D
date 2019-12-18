@@ -7,6 +7,7 @@
 #include <components/rigid_body.h>
 #include <components/force.h>
 #include <systems/editmode.h>
+#include <systems/controller.h>
 #include "level.h"
 #include "movable.h"
 #include "charlook.h"
@@ -17,7 +18,6 @@
 #include "../openal.candle/speaker.h"
 
 extern int window_width, window_height;
-int control = 1;
 
 c_character_t *c_character_new(entity_t orientation,
 		int plane_movement, entity_t force_down)
@@ -79,7 +79,7 @@ static void _c_character_teleport(c_character_t *self)
 		body->update_id++;
 	}
 
-	vec3_t npos = mat4_mul_vec4(model, vec4(0.0f, 0.0f, 0.0f, 1.0f)).xyz;
+	vec3_t npos = vec4_xyz(mat4_mul_vec4(model, vec4(0.0f, 0.0f, 0.0f, 1.0f)));
 	c_spatial_set_pos(sc, npos);
 
 	if(out_side != (ss->side & 1))
@@ -120,6 +120,7 @@ static void _c_character_teleport(c_character_t *self)
 int c_character_update(c_character_t *self, float *dt)
 {
 	c_side_t *ss = c_side(self);
+	if (!ss) return CONTINUE;
 	if(self->reset)
 	{
 		c_editmode_select(c_editmode(&SYS), c_entity(self));
@@ -132,7 +133,6 @@ int c_character_update(c_character_t *self, float *dt)
 	c_grid_t *gc = c_grid(&level->grid);
 	if(!gc) return CONTINUE;
 
-	const float corner = 1.0f / sqrtf(2.0f);
 	c_spatial_t *ori = c_spatial(&self->orientation);
 	float dif;
 
@@ -187,38 +187,42 @@ int c_character_update(c_character_t *self, float *dt)
 		vec3_t tang_speed = vec3_mul(tang, *vel);
 		self->max_jump_vel = fmax(self->max_jump_vel, 5.0f);
 		self->max_jump_vel = fmax(vec3_len(tang_speed), self->max_jump_vel);
-		self->last_vel = vec3(0.0f);
+		self->last_vel = vec3(0.0f, 0.0f, 0.0f);
 	}
 
-	if((self->left + self->right) && (self->forward || self->backward))
-	{
-		accel *= corner;
-	}
-
+	vec3_t walk_dir = vec3(0.0f, 0.0f, 0.0f);
 	if(self->left)
 	{
-		*vel = vec3_sub(*vel, vec3_scale(sideways, accel));
+		walk_dir = vec3_sub(walk_dir, vec3_scale(sideways, self->left));
 	}
-
 	if(self->right)
 	{
-		*vel = vec3_add(*vel, vec3_scale(sideways, accel));
+		walk_dir = vec3_add(walk_dir, vec3_scale(sideways, self->right));
 	}
-
 	if(self->forward)
 	{
-		*vel = vec3_sub(*vel, vec3_scale(front, accel));
+		walk_dir = vec3_sub(walk_dir, vec3_scale(front, self->forward));
 	}
-
 	if(self->backward)
 	{
-		*vel = vec3_add(*vel, vec3_scale(front, accel));
+		walk_dir = vec3_add(walk_dir, vec3_scale(front, self->backward));
 	}
+
+	{
+		/* clamp dir strength */
+		float walk_length = vec3_len(walk_dir);
+		if (walk_length > 1.0f)
+		{
+			walk_dir = vec3_scale(walk_dir, 1.0f / walk_length);
+		}
+	}
+
+	*vel = vec3_add(*vel, vec3_scale(walk_dir, accel));
 	vec3_t tang_speed = vec3_mul(tang, *vel);
 
 	if(self->swap == 1 && shiftable)
 	{
-		entity_signal(c_entity(self), sig("grid_update"), NULL, NULL);
+		entity_signal(c_entity(self), ref("grid_update"), NULL, NULL);
 		self->swap = 2;
 		c_force(&self->force_down)->force = up;
 		/* c_force(self->force_down)->force = vec3(0.0, 0.0, 30.0); */
@@ -286,7 +290,7 @@ int c_character_update(c_character_t *self, float *dt)
 			if(val & 0x2 && (val & 1) != (ss->side & 1))
 			{
 				push_at(ss->level, t.x, t.y, t.z, val, sc->pos);
-				*vel = vec3(0);
+				*vel = vec3(0.0f, 0.0f, 0.0f);
 			}
 		}
 		self->max_jump_vel = fmax(0.8, vec3_len(tang_speed));
@@ -330,7 +334,11 @@ int c_character_key_up(c_character_t *self, char *key)
 		case 'Q': case 'q': self->swap = 0; break;
 		case 'E': case 'e': self->pushing = 0; break;
 		case 'R': case 'r': self->kill_self = 1; break;
-		case '`': control = !control; break;
+		case '`':
+		{
+			c_editmode_activate(c_editmode(&SYS));
+			break;
+		}
 		case 32: self->jump = 0; break;
 	}
 	return CONTINUE;
@@ -340,10 +348,10 @@ int c_character_key_down(c_character_t *self, char *key)
 {
 	switch(*key)
 	{
-		case 'W': case 'w': self->forward = 1; break;
-		case 'A': case 'a': self->left = 1; break;
-		case 'D': case 'd': self->right = 1; break;
-		case 'S': case 's': self->backward = 1; break;
+		case 'W': case 'w': self->forward = 1.0f; break;
+		case 'A': case 'a': self->left = 1.0f; break;
+		case 'D': case 'd': self->right = 1.0f; break;
+		case 'S': case 's': self->backward = 1.0f; break;
 		case 'Q': case 'q': self->swap = self->swap?:1; break;
 		case 'E': case 'e': self->pushing = 1; break;
 		case 32: self->jump = self->jump?:1; break;
@@ -352,16 +360,78 @@ int c_character_key_down(c_character_t *self, char *key)
 	return CONTINUE;
 }
 
+int c_character_controller(c_character_t *self, controller_axis_t *event)
+{
+	if (event->side == 0)
+	{
+		self->backward = fmax( event->y, 0.f);
+		self->forward  = fmax(-event->y, 0.f);
+		self->left     = fmax(-event->x, 0.f);
+		self->right    = fmax( event->x, 0.f);
+		return STOP;
+	}
+	return CONTINUE;
+}
+
+int c_character_controller_button_up(c_character_t *self, controller_button_t *event)
+{
+	if (event->key == SDL_CONTROLLER_BUTTON_A)
+	{
+		self->jump = 0;
+		return STOP;
+	}
+	if (event->key == SDL_CONTROLLER_BUTTON_X)
+	{
+		self->pushing = 0;
+		return STOP;
+	}
+	else if (event->key == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
+	{
+		self->swap = 0;
+		return STOP;
+	}
+	return CONTINUE;
+}
+
+int c_character_controller_button_down(c_character_t *self, controller_button_t *event)
+{
+	if (event->key == SDL_CONTROLLER_BUTTON_A)
+	{
+		self->jump = self->jump?:1;
+		return STOP;
+	}
+	if (event->key == SDL_CONTROLLER_BUTTON_X)
+	{
+		self->pushing = 1;
+		return STOP;
+	}
+	else if (event->key == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
+	{
+		self->swap = self->swap?:1;
+		return STOP;
+	}
+	return CONTINUE;
+}
+
+
 REG()
 {
 	ct_t *ct = ct_new("character", sizeof(c_character_t),
 			NULL, NULL, 4, ref("velocity"), ref("node"),
 			ref("rigid_body"), ref("side"));
 
-	ct_listener(ct, WORLD, sig("key_up"), c_character_key_up);
+	ct_listener(ct, WORLD, 0, ref("key_up"), c_character_key_up);
 
-	ct_listener(ct, WORLD, sig("key_down"), c_character_key_down);
+	ct_listener(ct, WORLD, 0, ref("key_down"), c_character_key_down);
 
-	ct_listener(ct, WORLD, sig("world_update"), c_character_update);
+	ct_listener(ct, WORLD, 0, ref("world_update"), c_character_update);
+
+	ct_listener(ct, WORLD, 100, ref("controller_axis"), c_character_controller);
+
+	ct_listener(ct, WORLD, 100, ref("controller_button_up"),
+	            c_character_controller_button_up);
+
+	ct_listener(ct, WORLD, 100, ref("controller_button_down"),
+	            c_character_controller_button_down);
 }
 

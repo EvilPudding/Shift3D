@@ -67,7 +67,7 @@ REG()
 {
 	ct_t *ct = ct_new("key", sizeof(c_key_t), NULL, NULL, 1, ref("spatial"));
 
-	signal_init(sig("key_activated"), sizeof(key_activated_data));
+	signal_init(ref("key_activated"), sizeof(key_activated_data));
 
-	ct_listener(ct, ENTITY, sig("entity_created"), c_key_created);
+	ct_listener(ct, ENTITY, 0, ref("entity_created"), c_key_created);
 }

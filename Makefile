@@ -1,4 +1,4 @@
-CC = cc
+CC = cc -std=c99
 LD = cc
 AR = ar
 
@@ -25,8 +25,7 @@ LIBS_REL = $(LIBS) $(PLUGINS_REL)
 LIBS_DEB = $(LIBS) $(PLUGINS_DEB)
 LIBS_EMS = $(LIBS) $(PLUGINS_EMS) $(EMS_OPTS) -O2
 
-CFLAGS = -Wall -I. -Icandle -DUSE_VAO \
-		 $(shell sdl2-config --cflags)
+CFLAGS = -Wall -I. -Icandle -Wno-unused-function $(shell sdl2-config --cflags)
 
 CFLAGS_REL = $(CFLAGS) -O3
 

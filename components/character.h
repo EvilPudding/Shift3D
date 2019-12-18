@@ -6,7 +6,8 @@
 typedef struct
 {
 	c_t super; /* extends c_t */
-	int forward, backward, left, right, jump, swap, pushing;
+	float forward, backward, left, right;
+	bool_t jump, swap, pushing;
 	int control;
 	float max_jump_vel;
 

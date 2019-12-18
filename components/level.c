@@ -26,7 +26,7 @@ c_level_t *c_level_new(const char *filename, int32_t active)
 
 	if(!filename[0]) return self;
 
-	char open_map_name[256];
+	char open_map_name[512];
 	sprintf(open_map_name, "resauces/maps/%s.xmap", filename);
 
 	strcpy(self->file, filename);
@@ -125,7 +125,10 @@ void c_level_reset(c_level_t *self)
 {
 	c_level_set_active(self, 0);
 
-	entity_t lvl = entity_new(c_name_new(self->file), c_level_new(self->file, 0));
+	entity_t lvl = entity_new({
+		c_name_new(self->file);
+		c_level_new(self->file, 0);
+	});
 	c_level_t *level = c_level(&lvl);
 	c_level_set_active(level, 1);
 
@@ -133,7 +136,7 @@ void c_level_reset(c_level_t *self)
 		c_character_t *fc = (c_character_t*)ct_get_nth(ecm_get(ref("character")), 0);
 		c_mirror_t *mir = (c_mirror_t*)ct_get_nth(ecm_get(ref("mirror")), 0);
 
-		c_velocity(fc)->velocity = vec3(0.0f);
+		c_velocity(fc)->velocity = vec3(0.0f, 0.0f, 0.0f);
 		fc->max_jump_vel = 0.0f;
 
 		c_side_t *charside = c_side(fc);

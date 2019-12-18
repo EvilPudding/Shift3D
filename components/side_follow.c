@@ -55,7 +55,7 @@ REG()
 	ct_t *ct = ct_new("side_follow", sizeof(c_side_follow_t),
 			NULL, NULL, 1, ref("spatial"));
 
-	ct_listener(ct, WORLD, sig("world_update"), c_side_follow_update);
-	ct_listener(ct, WORLD, sig("component_menu"), c_side_follow_menu);
+	ct_listener(ct, WORLD, 0, ref("world_update"), c_side_follow_update);
+	ct_listener(ct, WORLD, 0, ref("component_menu"), c_side_follow_menu);
 }
 

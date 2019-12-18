@@ -13,7 +13,7 @@ typedef struct
 	entity_t pov;
 	entity_t door;
 	entity_t mirror;
-	char file[256];
+	char file[512];
 	int32_t active;
 } c_level_t;
 

@@ -38,18 +38,18 @@ void c_aabb_update(c_aabb_t *self)
 	mat4_t rot_matrix = quat_to_mat4(sc->rot_quat);
 	inv = mat4_invert(rot_matrix);
 
-	vec3_t dir_x = mat4_mul_vec4(inv, vec4(1.0, 0.0, 0.0, 0.0)).xyz;
-	vec3_t dir_y = mat4_mul_vec4(inv, vec4(0.0, 1.0, 0.0, 0.0)).xyz;
-	vec3_t dir_z = mat4_mul_vec4(inv, vec4(0.0, 0.0, 1.0, 0.0)).xyz;
+	vec3_t dir_x = vec4_xyz(mat4_mul_vec4(inv, vec4(1.0, 0.0, 0.0, 0.0)));
+	vec3_t dir_y = vec4_xyz(mat4_mul_vec4(inv, vec4(0.0, 1.0, 0.0, 0.0)));
+	vec3_t dir_z = vec4_xyz(mat4_mul_vec4(inv, vec4(0.0, 0.0, 1.0, 0.0)));
 
-	vec3_t max_x = XYZ(mesh_farthest(mesh,          dir_x )->pos);
-	vec3_t min_x = XYZ(mesh_farthest(mesh, vec3_inv(dir_x))->pos);
+	vec3_t max_x = vecN_xyz(mesh_farthest(mesh,          dir_x )->pos);
+	vec3_t min_x = vecN_xyz(mesh_farthest(mesh, vec3_inv(dir_x))->pos);
 
-	vec3_t max_y = XYZ(mesh_farthest(mesh,          dir_y )->pos);
-	vec3_t min_y = XYZ(mesh_farthest(mesh, vec3_inv(dir_y))->pos);
+	vec3_t max_y = vecN_xyz(mesh_farthest(mesh,          dir_y )->pos);
+	vec3_t min_y = vecN_xyz(mesh_farthest(mesh, vec3_inv(dir_y))->pos);
 
-	vec3_t max_z = XYZ(mesh_farthest(mesh,          dir_z )->pos);
-	vec3_t min_z = XYZ(mesh_farthest(mesh, vec3_inv(dir_z))->pos);
+	vec3_t max_z = vecN_xyz(mesh_farthest(mesh,          dir_z )->pos);
+	vec3_t min_z = vecN_xyz(mesh_farthest(mesh, vec3_inv(dir_z))->pos);
 
 	self->max.x = mat4_mul_vec4(sc->model_matrix, vec4(_vec3(max_x), 0.0)).x;
 	self->max.y = mat4_mul_vec4(sc->model_matrix, vec4(_vec3(max_y), 0.0)).y;
@@ -95,10 +95,10 @@ int c_aabb_intersects(c_aabb_t *self, c_aabb_t *other)
 REG()
 {
 	ct_t *ct = ct_new("aabb", sizeof(c_aabb_t),
-			c_aabb_init, NULL, 1, ref("spatial"));
+			(init_cb)c_aabb_init, NULL, 1, ref("spatial"));
 
-	ct_listener(ct, WORLD, sig("mesh_changed"), c_aabb_on_mesh_change);
-	ct_listener(ct, ENTITY, sig("spatial_changed"), c_aabb_spatial_changed);
+	ct_listener(ct, WORLD,  0, ref("mesh_changed"), c_aabb_on_mesh_change);
+	ct_listener(ct, ENTITY, 0, ref("spatial_changed"), c_aabb_spatial_changed);
 
 	/* ct_listener(ct, WORLD, collider_callback, c_grid_collider); */
 }

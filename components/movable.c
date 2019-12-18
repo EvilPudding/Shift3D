@@ -72,7 +72,7 @@ void push_at(entity_t lvl, int x, int y, int z, int value, vec3_t from)
 static int c_movable_update(c_movable_t *self, float *dt)
 {
 	if(!self->moving) return CONTINUE;
-	float inc = (*dt) * 6;
+	float inc = (*dt) * 3.0;
 	c_spatial_t *sc = c_spatial(self);
 
 	if(self->mx > 0)	
@@ -128,7 +128,7 @@ static int c_movable_update(c_movable_t *self, float *dt)
 			self->sy = 0;
 			if((side&1) != (c_side(&level->pov)->side&1))
 			{
-				entity_signal(c_entity(self), sig("grid_update"), NULL, NULL);
+				entity_signal(c_entity(self), ref("grid_update"), NULL, NULL);
 			}
 		}
 		else
@@ -144,9 +144,10 @@ static int c_movable_update(c_movable_t *self, float *dt)
 
 REG()
 {
-	ct_t *ct = ct_new("movable", sizeof(c_movable_t), NULL, NULL, 0);
+	ct_t *ct = ct_new("movable", sizeof(c_movable_t), NULL, NULL, 1,
+	                  ref("node"));
 
-	ct_listener(ct, WORLD, sig("world_update"), c_movable_update);
+	ct_listener(ct, WORLD, 0, ref("world_update"), c_movable_update);
 }
 
 

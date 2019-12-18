@@ -38,8 +38,8 @@ void c_bridge_ready(c_bridge_t *self)
 		/* mat1f(g_bridge_mat, ref("roughness.scale"), 0.2); */
 		/* mat1f(g_bridge_mat, ref("normal.scale"), 2.0); */
 		mat1t(g_bridge_mat, ref("normal.texture"), sauces("stone3_normal.png"));
-		mat1f(g_bridge_mat, ref("normal.blend"), 1.0f);
-		mat4f(g_bridge_mat, ref("absorve.color"), vec4(0.3f, 0.3f, 0.0f, 1.0));
+		mat1f(g_bridge_mat, ref("normal.blend"), 0.3f);
+		mat4f(g_bridge_mat, ref("absorb.color"), vec4(0.20f, 0.13f, 0.03f, 1.0));
 	}
 
 	entity_add_component(c_entity(self),
@@ -69,7 +69,7 @@ static float c_rigid_body_bridge_collider(c_rigid_body_t *self, vec3_t pos)
 	if(b->active != 1) return -1;
 	/* c_spatial_t *b = c_spatial(c_entity(self)); */
 
-	pos = mat4_mul_vec4(b->inverse_model, vec4(_vec3(pos), 1.0f)).xyz;
+	pos = vec4_xyz(mat4_mul_vec4(b->inverse_model, vec4(_vec3(pos), 1.0f)));
 
 	/* float inc = 0;//-0.01; */
 	int val = pos.x > b->min.x && pos.x < b->max.x
@@ -110,8 +110,8 @@ REG()
 	ct_t *ct = ct_new("bridge", sizeof(c_bridge_t), NULL, NULL,
 			1, ref("node"));
 
-	ct_listener(ct, ENTITY, sig("spatial_changed"), c_bridge_spatial_changed);
+	ct_listener(ct, ENTITY, 0, ref("spatial_changed"), c_bridge_spatial_changed);
 
-	ct_listener(ct, WORLD, sig("world_update"), c_bridge_update);
+	ct_listener(ct, WORLD, 0, ref("world_update"), c_bridge_update);
 }
 

@@ -1,0 +1,8 @@
+material _default 100.000000 10.000000 ff323232 1 1 0 0 0 -1
+material.albedo.texture = Paint05_col
+material.albedo.blend = 1.000000
+material.roughness.texture = Paint05_rgh
+material.roughness.blend = 1.000000
+material.normal.texture = Paint05_nrm
+material.normal.blend = 1.000000
+
