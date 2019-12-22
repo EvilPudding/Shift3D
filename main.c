@@ -346,7 +346,7 @@ int main(int argc, char **argv)
 
 	entity_new({
 		c_name_new("ambient");
-		c_light_new(-1.0f, vec4(0.5f, 0.5f, 0.5f, 0.5f), 0);
+		c_light_new(-1.0f, vec4(0.5f, 0.5f, 0.5f, 0.5f));
 	});
 	c_level_set_active(c_level(&lvl), 1);
 	entity_add_component(SYS, c_physics_new());

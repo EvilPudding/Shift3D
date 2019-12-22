@@ -357,7 +357,7 @@ static entity_t cmd_light(entity_t root, int argc, const char **argv)
 		c_name_new("light");
 		c_side_new(root, side, 0);
 		c_side_follow_new();
-		c_light_new(20.0f, color, 1024);
+		c_light_new(20.0f, color);
 	});
 
 	c_spatial_set_pos(c_spatial(&light), vec3(x, y, z));
