@@ -333,8 +333,6 @@ int main(int argc, char **argv)
 	entity_add_component(SYS, (c_t*)c_openal_new());
 	/* c_editmode_activate(c_editmode(&SYS)); */
 
-	c_sauces_index_dir(c_sauces(&SYS), "resauces");
-
 	reg_custom_cmds();
 
 	const char *level = argc > 1 ? argv[1] : "0";
