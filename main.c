@@ -1,4 +1,4 @@
-#include <candle.h>
+#include "candle/candle.h"
 
 #include "components/physics.h"
 #include "components/bridge.h"
@@ -14,16 +14,16 @@
 #include "components/mirror.h"
 #include "components/rigid_body.h"
 
-#include <components/node.h>
-#include <components/model.h>
-#include <components/force.h>
-#include <components/name.h>
-#include <components/camera.h>
-#include <components/ambient.h>
-#include <components/decal.h>
-#include <components/sprite.h>
-#include <components/light.h>
-#include <systems/editmode.h>
+#include "candle/components/node.h"
+#include "candle/components/model.h"
+#include "candle/components/force.h"
+#include "candle/components/name.h"
+#include "candle/components/camera.h"
+#include "candle/components/ambient.h"
+#include "candle/components/decal.h"
+#include "candle/components/sprite.h"
+#include "candle/components/light.h"
+#include "candle/systems/editmode.h"
 
 #include "openal.candle/openal.h"
 #include "openal.candle/speaker.h"

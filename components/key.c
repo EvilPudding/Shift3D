@@ -63,11 +63,9 @@ c_key_t *c_key_new(int rotX, int rotY, int rotZ, int key)
 	return self;
 }
 
-REG()
+void ct_key(ct_t *self)
 {
-	ct_t *ct = ct_new("key", sizeof(c_key_t), NULL, NULL, 1, ref("spatial"));
-
-	signal_init(ref("key_activated"), sizeof(key_activated_data));
-
-	ct_listener(ct, ENTITY, 0, ref("entity_created"), c_key_created);
+	ct_new(self, "key", sizeof(c_key_t));
+	ct_add_dependency(ct, ct_spatial);
+	ct_add_listener(ct, ENTITY, 0, ref("entity_created"), c_key_created);
 }

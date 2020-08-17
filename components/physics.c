@@ -1,14 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <candle.h>
+#include "../candle/candle.h"
 #include "physics.h"
-#include <components/spatial.h>
-#include <components/force.h>
-#include <components/velocity.h>
-#include <components/rigid_body.h>
-#include <components/light.h>
-#include <components/node.h>
+#include "../candle/components/spatial.h"
+#include "../candle/components/force.h"
+#include "../candle/components/velocity.h"
+#include "../candle/components/rigid_body.h"
+#include "../candle/components/light.h"
+#include "../candle/components/node.h"
 
 static vec3_t c_physics_handle_forces(c_physics_t *self, vec3_t vel, float *dt)
 {
@@ -239,12 +239,10 @@ c_physics_t *c_physics_new()
 	return self;
 }
 
-REG()
+void ct_physics(ct_t *self)
 {
-	ct_t *ct = ct_new("physics", sizeof(c_physics_t), NULL, NULL, 0);
+	ct_init(self, "physics", sizeof(c_physics_t));
 
-	ct_listener(ct, WORLD, 0, ref("world_update"), c_physics_update);
-
-	signal_init(ref("collider_callback"), 0);
+	ct_add_listener(ct, WORLD, 0, ref("world_update"), c_physics_update);
 }
 

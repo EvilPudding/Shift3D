@@ -128,11 +128,12 @@ void c_door_destroy(c_door_t *self)
 	drawable_set_mesh(&self->draw, NULL);
 }
 
-REG()
+void ct_door(ct_t *self)
 {
-	ct_t *ct = ct_new("door", sizeof(c_door_t), NULL,
-	                  (init_cb)c_door_destroy, 1, ref("node"));
-	ct_listener(ct, ENTITY, 0, ref("node_changed"), c_door_position_changed);
-	ct_listener(ct, WORLD,  0, ref("world_pre_draw"), c_door_pre_draw);
+	ct_init(self, "door", sizeof(c_door_t));
+	ct_set_destroy(self, (destroy_cb)c_door_destroy);
+	ct_set_dependency(self, ct_node);
+	ct_add_listener(ct, ENTITY, 0, ref("node_changed"), c_door_position_changed);
+	ct_add_listener(ct, WORLD,  0, ref("world_pre_draw"), c_door_pre_draw);
 }
 

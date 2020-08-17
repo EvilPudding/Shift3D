@@ -9,7 +9,7 @@ typedef struct
 {
 	c_t super; /* extends c_t */
 
-    int activated;
+	int activated;
 	char next[256];
 	drawable_t draw;
 	renderer_t *renderer;
@@ -19,7 +19,7 @@ typedef struct
 	int modified;
 } c_door_t;
 
-DEF_CASTER("door", c_door, c_door_t);
+DEF_CASTER(ct_door, c_door, c_door_t);
 
 c_door_t *c_door_new(const char *next);
 void c_door_set_active(c_door_t *self, int active);
