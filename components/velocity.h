@@ -1,8 +1,8 @@
 #ifndef VELOCITY_H
 #define VELOCITY_H
 
-#include <ecs/ecm.h>
-#include <utils/glutil.h>
+#include "../candle/ecs/ecm.h"
+#include "../candle/utils/glutil.h"
 
 typedef struct
 {
@@ -16,7 +16,7 @@ typedef struct
 	vec3_t velocity;
 } c_velocity_t;
 
-DEF_CASTER("velocity", c_velocity, c_velocity_t)
+DEF_CASTER(ct_velocity, c_velocity, c_velocity_t)
 
 c_velocity_t *c_velocity_new(float x, float y, float z);
 void c_velocity_init(c_velocity_t *self);

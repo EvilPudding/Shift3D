@@ -1,8 +1,8 @@
 #ifndef MENU_H
 #define MENU_H
 
-#include <ecs/ecm.h>
-#include <utils/renderer.h>
+#include "../candle/ecs/ecm.h"
+#include "../candle/utils/renderer.h"
 
 typedef struct c_menu_t
 {
@@ -15,9 +15,14 @@ typedef struct c_menu_t
 	renderer_t *menu_renderer;
 	bool_t control;
 	void *font0, *font1;
+
+	float motion_power;
+	float ssao_power;
+	float ssr_power;
+	bool_t squints_active;
 } c_menu_t;
 
-DEF_CASTER("menu", c_menu, c_menu_t)
+DEF_CASTER(ct_menu, c_menu, c_menu_t)
 
 c_menu_t *c_menu_new(void);
 

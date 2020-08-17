@@ -1,11 +1,10 @@
 #include "key.h"
 #include "bridge.h"
 #include "side.h"
-#include <components/spatial.h>
-#include <components/model.h>
-#include <components/rigid_body.h>
-#include <stdlib.h>
-#include <candle.h>
+#include "rigid_body.h"
+#include "../candle/components/spatial.h"
+#include "../candle/components/model.h"
+#include "../candle/candle.h"
 #include "../openal.candle/speaker.h"
 
 static float c_rigid_body_key_collider(c_rigid_body_t *self, vec3_t pos)
@@ -23,7 +22,7 @@ static float c_rigid_body_key_collider(c_rigid_body_t *self, vec3_t pos)
 		model->visible = 0;
 		/* entity_signal(ent, spatial_changed, &ent); */
 
-		ct_t *bridges = ecm_get(ref("bridge"));
+		ct_t *bridges = ecm_get(ct_bridge);
 
 		khiter_t k;
 		for(k = kh_begin(bridges->cs); k != kh_end(bridges->cs); ++k)
@@ -53,7 +52,7 @@ static int c_key_created(c_key_t *self)
 
 c_key_t *c_key_new(int rotX, int rotY, int rotZ, int key)
 {
-	c_key_t *self = component_new("key");
+	c_key_t *self = component_new(ct_key);
 
     self->rot.x = ((float)rotX) * (M_PI / 180);
     self->rot.y = ((float)rotY) * (M_PI / 180);
@@ -65,7 +64,7 @@ c_key_t *c_key_new(int rotX, int rotY, int rotZ, int key)
 
 void ct_key(ct_t *self)
 {
-	ct_new(self, "key", sizeof(c_key_t));
-	ct_add_dependency(ct, ct_spatial);
-	ct_add_listener(ct, ENTITY, 0, ref("entity_created"), c_key_created);
+	ct_init(self, "key", sizeof(c_key_t));
+	ct_add_dependency(self, ct_spatial);
+	ct_add_listener(self, ENTITY, 0, ref("entity_created"), c_key_created);
 }

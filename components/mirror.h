@@ -1,7 +1,7 @@
 #ifndef MIRROR_H
 #define MIRROR_H
 
-#include <ecs/ecm.h>
+#include "../candle/ecs/ecm.h"
 
 typedef struct
 {
@@ -9,7 +9,8 @@ typedef struct
 	entity_t follow;
 } c_mirror_t;
 
-DEF_CASTER("mirror", c_mirror, c_mirror_t)
+void ct_mirror(ct_t *self);
+DEF_CASTER(ct_mirror, c_mirror, c_mirror_t)
 
 c_mirror_t *c_mirror_new(entity_t follow);
 

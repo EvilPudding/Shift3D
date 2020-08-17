@@ -2,20 +2,11 @@
 #include "level.h"
 #include "door.h"
 #include "side.h"
-#include <stdlib.h>
-#include <components/node.h>
-#include <components/model.h>
-#include <components/light.h>
-#include <components/name.h>
-#include <components/camera.h>
-
-c_mirror_t *c_mirror_new(entity_t follow)
-{
-	c_mirror_t *self = component_new("mirror");
-
-	self->follow = follow;
-	return self;
-}
+#include "../candle/components/node.h"
+#include "../candle/components/model.h"
+#include "../candle/components/light.h"
+#include "../candle/components/name.h"
+#include "../candle/components/camera.h"
 
 static int c_mirror_update(c_mirror_t *self)
 {
@@ -59,10 +50,18 @@ static int c_mirror_update(c_mirror_t *self)
 	return CONTINUE;
 }
 
-REG()
+void ct_mirror(ct_t *self)
 {
-	ct_t *ct = ct_new("mirror", sizeof(c_mirror_t), NULL, NULL, 1, ref("node"));
-	ct_listener(ct, WORLD, 49, ref("world_pre_draw"), c_mirror_update);
+	ct_init(self, "mirror", sizeof(c_mirror_t));
+	ct_add_dependency(self, ct_node);
+	ct_add_listener(self, WORLD, 49, ref("world_pre_draw"), c_mirror_update);
 }
 
+c_mirror_t *c_mirror_new(entity_t follow)
+{
+	c_mirror_t *self = component_new(ct_mirror);
+
+	self->follow = follow;
+	return self;
+}
 

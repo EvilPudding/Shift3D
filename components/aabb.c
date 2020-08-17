@@ -1,7 +1,7 @@
 #include "aabb.h"
-#include <components/model.h>
-#include <components/spatial.h>
-#include <components/node.h>
+#include "../candle/components/model.h"
+#include "../candle/components/spatial.h"
+#include "../candle/components/node.h"
 
 
 static void c_aabb_init(c_aabb_t *self)
@@ -15,7 +15,7 @@ static void c_aabb_init(c_aabb_t *self)
 
 c_aabb_t *c_aabb_new()
 {
-	c_aabb_t *self = component_new("aabb");
+	c_aabb_t *self = component_new(ct_aabb);
 
 	return self;
 }
@@ -92,13 +92,14 @@ int c_aabb_intersects(c_aabb_t *self, c_aabb_t *other)
 		(min1.z <= max2.z && max1.z >= min2.z);
 }
 
-REG()
+void ct_aabb(ct_t *self)
 {
-	ct_t *ct = ct_new("aabb", sizeof(c_aabb_t),
-			(init_cb)c_aabb_init, NULL, 1, ref("spatial"));
+	ct_init(self, "aabb", sizeof(c_aabb_t));
+	ct_set_init(self, (init_cb)c_aabb_init);
+	ct_add_dependency(self, ct_node);
 
-	ct_listener(ct, WORLD,  0, ref("mesh_changed"), c_aabb_on_mesh_change);
-	ct_listener(ct, ENTITY, 0, ref("spatial_changed"), c_aabb_spatial_changed);
+	ct_add_listener(self, WORLD,  0, ref("mesh_changed"), c_aabb_on_mesh_change);
+	ct_add_listener(self, ENTITY, 0, ref("spatial_changed"), c_aabb_spatial_changed);
 
-	/* ct_listener(ct, WORLD, collider_callback, c_grid_collider); */
+	/* ct_listener(self, WORLD, collider_callback, c_grid_collider); */
 }

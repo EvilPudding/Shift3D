@@ -5,12 +5,11 @@
 #include "mirror.h"
 #include "side.h"
 #include "rigid_body.h"
-#include <components/node.h>
-#include <components/model.h>
-#include <components/name.h>
-#include <components/camera.h>
-#include <components/spatial.h>
-#include <stdlib.h>
+#include "../candle/components/node.h"
+#include "../candle/components/model.h"
+#include "../candle/components/name.h"
+#include "../candle/components/camera.h"
+#include "../candle/components/spatial.h"
 #include <string.h>
 
 static int c_door_position_changed(c_door_t *self);
@@ -20,7 +19,7 @@ static float c_rigid_body_door_collider(c_rigid_body_t *self, vec3_t pos)
 	c_spatial_t *door = c_spatial(self);
 	c_door_t *dc = c_door(self);
 	if(dc->active != 1) return -1;
-	c_character_t *ch = (c_character_t*)ct_get_nth(ecm_get(ref("character")), 0);
+	c_character_t *ch = (c_character_t*)ct_get_nth(ecm_get(ct_character), 0);
 	int side = c_side(dc)->side & 1;
 	if(side != (c_side(ch)->side & 1)) return -1;
 
@@ -38,7 +37,7 @@ static float c_rigid_body_door_collider(c_rigid_body_t *self, vec3_t pos)
 static mesh_t *g_portal_mesh;
 c_door_t *c_door_new(const char *next)
 {
-	c_door_t *self = component_new("door");
+	c_door_t *self = component_new(ct_door);
 
 	if(!g_portal_mesh)
 	{
@@ -132,8 +131,8 @@ void ct_door(ct_t *self)
 {
 	ct_init(self, "door", sizeof(c_door_t));
 	ct_set_destroy(self, (destroy_cb)c_door_destroy);
-	ct_set_dependency(self, ct_node);
-	ct_add_listener(ct, ENTITY, 0, ref("node_changed"), c_door_position_changed);
-	ct_add_listener(ct, WORLD,  0, ref("world_pre_draw"), c_door_pre_draw);
+	ct_add_dependency(self, ct_node);
+	ct_add_listener(self, ENTITY, 0, ref("node_changed"), c_door_position_changed);
+	ct_add_listener(self, WORLD,  0, ref("world_pre_draw"), c_door_pre_draw);
 }
 

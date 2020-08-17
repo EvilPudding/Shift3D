@@ -1,19 +1,21 @@
-#include <ecs/ecm.h>
-#include <candle.h>
-#include <components/rigid_body.h>
-#include <components/name.h>
-#include <components/model.h>
-#include <components/decal.h>
-#include <components/spatial.h>
-#include <components/node.h>
-#include <components/camera.h>
-#include <systems/editmode.h>
+#include "../candle/ecs/ecm.h"
+#include "../candle/candle.h"
+#include "../candle/components/name.h"
+#include "../candle/components/model.h"
+#include "../candle/components/decal.h"
+#include "../candle/components/spatial.h"
+#include "../candle/components/node.h"
+#include "../candle/components/camera.h"
+#include "../candle/systems/editmode.h"
+
+#include "rigid_body.h"
 #include "grid.h"
 #include "level.h"
 #include "side.h"
 #include "character.h"
 #include "movable.h"
 #include <stdlib.h>
+#include <stdarg.h>
 
 void mesh_add_spike(mesh_t *self, float s, vec3_t v, vec3_t dir, int inverted_normals);
 /* void mesh_add_spike(mesh_t *self, float s, float x, float y, float z, */
@@ -39,7 +41,7 @@ float c_rigid_body_grid_collider(c_rigid_body_t *self, vec3_t pos)
 	c_grid_t *g = c_grid(self);
 	if(g->active != 1) return -1;
 
-	c_character_t *fc = (c_character_t*)ct_get_nth(ecm_get(ref("character")), 0);
+	c_character_t *fc = (c_character_t*)ct_get_nth(ecm_get(ct_character), 0);
 	int side = c_side(fc)->side & 1;
 
 	pos = vec3_round(pos);
@@ -50,9 +52,234 @@ float c_rigid_body_grid_collider(c_rigid_body_t *self, vec3_t pos)
 	return ret;
 }
 
+static int c_grid_created(c_grid_t *self)
+{
+	c_side_t *ss = c_side(self);
+
+	self->blocks = entity_new({
+		c_name_new("blocks");
+		c_side_new(ss->level, 0, 1);
+		c_model_new(mesh_new(), sauces("white.mat"), 1, 1);
+	});
+	strcpy(c_model(&self->blocks)->mesh->name, "blocks");
+
+	self->cage = entity_new({
+		c_name_new("cage");
+		c_side_new(ss->level, 0, 1);
+		c_model_new(mesh_new(), sauces("paint05.mat"), 1, 1);
+	});
+	strcpy(c_model(&self->cage)->mesh->name, "cage");
+
+	mat_t *stone3 = sauces("stone3.mat");
+	mat_t *stone4 = sauces("stone4.mat");
+	/* mat1f(stone4, ref("albedo.blend"), 0.5); */
+	/* mat1f(stone4, ref("normal.blend"), 0.3); */
+
+
+	self->boxes = entity_new({
+		c_name_new("movable");
+		c_side_new(ss->level, 0, 1);
+		c_model_new(mesh_new(), stone4, 1, 1);
+	});
+	strcpy(c_model(&self->boxes)->mesh->name, "boxes");
+
+	self->blocks_inv = entity_new({
+		c_name_new("bloc_i");
+		c_side_new(ss->level, 1, 1);
+		c_model_new(mesh_new(), sauces("black.mat"), 1, 1);
+	});
+	strcpy(c_model(&self->blocks_inv)->mesh->name, "boxes_inv");
+
+	self->cage_inv = entity_new({
+		c_name_new("cage_i");
+		c_side_new(ss->level, 1, 1);
+		c_model_new(mesh_new(), sauces("paint01.mat"), 1, 1);
+	});
+	strcpy(c_model(&self->cage_inv)->mesh->name, "cage_inv");
+
+	self->boxes_inv = entity_new({
+		c_name_new("movab_i");
+		c_side_new(ss->level, 1, 1);
+		c_model_new(mesh_new(), stone3, 1, 1);
+	});
+	strcpy(c_model(&self->boxes_inv)->mesh->name, "boxes_inv");
+
+	/* c_model(&self->blocks_inv)->before_draw = */
+	/* 	c_model(&self->cage_inv)->before_draw = */
+	/* 	c_model(&self->boxes_inv)->before_draw = */
+	/* 	(before_draw_cb)cmd_model_before_draw; */
+
+	/* c_model(&self->blocks)->before_draw = */
+	/* 	c_model(&self->cage)->before_draw = */
+	/* 	c_model(&self->boxes)->before_draw = */
+	/* 	(before_draw_cb)cmd_model_before_draw; */
+
+	c_grid_update(self);
+
+	c_node_add(c_node(self), 6, self->boxes_inv, self->cage_inv,
+			self->blocks_inv, self->boxes, self->cage, self->blocks);
+
+	entity_add_component(c_entity(self),
+			(c_t*)c_rigid_body_new((collider_cb)c_rigid_body_grid_collider));
+
+	self->modified = 1;
+
+	return CONTINUE;
+}
+
+static int32_t grid_edit_init(c_grid_t *self)
+{
+	if (!entity_exists(self->edit_target))
+	{
+		printf("edit init\n");
+		mat_t *edit_mat = mat_new("edit_mat", "transparent");
+		mat_t *remove_mat = mat_new("remove_mat", "decal");
+		/* edit_mat->metalness.texture = sauces("rough.png"); */
+		/* edit_mat->metalness.color = vec4(1, 1, 1, 1); */
+		/* edit_mat->metalness.blend = 0; */
+		/* edit_mat->roughness.texture = sauces("rough.png"); */
+		/* edit_mat->roughness.blend = 0.8; */
+		/* edit_mat->roughness.scale = 0.2; */
+		/* edit_mat->normal.scale = 2.0; */
+		/* edit_mat->normal.texture = sauces("stone3_normal.tga"); */
+		/* edit_mat->normal.blend = 1; */
+		mat4f(edit_mat, ref("absorb.color"), vec4(0.3f, 0.3f, 0.0f, 1.0));
+		mat4f(remove_mat, ref("albedo.color"), vec4(1.0f, 0.3f, 0.0f, 1.0));
+
+		mesh_t *cube = mesh_new();
+		mesh_cube(cube, 0.5f, 1.0f);
+		self->edit_target = entity_new(c_model_new(cube, edit_mat, 0, 1));
+		self->remove_target = entity_new(c_decal_new(remove_mat, 1, 0));
+		c_spatial_scale(c_spatial(&self->remove_target), vec3(0.8, 0.8, 0.8));
+
+		c_model_t *mc = c_model(&self->edit_target);
+		c_model_set_groups(mc, mc->visible_group, mc->shadow_group,
+				mc->transparent_group, 0);
+
+		c_node(&self->remove_target)->ghost = 1;
+		c_node(&self->edit_target)->ghost = 1;
+	}
+	c_model_set_visible(c_model(&self->edit_target), 1);
+	return CONTINUE;
+}
+
+static int32_t grid_edit_move(c_grid_t *self, vec3_t p, c_editmode_t *ec)
+{
+	c_node_t *cam = c_node(&ec->camera);
+	vec3_t cam_pos = c_node_pos_to_global(cam, vec3(0.0f, 0.0f, 0.0f));
+
+	/* vec3_t alt; */
+	/* p = vec3_add(p, vec3_scale(dir, 0.05f / vec3_len(dir))); */
+
+	/* const vec3_t alt[6] = { */
+	/* 	vec3( 1.0f, 0.0f, 0.0f), */
+	/* 	vec3(-1.0f, 0.0f, 0.0f), */
+	/* 	vec3( 0.0f, 1.0f, 0.0f), */
+	/* 	vec3( 0.0f,-1.0f, 0.0f), */
+	/* 	vec3( 0.0f, 0.0f, 1.0f), */
+	/* 	vec3( 0.0f, 0.0f,-1.0f) */
+	/* }; */
+	/* uint32_t closest_dir = 0; */
+	/* for (uint32_t i = 1; i < 6; ++i) */
+	/* { */
+	/* 	if (vec3_dot(dir, alt[closest_dir]) > vec3_dot(dir, alt[i])) */
+	/* 	{ */
+	/* 		closest_dir = i; */
+	/* 	} */
+	/* } */
+
+	vec3_t pround = vec3_round(p);
+	/* const bool_t side = c_grid_get(self, _vec3(cam_pos)) & 1; */
+	vec3_t dif = vec3_sub(p, pround);
+	vec3_t palt = pround;
+	if (fabs(dif.x) > fabs(dif.y))
+	{
+		if (fabs(dif.x) > fabs(dif.z))
+		{
+			palt.x += dif.x > 0.0f ? 1.0f : -1.0f;
+		}
+		else
+		{
+			palt.z += dif.z > 0.0f ? 1.0f : -1.0f;
+		}
+	}
+	else if (fabs(dif.y) > fabs(dif.z) * 1.0f)
+	{
+		palt.y += dif.y > 0.0f ? 1.0f : -1.0f;
+	}
+	else
+	{
+		palt.z += dif.z > 0.0f ? 1.0f : -1.0f;
+	}
+	vec3_t rem, add;
+	if (vec3_dist(palt, cam_pos) > vec3_dist(cam_pos, pround))
+	{
+		rem = palt;
+		add = pround;
+	}
+	else
+	{
+		rem = pround;
+		add = palt;
+	}
+
+	rem = vec3_add(rem, vec3_scale(vec3_sub(add, rem), 0.3f));
+	c_spatial_set_pos(c_spatial(&self->remove_target), rem);
+	c_spatial_set_pos(c_spatial(&self->edit_target), add);
+	return CONTINUE;
+}
+
+static int32_t grid_edit_release(c_grid_t *self, vec3_t p, int32_t button,
+                                 c_editmode_t *ec)
+{
+	if(button == CANDLE_MOUSE_BUTTON_LEFT)
+	{
+		const vec3_t add = c_spatial(&self->edit_target)->pos;
+		c_grid_set(self, _vec3(add), 1);
+	}
+	else
+	{
+		const vec3_t rm = c_spatial(&self->remove_target)->pos;
+		c_grid_set(self, _vec3(rm), 0);
+	}
+
+	c_grid_update(self);
+
+	return STOP;
+}
+
+static int c_grid_editmode_toggle(c_grid_t *self)
+{
+	c_editmode_t *edit = c_editmode(&SYS);
+	if(!edit) return CONTINUE;
+
+	if(edit->control)
+	{
+		c_editmode_add_tool(c_editmode(&SYS), 'e', "grid_edit",
+		                    (mouse_tool_init_cb)grid_edit_init,
+		                    (mouse_tool_move_cb)grid_edit_move, NULL, NULL,
+		                    (mouse_tool_release_cb)grid_edit_release, NULL, NULL,
+		                    self, ref("grid"));
+
+	}
+
+	return CONTINUE;
+}
+
+void ct_grid(ct_t *self)
+{
+	ct_init(self, "grid", sizeof(c_grid_t));
+	ct_add_dependency(self, ct_node);
+
+	ct_add_listener(self, WORLD, 0, ref("grid_update"), c_grid_update);
+	ct_add_listener(self, ENTITY, 0, ref("entity_created"), c_grid_created);
+	ct_add_listener(self, WORLD, 0, ref("editmode_toggle"), c_grid_editmode_toggle);
+
+}
+
 c_grid_t *c_grid_new(int mx, int my, int mz)
 {
-	c_grid_t *self = component_new("grid");
+	c_grid_t *self = component_new(ct_grid);
 
 	self->mx = mx;
 	self->my = my;
@@ -289,81 +516,6 @@ void mesh_add_plane(mesh_t *self, float s, vec3_t v, vec3_t dir, int invert_norm
 	mesh_modified(self);
 }
 
-static int c_grid_created(c_grid_t *self)
-{
-	c_side_t *ss = c_side(self);
-
-	self->blocks = entity_new({
-		c_name_new("blocks");
-		c_side_new(ss->level, 0, 1);
-		c_model_new(mesh_new(), sauces("white.mat"), 1, 1);
-	});
-	strcpy(c_model(&self->blocks)->mesh->name, "blocks");
-
-	self->cage = entity_new({
-		c_name_new("cage");
-		c_side_new(ss->level, 0, 1);
-		c_model_new(mesh_new(), sauces("paint05.mat"), 1, 1);
-	});
-	strcpy(c_model(&self->cage)->mesh->name, "cage");
-
-	mat_t *stone3 = sauces("stone3.mat");
-	mat_t *stone4 = sauces("stone4.mat");
-	/* mat1f(stone4, ref("albedo.blend"), 0.5); */
-	/* mat1f(stone4, ref("normal.blend"), 0.3); */
-
-
-	self->boxes = entity_new({
-		c_name_new("movable");
-		c_side_new(ss->level, 0, 1);
-		c_model_new(mesh_new(), stone4, 1, 1);
-	});
-	strcpy(c_model(&self->boxes)->mesh->name, "boxes");
-
-	self->blocks_inv = entity_new({
-		c_name_new("bloc_i");
-		c_side_new(ss->level, 1, 1);
-		c_model_new(mesh_new(), sauces("black.mat"), 1, 1);
-	});
-	strcpy(c_model(&self->blocks_inv)->mesh->name, "boxes_inv");
-
-	self->cage_inv = entity_new({
-		c_name_new("cage_i");
-		c_side_new(ss->level, 1, 1);
-		c_model_new(mesh_new(), sauces("paint01.mat"), 1, 1);
-	});
-	strcpy(c_model(&self->cage_inv)->mesh->name, "cage_inv");
-
-	self->boxes_inv = entity_new({
-		c_name_new("movab_i");
-		c_side_new(ss->level, 1, 1);
-		c_model_new(mesh_new(), stone3, 1, 1);
-	});
-	strcpy(c_model(&self->boxes_inv)->mesh->name, "boxes_inv");
-
-	/* c_model(&self->blocks_inv)->before_draw = */
-	/* 	c_model(&self->cage_inv)->before_draw = */
-	/* 	c_model(&self->boxes_inv)->before_draw = */
-	/* 	(before_draw_cb)cmd_model_before_draw; */
-
-	/* c_model(&self->blocks)->before_draw = */
-	/* 	c_model(&self->cage)->before_draw = */
-	/* 	c_model(&self->boxes)->before_draw = */
-	/* 	(before_draw_cb)cmd_model_before_draw; */
-
-	c_grid_update(self);
-
-	c_node_add(c_node(self), 6, self->boxes_inv, self->cage_inv,
-			self->blocks_inv, self->boxes, self->cage, self->blocks);
-
-	entity_add_component(c_entity(self),
-			(c_t*)c_rigid_body_new((collider_cb)c_rigid_body_grid_collider));
-
-	self->modified = 1;
-
-	return CONTINUE;
-}
-
 void c_grid_set(c_grid_t *self, int x, int y, int z, int val)
 {
 	if(x < 0 || x >= self->mx ||
@@ -384,164 +536,12 @@ int c_grid_get(c_grid_t *self, int x, int y, int z)
 	return self->map[z + (y * self->mz + x) * self->mx];
 }
 
-static int32_t grid_edit_init(c_grid_t *self)
-{
-	if (!entity_exists(self->edit_target))
-	{
-		printf("edit init\n");
-		mat_t *edit_mat = mat_new("edit_mat", "transparent");
-		mat_t *remove_mat = mat_new("remove_mat", "decal");
-		/* edit_mat->metalness.texture = sauces("rough.png"); */
-		/* edit_mat->metalness.color = vec4(1, 1, 1, 1); */
-		/* edit_mat->metalness.blend = 0; */
-		/* edit_mat->roughness.texture = sauces("rough.png"); */
-		/* edit_mat->roughness.blend = 0.8; */
-		/* edit_mat->roughness.scale = 0.2; */
-		/* edit_mat->normal.scale = 2.0; */
-		/* edit_mat->normal.texture = sauces("stone3_normal.tga"); */
-		/* edit_mat->normal.blend = 1; */
-		mat4f(edit_mat, ref("absorb.color"), vec4(0.3f, 0.3f, 0.0f, 1.0));
-		mat4f(remove_mat, ref("albedo.color"), vec4(1.0f, 0.3f, 0.0f, 1.0));
-
-		mesh_t *cube = mesh_new();
-		mesh_cube(cube, 0.5f, 1.0f);
-		self->edit_target = entity_new(c_model_new(cube, edit_mat, 0, 1));
-		self->remove_target = entity_new(c_decal_new(remove_mat, 1, 0));
-		c_spatial_scale(c_spatial(&self->remove_target), vec3(0.8, 0.8, 0.8));
-
-		c_model_t *mc = c_model(&self->edit_target);
-		c_model_set_groups(mc, mc->visible_group, mc->shadow_group,
-				mc->transparent_group, 0);
-
-		c_node(&self->remove_target)->ghost = 1;
-		c_node(&self->edit_target)->ghost = 1;
-	}
-	c_model_set_visible(c_model(&self->edit_target), 1);
-	return CONTINUE;
-}
-
-static int32_t grid_edit_move(c_grid_t *self, vec3_t p, c_editmode_t *ec)
-{
-	c_node_t *cam = c_node(&ec->camera);
-	vec3_t cam_pos = c_node_pos_to_global(cam, vec3(0.0f, 0.0f, 0.0f));
-
-	/* vec3_t alt; */
-	/* p = vec3_add(p, vec3_scale(dir, 0.05f / vec3_len(dir))); */
-
-	/* const vec3_t alt[6] = { */
-	/* 	vec3( 1.0f, 0.0f, 0.0f), */
-	/* 	vec3(-1.0f, 0.0f, 0.0f), */
-	/* 	vec3( 0.0f, 1.0f, 0.0f), */
-	/* 	vec3( 0.0f,-1.0f, 0.0f), */
-	/* 	vec3( 0.0f, 0.0f, 1.0f), */
-	/* 	vec3( 0.0f, 0.0f,-1.0f) */
-	/* }; */
-	/* uint32_t closest_dir = 0; */
-	/* for (uint32_t i = 1; i < 6; ++i) */
-	/* { */
-	/* 	if (vec3_dot(dir, alt[closest_dir]) > vec3_dot(dir, alt[i])) */
-	/* 	{ */
-	/* 		closest_dir = i; */
-	/* 	} */
-	/* } */
-
-	vec3_t pround = vec3_round(p);
-	/* const bool_t side = c_grid_get(self, _vec3(cam_pos)) & 1; */
-	vec3_t dif = vec3_sub(p, pround);
-	vec3_t palt = pround;
-	if (fabs(dif.x) > fabs(dif.y))
-	{
-		if (fabs(dif.x) > fabs(dif.z))
-		{
-			palt.x += dif.x > 0.0f ? 1.0f : -1.0f;
-		}
-		else
-		{
-			palt.z += dif.z > 0.0f ? 1.0f : -1.0f;
-		}
-	}
-	else if (fabs(dif.y) > fabs(dif.z) * 1.0f)
-	{
-		palt.y += dif.y > 0.0f ? 1.0f : -1.0f;
-	}
-	else
-	{
-		palt.z += dif.z > 0.0f ? 1.0f : -1.0f;
-	}
-	vec3_t rem, add;
-	if (vec3_dist(palt, cam_pos) > vec3_dist(cam_pos, pround))
-	{
-		rem = palt;
-		add = pround;
-	}
-	else
-	{
-		rem = pround;
-		add = palt;
-	}
-
-	rem = vec3_add(rem, vec3_scale(vec3_sub(add, rem), 0.3f));
-	c_spatial_set_pos(c_spatial(&self->remove_target), rem);
-	c_spatial_set_pos(c_spatial(&self->edit_target), add);
-	return CONTINUE;
-}
-
 int32_t grid_edit_end(c_grid_t *self)
 {
 	c_model_set_visible(c_model(&self->edit_target), 0);
 	return CONTINUE;
 }
 
-
-static int32_t grid_edit_release(c_grid_t *self, vec3_t p, int32_t button,
-                                 c_editmode_t *ec)
-{
-	if(button == SDL_BUTTON_LEFT)
-	{
-		const vec3_t add = c_spatial(&self->edit_target)->pos;
-		c_grid_set(self, _vec3(add), 1);
-	}
-	else
-	{
-		const vec3_t rm = c_spatial(&self->remove_target)->pos;
-		c_grid_set(self, _vec3(rm), 0);
-	}
-
-	c_grid_update(self);
-
-	return STOP;
-}
-
-
-static int c_grid_editmode_toggle(c_grid_t *self)
-{
-	c_editmode_t *edit = c_editmode(&SYS);
-	if(!edit) return CONTINUE;
-
-	if(edit->control)
-	{
-		c_editmode_add_tool(c_editmode(&SYS), 'e', "grid_edit",
-		                    (mouse_tool_init_cb)grid_edit_init,
-		                    (mouse_tool_move_cb)grid_edit_move, NULL, NULL,
-		                    (mouse_tool_release_cb)grid_edit_release, NULL, NULL,
-		                    self, ref("grid"));
-
-	}
-
-	return CONTINUE;
-}
-
-REG()
-{
-	ct_t *ct = ct_new("grid", sizeof(c_grid_t), NULL, NULL, 1, ref("node"));
-
-	signal_init(sig("grid_update"), 0);
-
-	ct_listener(ct, WORLD, 0, ref("grid_update"), c_grid_update);
-	ct_listener(ct, ENTITY, 0, ref("entity_created"), c_grid_created);
-	ct_listener(ct, WORLD, 0, ref("editmode_toggle"), c_grid_editmode_toggle);
-
-}
 
 static int c_grid_update(c_grid_t *self)
 {

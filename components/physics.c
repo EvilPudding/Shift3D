@@ -1,12 +1,10 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include "../candle/candle.h"
 #include "physics.h"
+#include "force.h"
+#include "velocity.h"
+#include "rigid_body.h"
 #include "../candle/components/spatial.h"
-#include "../candle/components/force.h"
-#include "../candle/components/velocity.h"
-#include "../candle/components/rigid_body.h"
 #include "../candle/components/light.h"
 #include "../candle/components/node.h"
 
@@ -14,7 +12,7 @@ static vec3_t c_physics_handle_forces(c_physics_t *self, vec3_t vel, float *dt)
 {
 	khiter_t k;
 
-	ct_t *forces = ecm_get(ref("force"));
+	ct_t *forces = ecm_get(ct_force);
 
 	for(k = kh_begin(forces->cs); k != kh_end(forces->cs); ++k)
 	{
@@ -178,8 +176,8 @@ static int c_physics_update(c_physics_t *self, float *dt)
 {
 	khiter_t k, k2;
 
-	ct_t *vels = ecm_get(ref("velocity"));
-	ct_t *bodies = ecm_get(ref("rigid_body"));
+	ct_t *vels = ecm_get(ct_velocity);
+	ct_t *bodies = ecm_get(ct_rigid_body);
 
 	for(k = kh_begin(vels->cs); k != kh_end(vels->cs); ++k)
 	{
@@ -234,7 +232,7 @@ static int c_physics_update(c_physics_t *self, float *dt)
 
 c_physics_t *c_physics_new()
 {
-	c_physics_t *self = component_new("physics");
+	c_physics_t *self = component_new(ct_physics);
 
 	return self;
 }
@@ -243,6 +241,6 @@ void ct_physics(ct_t *self)
 {
 	ct_init(self, "physics", sizeof(c_physics_t));
 
-	ct_add_listener(ct, WORLD, 0, ref("world_update"), c_physics_update);
+	ct_add_listener(self, WORLD, 0, ref("world_update"), c_physics_update);
 }
 

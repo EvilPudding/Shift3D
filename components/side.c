@@ -1,13 +1,12 @@
+#include "../candle/components/node.h"
+#include "../candle/components/model.h"
+#include "../candle/components/light.h"
+#include "../candle/components/name.h"
+#include "../candle/systems/editmode.h"
 #include "side.h"
 #include "level.h"
 #include "grid.h"
 #include "charlook.h"
-#include <stdlib.h>
-#include <components/node.h>
-#include <components/model.h>
-#include <components/light.h>
-#include <components/name.h>
-#include <systems/editmode.h>
 
 static int c_side_position_changed(c_side_t *self);
 
@@ -18,7 +17,7 @@ void c_side_init(c_side_t *self)
 
 c_side_t *c_side_new(entity_t level, int side, int locked)
 {
-	c_side_t *self = component_new("side");
+	c_side_t *self = component_new(ct_side);
 	self->level = level;
 
 	self->locked = locked;
@@ -78,7 +77,9 @@ static int c_side_position_changed(c_side_t *self)
 
 	if(level)
 	{
-		vec3_t pos = vec3_round(c_node_pos_to_global(c_node(self), vec3(0.0f, 0.0f, 0.0f)));
+		c_node_t *nc = c_node(self);
+		if (!c_node(self)) return CONTINUE;
+		vec3_t pos = vec3_round(c_node_pos_to_global(nc, vec3(0.0f, 0.0f, 0.0f)));
 
 		c_grid_t *gc = c_grid(&level->grid);
 		if(gc)
@@ -105,16 +106,15 @@ static int c_side_level_changed(c_side_t *self, entity_t *level)
 	return CONTINUE;
 }
 
-REG()
+void ct_side(ct_t *self)
 {
-	ct_t *ct = ct_new("side", sizeof(c_side_t), (init_cb)c_side_init, NULL, 1, ref("node"));
-	ct_listener(ct, WORLD,  0, ref("side_changed"), c_side_changed);
-	ct_listener(ct, WORLD,  0, ref("level_changed"), c_side_level_changed);
-	ct_listener(ct, ENTITY, 0, ref("node_changed"), c_side_position_changed);
-	ct_listener(ct, WORLD,  0, ref("component_menu"), c_side_menu);
-
-	signal_init(ref("side_changed"), 0);
-	signal_init(ref("level_changed"), 0);
+	ct_init(self, "side", sizeof(c_side_t));
+	ct_set_init(self, (init_cb)c_side_init);
+	ct_add_dependency(self, ct_node);
+	ct_add_listener(self, WORLD,  0, ref("side_changed"), c_side_changed);
+	ct_add_listener(self, WORLD,  0, ref("level_changed"), c_side_level_changed);
+	ct_add_listener(self, ENTITY, 0, ref("node_changed"), c_side_position_changed);
+	ct_add_listener(self, WORLD,  0, ref("component_menu"), c_side_menu);
 }
 
 

@@ -1,10 +1,10 @@
-#include <ecs/ecm.h>
-#include <stdlib.h>
+#include "../candle/ecs/ecm.h"
+#include "../candle/components/node.h"
 #include "velocity.h"
 
 c_velocity_t *c_velocity_new(float x, float y, float z)
 {
-	c_velocity_t *self = component_new("velocity");
+	c_velocity_t *self = component_new(ct_velocity);
 
 	self->velocity = vec3(x, y, z);
 
@@ -23,8 +23,9 @@ void c_velocity_set_vel(c_velocity_t *self, float x, float y, float z)
 	self->velocity.z = z;
 }
 
-REG()
+void ct_velocity(ct_t *self)
 {
-	ct_new("velocity", sizeof(c_velocity_t), NULL, NULL, 1, ref("spatial"));
+	ct_init(self, "velocity", sizeof(c_velocity_t));
+	ct_add_dependency(self, ct_node);
 }
 

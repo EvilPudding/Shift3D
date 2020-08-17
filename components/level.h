@@ -1,8 +1,8 @@
 #ifndef LEVEL_H
 #define LEVEL_H
 
-#include <ecs/ecm.h>
-#include <candle.h>
+#include "../candle/ecs/ecm.h"
+#include "../candle/candle.h"
 
 typedef struct
 {
@@ -17,7 +17,8 @@ typedef struct
 	int32_t active;
 } c_level_t;
 
-DEF_CASTER("level", c_level, c_level_t);
+void ct_level(ct_t *self);
+DEF_CASTER(ct_level, c_level, c_level_t);
 
 c_level_t *c_level_new(const char *filename, int32_t active);
 void c_level_set_active(c_level_t *self, int32_t active);

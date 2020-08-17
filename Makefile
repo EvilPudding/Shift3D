@@ -24,13 +24,9 @@ CFLAGS_EMS = $(CFLAGS) -O3
 
 ##############################################################################
 
-all: init $(DIR)/coolbutts
-
-release: all
+all: init $(OBJS_REL)
 	make -C candle SAUCES=resauces
-
-$(DIR)/coolbutts: $(OBJS_REL)
-	$(LD) -o $@ $(OBJS_REL) `candle/candle-config --libs`
+	$(LD) -o $(DIR)/coolbutts $(OBJS_REL) `candle/candle-config --libs`
 
 $(DIR)/%.o: %.c
 	$(CC) -o $@ -c $< $(CFLAGS_REL)
@@ -38,9 +34,9 @@ $(DIR)/%.o: %.c
 ##############################################################################
 
 debug: init $(DIR)/coolbutts_debug
-	make -C candle debug SAUCES=resauces
 
 $(DIR)/coolbutts_debug: $(OBJS_DEB)
+	make -C candle debug SAUCES=resauces
 	$(LD) -o $@ $(OBJS_DEB) `candle/candle-config --debug --libs`
 
 $(DIR)/%.debug.o: %.c

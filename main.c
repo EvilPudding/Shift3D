@@ -13,10 +13,10 @@
 #include "components/side_follow.h"
 #include "components/mirror.h"
 #include "components/rigid_body.h"
+#include "components/force.h"
 
 #include "candle/components/node.h"
 #include "candle/components/model.h"
-#include "candle/components/force.h"
 #include "candle/components/name.h"
 #include "candle/components/camera.h"
 #include "candle/components/ambient.h"
@@ -53,19 +53,23 @@ float g_motion_power = 1.0f;
 float g_ssao_power = 0.6f;
 float g_ssr_power = 1.0f;
 bool_t g_squints_active = true;
-float get_motion_power()
+
+static float get_motion_power()
 {
 	return g_motion_power;
 }
-float get_ssao_power()
+
+static float get_ssao_power()
 {
 	return g_ssao_power;
 }
-float get_ssr_power()
+
+static float get_ssr_power()
 {
 	return g_ssr_power;
 }
-texture_t *get_last_pass(renderer_t *renderer)
+
+static texture_t *get_last_pass(renderer_t *renderer)
 {
 	if (g_motion_power > 0.05f)
 	{
@@ -79,7 +83,7 @@ texture_t *get_last_pass(renderer_t *renderer)
 
 
 
-renderer_t *shift_renderer()
+static renderer_t *shift_renderer()
 {
 	/* renderer_t *self = renderer_new(1.0f); */
 	renderer_t *self = renderer_new(0.66f);
@@ -326,6 +330,8 @@ int main(int argc, char **argv)
 	/* 	} */
 	/* } */
 	/* exit(1); */
+	candle_init(argv[0]);
+
 	if (candle_utility(argc, argv))
 		return 0;
 

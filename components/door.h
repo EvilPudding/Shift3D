@@ -1,9 +1,9 @@
 #ifndef DOOR_H
 #define DOOR_H
 
-#include <ecs/ecm.h>
-#include <utils/renderer.h>
-#include <utils/drawable.h>
+#include "../candle/ecs/ecm.h"
+#include "../candle/utils/renderer.h"
+#include "../candle/utils/drawable.h"
 
 typedef struct
 {

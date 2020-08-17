@@ -1,7 +1,7 @@
 #ifndef CHARACTER_H
 #define CHARACTER_H
 
-#include <ecs/ecm.h>
+#include "../candle/ecs/ecm.h"
 
 typedef struct
 {
@@ -31,11 +31,11 @@ typedef struct
 	int kill_self;
 } c_character_t;
 
-DEF_CASTER("character", c_character, c_character_t);
+void ct_character(ct_t *self);
+DEF_CASTER(ct_character, c_character, c_character_t);
 
 c_character_t *c_character_new(entity_t orientation,
 		int plane_movement, entity_t force_down);
 void c_character_teleport(c_character_t *self, entity_t in, entity_t out);
-void c_character_register(void);
 
 #endif /* !CHARACTER_H */

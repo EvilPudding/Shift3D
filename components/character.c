@@ -1,28 +1,28 @@
+#include "../candle/candle.h"
+#include "../candle/components/spatial.h"
+#include "../candle/components/node.h"
+#include "../candle/systems/editmode.h"
+#include "../candle/systems/controller.h"
+#include "../candle/systems/keyboard.h"
+#include "../openal.candle/listener.h"
+#include "../openal.candle/speaker.h"
 #include "character.h"
 #include "side.h"
-#include <candle.h>
-#include <components/spatial.h>
-#include <components/velocity.h>
-#include <components/node.h>
-#include <components/rigid_body.h>
-#include <components/force.h>
-#include <systems/editmode.h>
-#include <systems/controller.h>
+#include "velocity.h"
+#include "rigid_body.h"
+#include "force.h"
 #include "level.h"
 #include "movable.h"
 #include "charlook.h"
 #include "grid.h"
-#include <systems/keyboard.h>
 #include <math.h>
-#include <stdlib.h>
-#include "../openal.candle/speaker.h"
 
 extern int window_width, window_height;
 
 c_character_t *c_character_new(entity_t orientation,
 		int plane_movement, entity_t force_down)
 {
-	c_character_t *self = component_new("character");
+	c_character_t *self = component_new(ct_character);
 	self->plane_movement = plane_movement;
 	self->force_down = force_down;
 
@@ -40,7 +40,7 @@ void c_character_teleport(c_character_t *self, entity_t in, entity_t out)
 
 static void _c_character_teleport(c_character_t *self)
 {
-	c_charlook_t *charlook = (c_charlook_t*)ct_get_nth(ecm_get(ref("charlook")), 0);
+	c_charlook_t *charlook = (c_charlook_t*)ct_get_nth(ecm_get(ct_charlook), 0);
 	c_spatial_t *cam = c_spatial(charlook);
 	c_spatial_t *in = c_spatial(&self->in);
 	c_spatial_t *out = c_spatial(&self->out);
@@ -323,7 +323,7 @@ end:
 	return CONTINUE;
 }
 
-int c_character_key_up(c_character_t *self, char *key)
+int c_character_key_up(c_character_t *self, candle_key_e *key)
 {
 	switch(*key)
 	{
@@ -340,11 +340,12 @@ int c_character_key_up(c_character_t *self, char *key)
 			break;
 		}
 		case 32: self->jump = 0; break;
+		default: return CONTINUE;
 	}
 	return CONTINUE;
 }
 
-int c_character_key_down(c_character_t *self, char *key)
+int c_character_key_down(c_character_t *self, candle_key_e *key)
 {
 	switch(*key)
 	{
@@ -355,7 +356,7 @@ int c_character_key_down(c_character_t *self, char *key)
 		case 'Q': case 'q': self->swap = self->swap?:1; break;
 		case 'E': case 'e': self->pushing = 1; break;
 		case 32: self->jump = self->jump?:1; break;
-		default: printf("key: %d pressed\n", *key); break;
+		default: return CONTINUE;
 	}
 	return CONTINUE;
 }
@@ -375,17 +376,17 @@ int c_character_controller(c_character_t *self, controller_axis_t *event)
 
 int c_character_controller_button_up(c_character_t *self, controller_button_t *event)
 {
-	if (event->key == SDL_CONTROLLER_BUTTON_A)
+	if (event->key == CANDLE_CONTROLLER_BUTTON_A)
 	{
 		self->jump = 0;
 		return STOP;
 	}
-	if (event->key == SDL_CONTROLLER_BUTTON_X)
+	if (event->key == CANDLE_CONTROLLER_BUTTON_X)
 	{
 		self->pushing = 0;
 		return STOP;
 	}
-	else if (event->key == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
+	else if (event->key == CANDLE_CONTROLLER_BUTTON_LEFTSHOULDER)
 	{
 		self->swap = 0;
 		return STOP;
@@ -395,17 +396,17 @@ int c_character_controller_button_up(c_character_t *self, controller_button_t *e
 
 int c_character_controller_button_down(c_character_t *self, controller_button_t *event)
 {
-	if (event->key == SDL_CONTROLLER_BUTTON_A)
+	if (event->key == CANDLE_CONTROLLER_BUTTON_A)
 	{
 		self->jump = self->jump?:1;
 		return STOP;
 	}
-	if (event->key == SDL_CONTROLLER_BUTTON_X)
+	if (event->key == CANDLE_CONTROLLER_BUTTON_X)
 	{
 		self->pushing = 1;
 		return STOP;
 	}
-	else if (event->key == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
+	else if (event->key == CANDLE_CONTROLLER_BUTTON_LEFTSHOULDER)
 	{
 		self->swap = self->swap?:1;
 		return STOP;
@@ -414,24 +415,27 @@ int c_character_controller_button_down(c_character_t *self, controller_button_t 
 }
 
 
-REG()
+void ct_character(ct_t *self)
 {
-	ct_t *ct = ct_new("character", sizeof(c_character_t),
-			NULL, NULL, 4, ref("velocity"), ref("node"),
-			ref("rigid_body"), ref("side"));
+	ct_init(self, "character", sizeof(c_character_t));
+	ct_add_dependency(self, ct_node);
+	ct_add_dependency(self, ct_velocity);
+	ct_add_dependency(self, ct_rigid_body);
+	ct_add_dependency(self, ct_side);
+	ct_add_dependency(self, ct_listener);
 
-	ct_listener(ct, WORLD, 0, ref("key_up"), c_character_key_up);
+	ct_add_listener(self, WORLD, 0, ref("key_up"), c_character_key_up);
 
-	ct_listener(ct, WORLD, 0, ref("key_down"), c_character_key_down);
+	ct_add_listener(self, WORLD, 0, ref("key_down"), c_character_key_down);
 
-	ct_listener(ct, WORLD, 0, ref("world_update"), c_character_update);
+	ct_add_listener(self, WORLD, 0, ref("world_update"), c_character_update);
 
-	ct_listener(ct, WORLD, 100, ref("controller_axis"), c_character_controller);
+	ct_add_listener(self, WORLD, 100, ref("controller_axis"), c_character_controller);
 
-	ct_listener(ct, WORLD, 100, ref("controller_button_up"),
-	            c_character_controller_button_up);
+	ct_add_listener(self, WORLD, 100, ref("controller_button_up"),
+	                c_character_controller_button_up);
 
-	ct_listener(ct, WORLD, 100, ref("controller_button_down"),
-	            c_character_controller_button_down);
+	ct_add_listener(self, WORLD, 100, ref("controller_button_down"),
+	                c_character_controller_button_down);
 }
 

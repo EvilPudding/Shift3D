@@ -12,16 +12,16 @@
 #include "components/rigid_body.h"
 #include "components/side.h"
 #include "components/side_follow.h"
+#include "components/force.h"
 
-#include <components/model.h>
-#include <components/node.h>
-#include <components/name.h>
-#include <components/force.h>
-#include <components/light.h>
-#include <components/camera.h>
+#include "candle/components/model.h"
+#include "candle/components/node.h"
+#include "candle/components/name.h"
+#include "candle/components/light.h"
+#include "candle/components/camera.h"
+#include "candle/utils/renderer.h"
 #include "openal.candle/openal.h"
 #include "openal.candle/speaker.h"
-#include <utils/renderer.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -122,7 +122,7 @@ static entity_t cmd_key(entity_t root, int argc, const char **argv)
 
 	entity_t key = entity_new({
 		c_name_new("key");
-		c_model_new(sauces("key.obj"), sauces("key.mat"), 1, 1);
+		c_model_new(sauces("key.obj"), sauces("key.mat"), 0, 1);
 		c_side_new(root, side, 0);
 		c_key_new(rotX, rotY, rotZ, id);
 	});
@@ -135,12 +135,256 @@ static entity_t cmd_key(entity_t root, int argc, const char **argv)
 	return key;
 }
 
-c_t *get_char(void)
+static c_t *get_char(void)
 {
-	return ct_get_nth(ecm_get(ref("character")), 0);
+	return ct_get_nth(ecm_get(ct_character), 0);
 }
 
-renderer_t *shift_renderer();
+static float get_motion_power(pass_t *pass, c_menu_t *menu)
+{
+	return menu->motion_power;
+}
+
+static float get_ssao_power(pass_t *pass, c_menu_t *menu)
+{
+	return menu->ssao_power;
+}
+
+static float get_ssr_power(pass_t *pass, c_menu_t *menu)
+{
+	return menu->ssr_power;
+}
+
+static renderer_t *shift_renderer(c_menu_t *menu)
+{
+	renderer_t *self = renderer_new(0.66f);
+
+	texture_t *query_mips = texture_new_2D(0, 0, 0, 5,
+		buffer_new("depth",		true, -1),
+		buffer_new("tiles0",	false, 4),
+		buffer_new("tiles1",	false, 4),
+		buffer_new("tiles2",	false, 4),
+		buffer_new("tiles3",	false, 4));
+
+	texture_t *gbuffer, *gbuffer2, *portal, *ssao, *light, *refr, *bloom,
+			  *tmp, *final, *volum;
+
+	gbuffer = texture_new_2D(0, 0, 0, 5,
+		buffer_new("depth",     true, -1),
+		buffer_new("albedo",    false,  4),
+		buffer_new("nn",        false,  2),
+		buffer_new("mr",        false, 2),
+		buffer_new("emissive",  false, 3));
+
+	gbuffer2 = texture_new_2D(0, 0, 0, 5,
+		buffer_new("depth",	    true, -1),
+		buffer_new("albedo",    false, 4),
+		buffer_new("nn",        false,  2),
+		buffer_new("mr",        false, 2),
+		buffer_new("emissive",  false, 3));
+
+	portal = texture_new_2D(0, 0, 0, 2,
+		buffer_new("depth",	 true, -1),
+		buffer_new("ignore", true, 1));
+
+	light = texture_new_2D(0, 0, TEX_INTERPOLATE, 1,
+			buffer_new("color",	true, 4));
+
+	refr = texture_new_2D(0, 0, TEX_MIPMAP | TEX_INTERPOLATE, 1,
+			buffer_new("color", false, 4));
+
+	bloom = texture_new_2D(0, 0, TEX_MIPMAP | TEX_INTERPOLATE, 1,
+			buffer_new("color", false, 4));
+
+	tmp = texture_new_2D(0, 0, TEX_MIPMAP | TEX_INTERPOLATE, 1,
+			buffer_new("color", false, 4));
+
+	final = texture_new_2D(0, 0, TEX_MIPMAP | TEX_INTERPOLATE, 1,
+		buffer_new("color",	true, 4));
+
+	ssao = texture_new_2D(0, 0, TEX_INTERPOLATE, 1,
+		buffer_new("occlusion", false, 1));
+
+	volum =	texture_new_2D(0, 0, TEX_INTERPOLATE, 1,
+		buffer_new("color",	false, 4));
+
+	renderer_add_tex(self, "query_mips", 0.1f, query_mips);
+	renderer_add_tex(self, "portal",	 1.0f, portal);
+	renderer_add_tex(self, "tmp",		 1.0f, tmp);
+	renderer_add_tex(self, "refr",		 1.0f, refr);
+	renderer_add_tex(self, "bloom",		 1.0f, bloom);
+	renderer_add_tex(self, "final",		 1.0f, final);
+	renderer_add_tex(self, "ssao",		 0.5f, ssao);
+	renderer_add_tex(self, "light",		 1.0f, light);
+	renderer_add_tex(self, "gbuffer",	 1.0f, gbuffer);
+	renderer_add_tex(self, "gbuffer2",	 1.0f, gbuffer2);
+	renderer_add_tex(self, "volum",		 0.5f, volum);
+
+	renderer_add_pass(self, "query_mips", "query_mips", ref("visible"), 0,
+			query_mips, query_mips, 0, ~0, 3,
+			opt_clear_depth(1.0f, NULL),
+			opt_clear_color(Z4, NULL),
+			opt_skip(16)
+	);
+	renderer_add_pass(self, "query_mips", "query_mips", ref("decals"), 0,
+			query_mips, NULL, 0, ~0, 1,
+			opt_skip(16)
+	);
+	renderer_add_pass(self, "query_mips", "query_mips", ref("transparent"), 0,
+			query_mips, query_mips, 0, ~0, 1,
+			opt_skip(16)
+	);
+	renderer_add_pass(self, "svt", NULL, -1, 0,
+			query_mips, query_mips, 0, ~0, 2,
+			opt_callback((getter_cb)pass_process_query_mips),
+			opt_skip(16)
+	);
+
+	renderer_add_pass(self, "gbuffer", "gbuffer", ref("visible"), 0,
+			gbuffer, gbuffer, 0, ~0, 2,
+			opt_clear_depth(1.0f, NULL),
+			opt_clear_color(Z4, NULL)
+	);
+
+	/* DECAL PASS */
+	renderer_add_pass(self, "decals_pass", "gbuffer", ref("decals"), BLEND,
+			gbuffer, NULL, 0, ~0, 1,
+			opt_tex("gbuffer", gbuffer, NULL)
+	);
+
+	/* renderer_add_pass(self, "portal", "portal", ref("portal"), */
+	/* 		DEPTH_DISABLE, portal, portal, 0, ~0, */
+	/* 	(bind_t[]){ */
+	/* 		{CLEAR_DEPTH, .number = 0.0f}, */
+	/* 		{CLEAR_COLOR, .vec4 = vec4(0.0f)}, */
+	/* 		{TEX, "gbuffer", .buffer = gbuffer}, */
+	/* 		{NONE} */
+	/* 	} */
+	/* ); */
+
+	/* renderer_add_pass(self, "gbuffer2", "masked_gbuffer", ref("next_level"), 0, */
+	/* 		gbuffer2, gbuffer2, 0, ~0, */
+	/* 	(bind_t[]){ */
+	/* 		{CLEAR_DEPTH, .number = 1.0f}, */
+	/* 		{CLEAR_COLOR, .vec4 = vec4(0.0f)}, */
+	/* 		{CAM, .integer = 1}, */
+	/* 		{TEX, "portal", .buffer = portal}, */
+	/* 		{NONE} */
+	/* 	} */
+	/* ); */
+	/* renderer_add_pass(self, "copy_gbuffer", "copy_gbuffer", ref("quad"), */
+	/* 		DEPTH_DISABLE, gbuffer, gbuffer, 0, ~0, */
+	/* 	(bind_t[]){ */
+	/* 		{TEX, "buf", .buffer = gbuffer2}, */
+	/* 		{NONE} */
+	/* 	} */
+	/* ); */
+
+	renderer_add_pass(self, "ambient_light_pass", "phong", ref("ambient"),
+			ADD, light, NULL, 0, ~0, 2,
+			opt_clear_color(Z4, NULL),
+			opt_tex("gbuffer", gbuffer, NULL)
+	);
+
+	renderer_add_pass(self, "render_pass", "phong", ref("light"),
+			ADD, light, NULL, 0, ~0, 1,
+			opt_tex("gbuffer", gbuffer, NULL)
+	);
+
+	/* renderer_add_pass(self, "volum_pass", "volum", ref("light"), */
+	/* 		ADD | CULL_DISABLE, volum, NULL, 0, ~0, */
+	/* 	(bind_t[]){ */
+	/* 		{TEX, "gbuffer", .buffer = gbuffer}, */
+	/* 		{CLEAR_COLOR, .vec4 = vec4(0.0f)}, */
+	/* 		{NONE} */
+	/* 	} */
+	/* ); */
+
+	/* renderer_add_pass(self, "render_pass2", "phong", ref("next_level_light"), */
+	/* 		ADD, light, NULL, 0, ~0, */
+	/* 	(bind_t[]){ */
+	/* 		{TEX, "gbuffer", .buffer = gbuffer2}, */
+	/* 		{CAM, .integer = 1}, */
+	/* 		{NONE} */
+	/* 	} */
+	/* ); */
+
+	renderer_add_pass(self, "refraction", "copy", ref("quad"), 0,
+			refr, NULL, 0, ~0, 2,
+			opt_tex("buf", light, NULL),
+			opt_int("level", 0, NULL)
+	);
+	renderer_add_kawase(self, refr, tmp, 0, 1);
+	renderer_add_kawase(self, refr, tmp, 1, 2);
+	renderer_add_kawase(self, refr, tmp, 2, 3);
+
+	renderer_add_pass(self, "transp_1", "gbuffer", ref("transparent"),
+			0, gbuffer, gbuffer, 0, ~0, 0);
+
+	renderer_add_pass(self, "transp", "transparency", ref("transparent"),
+			DEPTH_EQUAL | DEPTH_LOCK, light, gbuffer, 0, ~0, 1,
+			opt_tex("refr", refr, NULL)
+	);
+
+
+	renderer_add_pass(self, "ssao_pass", "ssao", ref("quad"), 0,
+			ssao, NULL, 0, ~0, 2,
+			opt_tex("gbuffer", gbuffer, NULL),
+			opt_clear_color(Z4, NULL)
+	);
+
+	renderer_add_pass(self, "final", "ssr", ref("quad"), 0, final,
+			NULL, 0, ~0, 8,
+			opt_tex("gbuffer", gbuffer, NULL),
+			opt_tex("light", light, NULL),
+			opt_tex("refr", refr, NULL),
+			opt_num("ssr_power", 0.0f, (getter_cb)get_ssr_power),
+			opt_tex("ssao", ssao, NULL),
+			opt_num("ssao_power", 0, (getter_cb)get_ssao_power),
+			opt_tex("volum", volum, NULL),
+			opt_usrptr(menu)
+	);
+
+	renderer_add_pass(self, "motion blur", "motion", ref("quad"), 0,
+			tmp, NULL, 0, ~0, 4,
+			opt_tex("gbuffer", gbuffer, NULL),
+			opt_tex("buf", final, NULL),
+			opt_num("power", 0.0f, (getter_cb)get_motion_power),
+			opt_usrptr(menu)
+	);
+	renderer_add_pass(self, "output_motion", "copy", ref("quad"), 0,
+			final, NULL, 0, ~0, 2,
+			opt_tex("buf", tmp, NULL),
+			opt_int("level", 0, NULL)
+	);
+
+	renderer_add_pass(self, "bloom_0", "bright", ref("quad"), 0,
+			bloom, NULL, 0, ~0, 1,
+			opt_tex("buf", final, NULL)
+	);
+	renderer_add_kawase(self, bloom, tmp, 0, 1);
+	renderer_add_kawase(self, bloom, tmp, 1, 2);
+	renderer_add_kawase(self, bloom, tmp, 2, 3);
+
+	renderer_add_pass(self, "bloom_1", "upsample", ref("quad"), ADD,
+			final, NULL, 0, ~0, 3,
+			opt_tex("buf", bloom, NULL),
+			opt_int("level", 3, NULL),
+			opt_num("alpha", 0.5, NULL)
+	);
+
+	renderer_add_pass(self, "luminance_calc", NULL, -1, 0,
+			final, NULL, 0, ~0, 3,
+			opt_callback((getter_cb)pass_process_brightness),
+			opt_skip(8),
+			opt_usrptr(menu)
+	);
+
+	self->output = final;
+
+	return self;
+}
+
 static entity_t cmd_spawn(entity_t root, int argc, const char **argv)
 {
 	vec3_t pos;
@@ -185,8 +429,6 @@ static entity_t cmd_spawn(entity_t root, int argc, const char **argv)
 			c_name_new("body");
 		});
 
-		renderer_t *renderer = shift_renderer();	
-		/* renderer_t *renderer = debug_renderer(); */	
 	
 		entity_t character = entity_new({
 			c_name_new("character");
@@ -195,6 +437,8 @@ static entity_t cmd_spawn(entity_t root, int argc, const char **argv)
 			c_speaker_new();
 			c_menu_new();
 		});
+		renderer_t *renderer = shift_renderer(c_menu(&character));	
+
 		c_spatial_t *sc = c_spatial(&character);
 		c_spatial_lock(sc);
 
@@ -207,7 +451,6 @@ static entity_t cmd_spawn(entity_t root, int argc, const char **argv)
 			c_side_new(root, side, 0);
 		});
 		c_charlook_reset(c_charlook(&camera));
-		c_openal_set_listener(c_openal(&SYS), camera);
 
 		c_node_add(c_node(&character), 1, body);
 		c_node_add(c_node(&body), 1, camera);

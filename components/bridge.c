@@ -1,17 +1,15 @@
 #include "bridge.h"
-#include <components/rigid_body.h>
-#include <components/spatial.h>
-#include <components/model.h>
-#include <stdlib.h>
-#include <candle.h>
+#include "rigid_body.h"
+#include "../candle/components/spatial.h"
+#include "../candle/components/model.h"
+#include "../candle/candle.h"
 #include "../openal.candle/speaker.h"
-
 
 static float c_rigid_body_bridge_collider(c_rigid_body_t *self, vec3_t pos);
 
 c_bridge_t *c_bridge_new()
 {
-	c_bridge_t *self = component_new("bridge");
+	c_bridge_t *self = component_new(ct_bridge);
 
 	entity_add_component(c_entity(self),
 			(c_t*)c_rigid_body_new((collider_cb)c_rigid_body_bridge_collider));
@@ -105,13 +103,13 @@ static int c_bridge_update(c_bridge_t *self, float *dt)
 	return CONTINUE;
 }
 
-REG()
+void ct_bridge(ct_t *self)
 {
-	ct_t *ct = ct_new("bridge", sizeof(c_bridge_t), NULL, NULL,
-			1, ref("node"));
+	ct_init(self, "bridge", sizeof(c_bridge_t));
+	ct_add_dependency(self, ct_node);
 
-	ct_listener(ct, ENTITY, 0, ref("spatial_changed"), c_bridge_spatial_changed);
+	ct_add_listener(self, ENTITY, 0, ref("spatial_changed"), c_bridge_spatial_changed);
 
-	ct_listener(ct, WORLD, 0, ref("world_update"), c_bridge_update);
+	ct_add_listener(self, WORLD, 0, ref("world_update"), c_bridge_update);
 }
 

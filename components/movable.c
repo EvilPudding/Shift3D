@@ -1,16 +1,15 @@
-#include <candle.h>
+#include "../candle/candle.h"
 #include "movable.h"
 #include "level.h"
 #include "side.h"
 #include "grid.h"
-#include <stdlib.h>
-#include <components/spatial.h>
-#include <components/model.h>
+#include "../candle/components/spatial.h"
+#include "../candle/components/model.h"
 #include "../openal.candle/speaker.h"
 
 c_movable_t *c_movable_new(int value)
 {
-	c_movable_t *self = component_new("movable");
+	c_movable_t *self = component_new(ct_movable);
 	self->value = value;
 	entity_add_component(c_entity(self), c_speaker_new());
 
@@ -23,7 +22,7 @@ void push_at(entity_t lvl, int x, int y, int z, int value, vec3_t from)
 	c_level_t *level = c_level(&lvl);
 	c_grid_t *gc = c_grid(&level->grid);
 
-	ct_t *movables = ecm_get(ref("movable"));
+	ct_t *movables = ecm_get(ct_movable);
 	vec3_t pos = vec3(x, y, z);
 
 	vec3_t dif = vec3_sub(from, pos);
@@ -142,12 +141,12 @@ static int c_movable_update(c_movable_t *self, float *dt)
 	return CONTINUE;
 }
 
-REG()
+void ct_movable(ct_t *self)
 {
-	ct_t *ct = ct_new("movable", sizeof(c_movable_t), NULL, NULL, 1,
-	                  ref("node"));
+	ct_init(self, "movable", sizeof(c_movable_t));
+	ct_add_dependency(self, ct_node);
 
-	ct_listener(ct, WORLD, 0, ref("world_update"), c_movable_update);
+	ct_add_listener(self, WORLD, 0, ref("world_update"), c_movable_update);
 }
 
 

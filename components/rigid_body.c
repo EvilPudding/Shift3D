@@ -1,6 +1,6 @@
 #include "rigid_body.h"
-#include <components/model.h>
-#include <components/spatial.h>
+#include "../candle/components/model.h"
+#include "../candle/components/spatial.h"
 #include "aabb.h"
 #include <float.h>
 
@@ -12,7 +12,7 @@ const float REL_ERROR = (float)(1.0e-3);
 
 c_rigid_body_t *c_rigid_body_new(collider_cb costum)
 {
-	c_rigid_body_t *self = component_new("rigid_body");
+	c_rigid_body_t *self = component_new(ct_rigid_body);
 
 	self->costum = costum;
 
@@ -44,10 +44,10 @@ int c_rigid_body_intersects(c_rigid_body_t *self, c_rigid_body_t *other,
 	return c_rigid_body_narrow(self, other, contact);
 }
 
-REG()
+void ct_rigid_body(ct_t *self)
 {
-	ct_new("rigid_body", sizeof(c_rigid_body_t), NULL, NULL,
-			1, ref("spatial"));
+	ct_init(self, "rigid_body", sizeof(c_rigid_body_t));
+	ct_add_dependency(self, ct_node);
 }
 
 /* GJK */

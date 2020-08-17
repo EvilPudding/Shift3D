@@ -1,7 +1,7 @@
 #ifndef BRIDGE_H
 #define BRIDGE_H
 
-#include <ecs/ecm.h>
+#include "../candle/ecs/ecm.h"
 
 typedef struct
 {
@@ -27,7 +27,8 @@ typedef struct
 	int32_t active;
 } c_bridge_t;
 
-DEF_CASTER("bridge", c_bridge, c_bridge_t);
+void ct_bridge(ct_t *self);
+DEF_CASTER(ct_bridge, c_bridge, c_bridge_t);
 
 c_bridge_t *c_bridge_new(void);
 void c_bridge_ready(c_bridge_t *self);

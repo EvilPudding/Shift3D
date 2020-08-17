@@ -1,7 +1,7 @@
 #ifndef GRID_H
 #define GRID_H
 
-#include <ecs/ecm.h>
+#include "../candle/ecs/ecm.h"
 
 typedef struct c_grid_t c_grid_t;
 
@@ -19,7 +19,7 @@ typedef struct c_grid_t
 	entity_t edit_target, remove_target;
 } c_grid_t;
 
-DEF_CASTER("grid", c_grid, c_grid_t);
+DEF_CASTER(ct_grid, c_grid, c_grid_t);
 
 c_grid_t *c_grid_new(int mx, int my, int mz);
 

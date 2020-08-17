@@ -1,14 +1,14 @@
-#include <candle.h>
-#include <components/node.h>
-#include <components/name.h>
-#include <components/model.h>
-#include <components/light.h>
-#include <systems/editmode.h>
-#include "components/key.h"
-#include "components/movable.h"
-#include "components/grid.h"
-#include "components/bridge.h"
-#include "components/door.h"
+#include "../candle/candle.h"
+#include "../candle/components/node.h"
+#include "../candle/components/name.h"
+#include "../candle/components/model.h"
+#include "../candle/components/light.h"
+#include "../candle/systems/editmode.h"
+#include "key.h"
+#include "movable.h"
+#include "grid.h"
+#include "bridge.h"
+#include "door.h"
 #include "character.h"
 #include "force.h"
 #include "velocity.h"
@@ -17,17 +17,16 @@
 #include "mirror.h"
 #include "level.h"
 #include "side.h"
-#include <stdlib.h>
 #include <string.h>
 
 c_level_t *c_level_new(const char *filename, int32_t active)
 {
-	c_level_t *self = component_new("level");
+	c_level_t *self = component_new(ct_level);
 
 	if(!filename[0]) return self;
 
 	char open_map_name[512];
-	sprintf(open_map_name, "resauces/maps/%s.xmap", filename);
+	sprintf(open_map_name, "resauces/maps/%.*s.xmap", 128, filename);
 
 	strcpy(self->file, filename);
 
@@ -132,9 +131,9 @@ void c_level_reset(c_level_t *self)
 	c_level_t *level = c_level(&lvl);
 	c_level_set_active(level, 1);
 
-		c_charlook_t *cam = (c_charlook_t*)ct_get_nth(ecm_get(ref("charlook")), 0);
-		c_character_t *fc = (c_character_t*)ct_get_nth(ecm_get(ref("character")), 0);
-		c_mirror_t *mir = (c_mirror_t*)ct_get_nth(ecm_get(ref("mirror")), 0);
+		c_charlook_t *cam = (c_charlook_t*)ct_get_nth(ecm_get(ct_charlook), 0);
+		c_character_t *fc = (c_character_t*)ct_get_nth(ecm_get(ct_character), 0);
+		c_mirror_t *mir = (c_mirror_t*)ct_get_nth(ecm_get(ct_mirror), 0);
 
 		c_velocity(fc)->velocity = vec3(0.0f, 0.0f, 0.0f);
 		fc->max_jump_vel = 0.0f;
@@ -180,7 +179,8 @@ void c_level_set_active(c_level_t *self, int32_t active)
 	self->active = active;
 }
 
-REG()
+void ct_level(ct_t *self)
 {
-	ct_new("level", sizeof(c_level_t), NULL, NULL, 1, ref("node"));
+	ct_init(self, "level", sizeof(c_level_t));
+	ct_add_dependency(self, ct_node);
 }

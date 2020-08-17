@@ -1,7 +1,7 @@
 #ifndef MOVABLE_H
 #define MOVABLE_H
 
-#include <ecs/ecm.h>
+#include "../candle/ecs/ecm.h"
 
 typedef struct
 {
@@ -14,7 +14,7 @@ typedef struct
 	int value;
 } c_movable_t;
 
-DEF_CASTER("movable", c_movable, c_movable_t);
+DEF_CASTER(ct_movable, c_movable, c_movable_t);
 
 c_movable_t *c_movable_new(int value);
 

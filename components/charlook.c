@@ -1,17 +1,16 @@
+#include "../candle/candle.h"
+#include "../candle/systems/window.h"
+#include "../candle/components/spatial.h"
+#include "../candle/components/node.h"
+#include "../candle/systems/mouse.h"
+#include "../candle/systems/controller.h"
 #include "charlook.h"
 #include "side.h"
-#include <systems/window.h>
-#include <components/spatial.h>
-#include <components/force.h>
-#include <components/node.h>
+#include "force.h"
 #include "level.h"
 #include "grid.h"
 #include "character.h"
-#include <systems/mouse.h>
-#include <systems/controller.h>
-#include <candle.h>
 #include <math.h>
-#include <stdlib.h>
 
 #define FULL_HEIGHT 1.3
 static int c_charlook_mouse_move(c_charlook_t *self, mouse_move_data *event);
@@ -23,11 +22,11 @@ void c_charlook_init(c_charlook_t *self)
 
 c_charlook_t *c_charlook_new(entity_t x, float sensitivity)
 {
-	c_charlook_t *self = component_new("charlook");
+	c_charlook_t *self = component_new(ct_charlook);
 
 	self->sensitivity = sensitivity;
 	c_mouse(self)->visible = false;
-	c_mouse_activate(c_mouse(self));
+	c_mouse_activate(c_mouse(self), false);
 
 	self->x = x;
 
@@ -83,7 +82,7 @@ static int c_charlook_mouse_move(c_charlook_t *self, mouse_move_data *event)
 	if (!nc) return CONTINUE;
 	c_node_t *parent = c_node(&c_node(self)->parent);
 	if (!parent) return CONTINUE;
-	c_side_t *cside = c_side(ct_get_nth(ecm_get(ref("character")), 0));
+	c_side_t *cside = c_side(ct_get_nth(ecm_get(ct_character), 0));
 	c_grid_t *gc = c_grid(&c_level(&cside->level)->grid);
 	vec3_t pos = vec3_round(c_node_pos_to_global(parent, vec3(0.0f, FULL_HEIGHT, 0.0f)));
 	int side_above = c_grid_get(gc, _vec3(pos));
@@ -129,7 +128,8 @@ int c_charlook_controller(c_charlook_t *self, controller_axis_t *event)
 	c_spatial_t *sc = c_spatial(self);
 	if (event->side == 1)
 	{
-		float frac = self->sensitivity / 58.f;
+		/* float frac = self->sensitivity / 58.f; */
+		float frac = self->sensitivity / 30.f;
 
 		float inc_y = -(event->y * frac);
 		float inc_x = -(event->x * frac);
@@ -146,25 +146,25 @@ int c_charlook_controller(c_charlook_t *self, controller_axis_t *event)
 		}
 
 
-	c_node_t *nc = c_node(self);
-	if (!nc) return CONTINUE;
-	c_node_t *parent = c_node(&c_node(self)->parent);
-	if (!parent) return CONTINUE;
-	c_side_t *cside = c_side(ct_get_nth(ecm_get(ref("character")), 0));
-	c_grid_t *gc = c_grid(&c_level(&cside->level)->grid);
-	vec3_t pos = vec3_round(c_node_pos_to_global(parent, vec3(0.0f, FULL_HEIGHT, 0.0f)));
-	int side_above = c_grid_get(gc, _vec3(pos));
-	if ((side_above & 1) != (cside->side & 1))
-	{
-		c_spatial_set_pos(sc, vec3(0.0, 0.8, 0.0));
-	}
-	else
-	{
-		c_spatial_set_pos(sc, vec3(0.0, FULL_HEIGHT, 0.0));
-	}
-	/* c_side_t *side = c_side(self); */
-	/* if (!side) return CONTINUE; */
-	inc_x = (cside->side & 1) ? -inc_x : inc_x;
+		c_node_t *nc = c_node(self);
+		if (!nc) return CONTINUE;
+		c_node_t *parent = c_node(&c_node(self)->parent);
+		if (!parent) return CONTINUE;
+		c_side_t *cside = c_side(ct_get_nth(ecm_get(ct_character), 0));
+		c_grid_t *gc = c_grid(&c_level(&cside->level)->grid);
+		vec3_t pos = vec3_round(c_node_pos_to_global(parent, vec3(0.0f, FULL_HEIGHT, 0.0f)));
+		int side_above = c_grid_get(gc, _vec3(pos));
+		if ((side_above & 1) != (cside->side & 1))
+		{
+			c_spatial_set_pos(sc, vec3(0.0, 0.8, 0.0));
+		}
+		else
+		{
+			c_spatial_set_pos(sc, vec3(0.0, FULL_HEIGHT, 0.0));
+		}
+		/* c_side_t *side = c_side(self); */
+		/* if (!side) return CONTINUE; */
+		inc_x = (cside->side & 1) ? -inc_x : inc_x;
 
 
 		if(inc_y)
@@ -192,15 +192,17 @@ int c_charlook_controller(c_charlook_t *self, controller_axis_t *event)
 }
 
 
-REG()
+void ct_charlook(ct_t *self)
 {
-	ct_t *ct = ct_new("charlook", sizeof(c_charlook_t), (init_cb)c_charlook_init, NULL,
-			2, ref("node"), ref("mouse"));
+	ct_init(self, "charlook", sizeof(c_charlook_t));
+	ct_set_init(self, (init_cb)c_charlook_init);
+	ct_add_dependency(self, ct_node);
+	ct_add_dependency(self, ct_mouse);
 
-	ct_listener(ct, ENTITY, 0, ref("mouse_move"), c_charlook_mouse_move);
+	ct_add_listener(self, ENTITY, 0, ref("mouse_move"), c_charlook_mouse_move);
 
-	ct_listener(ct, WORLD, 0, ref("window_resize"), c_charlook_window_resize);
-	ct_listener(ct, WORLD, 0, ref("world_update"), c_charlook_update);
-	ct_listener(ct, WORLD, 100, ref("controller_axis"), c_charlook_controller);
+	ct_add_listener(self, WORLD, 0, ref("window_resize"), c_charlook_window_resize);
+	ct_add_listener(self, WORLD, 0, ref("world_update"), c_charlook_update);
+	ct_add_listener(self, WORLD, 100, ref("controller_axis"), c_charlook_controller);
 }
 

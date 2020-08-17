@@ -1,8 +1,8 @@
 #ifndef FORCE_H
 #define FORCE_H
 
-#include <ecs/ecm.h>
-#include <utils/glutil.h>
+#include "../candle/ecs/ecm.h"
+#include "../candle/utils/glutil.h"
 
 typedef struct
 {
@@ -12,7 +12,7 @@ typedef struct
 	vec3_t force;
 } c_force_t;
 
-DEF_CASTER("force", c_force, c_force_t)
+DEF_CASTER(ct_force, c_force, c_force_t)
 
 c_force_t *c_force_new(float x, float y, float z, int active);
 

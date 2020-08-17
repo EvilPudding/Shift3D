@@ -1,17 +1,16 @@
-#include <candle.h>
-#include <components/spatial.h>
-#include <components/node.h>
-#include <utils/nk.h>
+#include "../candle/candle.h"
+#include "../candle/components/spatial.h"
+#include "../candle/components/node.h"
+#include "../candle/utils/nk.h"
 #include "side.h"
 #include "level.h"
 #include "grid.h"
 #include "character.h"
 #include "side_follow.h"
-#include <stdlib.h>
 
 c_side_follow_t *c_side_follow_new()
 {
-	c_side_follow_t *self = component_new("side_follow");
+	c_side_follow_t *self = component_new(ct_side_follow);
 	self->active = 1;
 	return self;
 }
@@ -50,12 +49,12 @@ int c_side_follow_menu(c_side_follow_t *self, void *ctx)
 }
 
 
-REG()
+void ct_side_follow(ct_t *self)
 {
-	ct_t *ct = ct_new("side_follow", sizeof(c_side_follow_t),
-			NULL, NULL, 1, ref("spatial"));
+	ct_init(self, "side_follow", sizeof(c_side_follow_t));
+	ct_add_dependency(self, ct_node);
 
-	ct_listener(ct, WORLD, 0, ref("world_update"), c_side_follow_update);
-	ct_listener(ct, WORLD, 0, ref("component_menu"), c_side_follow_menu);
+	ct_add_listener(self, WORLD, 0, ref("world_update"), c_side_follow_update);
+	ct_add_listener(self, WORLD, 0, ref("component_menu"), c_side_follow_menu);
 }
 
