@@ -353,9 +353,9 @@ int c_character_key_down(c_character_t *self, candle_key_e *key)
 		case 'A': case 'a': self->left = 1.0f; break;
 		case 'D': case 'd': self->right = 1.0f; break;
 		case 'S': case 's': self->backward = 1.0f; break;
-		case 'Q': case 'q': self->swap = self->swap?:1; break;
+		case 'Q': case 'q': self->swap = self->swap ? self->swap : 1; break;
 		case 'E': case 'e': self->pushing = 1; break;
-		case 32: self->jump = self->jump?:1; break;
+		case 32: self->jump = self->jump ? self->jump : 1; break;
 		default: return CONTINUE;
 	}
 	return CONTINUE;
@@ -398,7 +398,7 @@ int c_character_controller_button_down(c_character_t *self, controller_button_t 
 {
 	if (event->key == CANDLE_CONTROLLER_BUTTON_A)
 	{
-		self->jump = self->jump?:1;
+		self->jump = self->jump ? self->jump : 1;
 		return STOP;
 	}
 	if (event->key == CANDLE_CONTROLLER_BUTTON_X)
@@ -408,7 +408,7 @@ int c_character_controller_button_down(c_character_t *self, controller_button_t 
 	}
 	else if (event->key == CANDLE_CONTROLLER_BUTTON_LEFTSHOULDER)
 	{
-		self->swap = self->swap?:1;
+		self->swap = self->swap ? self->swap : 1;
 		return STOP;
 	}
 	return CONTINUE;
