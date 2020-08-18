@@ -22,16 +22,33 @@
 c_level_t *c_level_new(const char *filename, int32_t active)
 {
 	c_level_t *self = component_new(ct_level);
+	char *bytes;
+	size_t bytes_num;
+	resource_t *sauce;
 
-	if(!filename[0]) return self;
+	if(!filename[0])
+	{
+		return self;
+	}
 
 	char open_map_name[512];
-	sprintf(open_map_name, "resauces/maps/%.*s.xmap", 128, filename);
+	sprintf(open_map_name, "%.*s.xmap", 128, filename);
 
 	strcpy(self->file, filename);
 
-	candle_run(c_entity(self), open_map_name);
+	sauce = c_sauces_get_sauce(c_sauces(&SYS), sauce_handle(open_map_name));
+	if (!sauce)
+	{
+		return self;
+	}
 
+	bytes = c_sauces_get_bytes(c_sauces(&SYS), sauce, &bytes_num);
+	if (!bytes)
+	{
+		return self;
+	}
+
+	candle_run_from_memory(c_entity(self), bytes, bytes_num);
 	c_level_set_active(self, active);
 
 	return self;

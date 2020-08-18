@@ -157,7 +157,7 @@ static float get_ssr_power(pass_t *pass, c_menu_t *menu)
 
 static renderer_t *shift_renderer(c_menu_t *menu)
 {
-	renderer_t *self = renderer_new(0.66f);
+	renderer_t *self = renderer_new(1.0f);
 
 	texture_t *query_mips = texture_new_2D(0, 0, 0, 5,
 		buffer_new("depth",		true, -1),
@@ -220,17 +220,17 @@ static renderer_t *shift_renderer(c_menu_t *menu)
 	renderer_add_tex(self, "gbuffer2",	 1.0f, gbuffer2);
 	renderer_add_tex(self, "volum",		 0.5f, volum);
 
-	renderer_add_pass(self, "query_mips", "query_mips", ref("visible"), 0,
+	renderer_add_pass(self, "query_mips", "candle:query_mips", ref("visible"), 0,
 			query_mips, query_mips, 0, ~0, 3,
 			opt_clear_depth(1.0f, NULL),
 			opt_clear_color(Z4, NULL),
 			opt_skip(16)
 	);
-	renderer_add_pass(self, "query_mips", "query_mips", ref("decals"), 0,
+	renderer_add_pass(self, "query_mips", "candle:query_mips", ref("decals"), 0,
 			query_mips, NULL, 0, ~0, 1,
 			opt_skip(16)
 	);
-	renderer_add_pass(self, "query_mips", "query_mips", ref("transparent"), 0,
+	renderer_add_pass(self, "query_mips", "candle:query_mips", ref("transparent"), 0,
 			query_mips, query_mips, 0, ~0, 1,
 			opt_skip(16)
 	);
@@ -240,14 +240,14 @@ static renderer_t *shift_renderer(c_menu_t *menu)
 			opt_skip(16)
 	);
 
-	renderer_add_pass(self, "gbuffer", "gbuffer", ref("visible"), 0,
+	renderer_add_pass(self, "gbuffer", "candle:gbuffer", ref("visible"), 0,
 			gbuffer, gbuffer, 0, ~0, 2,
 			opt_clear_depth(1.0f, NULL),
 			opt_clear_color(Z4, NULL)
 	);
 
 	/* DECAL PASS */
-	renderer_add_pass(self, "decals_pass", "gbuffer", ref("decals"), BLEND,
+	renderer_add_pass(self, "decals_pass", "candle:gbuffer", ref("decals"), BLEND,
 			gbuffer, NULL, 0, ~0, 1,
 			opt_tex("gbuffer", gbuffer, NULL)
 	);
@@ -280,18 +280,18 @@ static renderer_t *shift_renderer(c_menu_t *menu)
 	/* 	} */
 	/* ); */
 
-	renderer_add_pass(self, "ambient_light_pass", "phong", ref("ambient"),
+	renderer_add_pass(self, "ambient_light_pass", "candle:pbr", ref("ambient"),
 			ADD, light, NULL, 0, ~0, 2,
 			opt_clear_color(Z4, NULL),
 			opt_tex("gbuffer", gbuffer, NULL)
 	);
 
-	renderer_add_pass(self, "render_pass", "phong", ref("light"),
+	renderer_add_pass(self, "render_pass", "candle:pbr", ref("light"),
 			ADD, light, NULL, 0, ~0, 1,
 			opt_tex("gbuffer", gbuffer, NULL)
 	);
 
-	/* renderer_add_pass(self, "volum_pass", "volum", ref("light"), */
+	/* renderer_add_pass(self, "volum_pass", "candle:volum", ref("light"), */
 	/* 		ADD | CULL_DISABLE, volum, NULL, 0, ~0, */
 	/* 	(bind_t[]){ */
 	/* 		{TEX, "gbuffer", .buffer = gbuffer}, */
@@ -300,7 +300,7 @@ static renderer_t *shift_renderer(c_menu_t *menu)
 	/* 	} */
 	/* ); */
 
-	/* renderer_add_pass(self, "render_pass2", "phong", ref("next_level_light"), */
+	/* renderer_add_pass(self, "render_pass2", "candle:pbr", ref("next_level_light"), */
 	/* 		ADD, light, NULL, 0, ~0, */
 	/* 	(bind_t[]){ */
 	/* 		{TEX, "gbuffer", .buffer = gbuffer2}, */
@@ -309,7 +309,7 @@ static renderer_t *shift_renderer(c_menu_t *menu)
 	/* 	} */
 	/* ); */
 
-	renderer_add_pass(self, "refraction", "copy", ref("quad"), 0,
+	renderer_add_pass(self, "refraction", "candle:copy", ref("quad"), 0,
 			refr, NULL, 0, ~0, 2,
 			opt_tex("buf", light, NULL),
 			opt_int("level", 0, NULL)
@@ -318,22 +318,22 @@ static renderer_t *shift_renderer(c_menu_t *menu)
 	renderer_add_kawase(self, refr, tmp, 1, 2);
 	renderer_add_kawase(self, refr, tmp, 2, 3);
 
-	renderer_add_pass(self, "transp_1", "gbuffer", ref("transparent"),
+	renderer_add_pass(self, "transp_1", "candle:gbuffer", ref("transparent"),
 			0, gbuffer, gbuffer, 0, ~0, 0);
 
-	renderer_add_pass(self, "transp", "transparency", ref("transparent"),
+	renderer_add_pass(self, "transp", "candle:transparent", ref("transparent"),
 			DEPTH_EQUAL | DEPTH_LOCK, light, gbuffer, 0, ~0, 1,
 			opt_tex("refr", refr, NULL)
 	);
 
 
-	renderer_add_pass(self, "ssao_pass", "ssao", ref("quad"), 0,
+	renderer_add_pass(self, "ssao_pass", "candle:ssao", ref("quad"), 0,
 			ssao, NULL, 0, ~0, 2,
 			opt_tex("gbuffer", gbuffer, NULL),
 			opt_clear_color(Z4, NULL)
 	);
 
-	renderer_add_pass(self, "final", "ssr", ref("quad"), 0, final,
+	renderer_add_pass(self, "final", "candle:final", ref("quad"), 0, final,
 			NULL, 0, ~0, 8,
 			opt_tex("gbuffer", gbuffer, NULL),
 			opt_tex("light", light, NULL),
@@ -345,20 +345,20 @@ static renderer_t *shift_renderer(c_menu_t *menu)
 			opt_usrptr(menu)
 	);
 
-	renderer_add_pass(self, "motion blur", "motion", ref("quad"), 0,
+	renderer_add_pass(self, "motion blur", "candle:motion", ref("quad"), 0,
 			tmp, NULL, 0, ~0, 4,
 			opt_tex("gbuffer", gbuffer, NULL),
 			opt_tex("buf", final, NULL),
 			opt_num("power", 0.0f, (getter_cb)get_motion_power),
 			opt_usrptr(menu)
 	);
-	renderer_add_pass(self, "output_motion", "copy", ref("quad"), 0,
+	renderer_add_pass(self, "output_motion", "candle:copy", ref("quad"), 0,
 			final, NULL, 0, ~0, 2,
 			opt_tex("buf", tmp, NULL),
 			opt_int("level", 0, NULL)
 	);
 
-	renderer_add_pass(self, "bloom_0", "bright", ref("quad"), 0,
+	renderer_add_pass(self, "bloom_0", "candle:bright", ref("quad"), 0,
 			bloom, NULL, 0, ~0, 1,
 			opt_tex("buf", final, NULL)
 	);
@@ -366,7 +366,7 @@ static renderer_t *shift_renderer(c_menu_t *menu)
 	renderer_add_kawase(self, bloom, tmp, 1, 2);
 	renderer_add_kawase(self, bloom, tmp, 2, 3);
 
-	renderer_add_pass(self, "bloom_1", "upsample", ref("quad"), ADD,
+	renderer_add_pass(self, "bloom_1", "candle:upsample", ref("quad"), ADD,
 			final, NULL, 0, ~0, 3,
 			opt_tex("buf", bloom, NULL),
 			opt_int("level", 3, NULL),
@@ -446,7 +446,7 @@ static entity_t cmd_spawn(entity_t root, int argc, const char **argv)
 
 		entity_t camera = entity_new({
 			c_name_new("camera");
-			c_camera_new(70, 0.1, 100.0, 1, 1, 1, renderer);
+			c_camera_new(70, 0.1, 1000.0, 1, 1, 1, renderer);
 			c_charlook_new(body, 1.9);
 			c_side_new(root, side, 0);
 		});
@@ -464,7 +464,7 @@ static entity_t cmd_spawn(entity_t root, int argc, const char **argv)
 		level->mirror = entity_new({
 			c_name_new("mirror");
 			c_mirror_new(camera);
-			c_camera_new(70, 0.1, 100.0, 0, 0, 0, renderer);
+			c_camera_new(70, 0.1, 1000.0, 0, 0, 0, renderer);
 		});
 		c_camera(&level->mirror)->auto_transform = 0;
 
