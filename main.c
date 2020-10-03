@@ -27,6 +27,7 @@
 
 #include "openal.candle/openal.h"
 #include "openal.candle/speaker.h"
+#include "openxr.candle/openxr.h"
 
 #include "cmds.h"
 
@@ -75,6 +76,7 @@ int main(int argc, char **argv)
 
 	entity_add_component(SYS, (c_t*)c_editmode_new());
 	entity_add_component(SYS, (c_t*)c_openal_new());
+	entity_add_component(SYS, (c_t*)c_openxr_new());
 	/* c_editmode_activate(c_editmode(&SYS)); */
 
 	reg_custom_cmds();

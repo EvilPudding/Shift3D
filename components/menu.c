@@ -319,7 +319,7 @@ void ct_menu(ct_t *self)
 c_menu_t *c_menu_new()
 {
 	c_menu_t *self = component_new(ct_menu);
-	self->motion_power = 1.0f;
+	self->motion_power = 0.0f;
 	self->ssao_power = 0.6f;
 	self->ssr_power = 1.0f;
 	self->squints_active = true;

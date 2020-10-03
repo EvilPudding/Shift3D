@@ -22,6 +22,7 @@
 #include "candle/utils/renderer.h"
 #include "openal.candle/openal.h"
 #include "openal.candle/speaker.h"
+#include "openxr.candle/openxr.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -450,6 +451,10 @@ static entity_t cmd_spawn(entity_t root, int argc, const char **argv)
 			c_charlook_new(body, 1.9);
 			c_side_new(root, side, 0);
 		});
+		if (c_openxr(&SYS)) {
+			c_openxr(&SYS)->renderer = renderer;
+			c_camera(&camera)->active = false;
+		}
 		c_charlook_reset(c_charlook(&camera));
 
 		c_node_add(c_node(&character), 1, body);
@@ -588,9 +593,9 @@ static entity_t cmd_light(entity_t root, int argc, const char **argv)
 	sscanf(argv[6], "%f", &color.y);
 	sscanf(argv[7], "%f", &color.z);
 
-	color.x *= 0.1;
-	color.y *= 0.1;
-	color.z *= 0.1;
+	color.x *= 0.8;
+	color.y *= 0.8;
+	color.z *= 0.8;
 
 	c_level_t *level = c_level(&root);
 
